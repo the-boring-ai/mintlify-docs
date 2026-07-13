@@ -1,0 +1,114 @@
+---
+title: "Roll out Bily to production"
+sidebarTitle: "Production rollout"
+description: "Release Bily browser, API, and MCP work in stages with explicit checks and rollback criteria."
+---
+
+Treat a tracking or automation change like any other production data change. Release a small reviewed contract, prove it with real flows, and expand only when the observed result matches the event plan.
+
+## Before the first release
+
+Confirm that:
+
+- one owner approves the event names and business meaning;
+- one browser installation path owns loading;
+- the exact production script URL comes from the intended Bily store;
+- page-view ownership is documented for direct loads and SPA routes;
+- customer fields have consent and privacy approval;
+- API and MCP credentials are created for the intended workload and scope;
+- every write has a verification read and rollback decision.
+
+## Use staged release gates
+
+### Gate 1: Local or development behavior
+
+- The project builds and type-checks.
+- Bily imports remain safe during server rendering.
+- The application sends no success event on a failed operation.
+- Event payloads contain only reviewed fields.
+
+### Gate 2: Staging evidence
+
+- One Bily script loads with the exact URL.
+- One initial page view appears.
+- Later SPA routes produce one explicit page view each.
+- Representative product, checkout, order, and custom events match the event plan.
+- Login, logout, consent-denied, and storage-restricted paths behave as expected.
+- Read-only API and MCP discovery calls use the intended organization and store.
+
+### Gate 3: Limited production exposure
+
+- Release to the smallest practical traffic or operator group.
+- Run a short, named verification window.
+- Compare event counts to the expected product actions, not to an unrelated metric.
+- Inspect at least one real payload for every new or changed event.
+- Exercise one safe read for each new API or MCP workload.
+
+### Gate 4: Full production
+
+- Expand only after the limited window passes.
+- Remove temporary SDK diagnostics.
+- Record the release time, owner, event changes, credential changes, and verification evidence.
+- Keep the rollback path available until the next stable review window.
+
+## Roll out event changes safely
+
+Prefer additive changes:
+
+- add a new property before removing an old one;
+- keep property types stable;
+- add a new event when the business meaning changes;
+- avoid renaming events and properties in place without a migration window.
+
+If the same logical outcome can be emitted by two systems during a migration, provide one stable `event_id` and test the observed result. An event ID does not itself guarantee exactly-once ingestion.
+
+## Roll out API workloads safely
+
+1. Start with `GET /context` and select an exact nested store URL.
+2. Verify one read-only store endpoint.
+3. Preserve `x-request-id` in logs.
+4. Add bounded retries only for safe reads.
+5. Before a write, read the current state and record the intended change.
+6. After a write, read the state again before reporting success.
+
+Do not automatically repeat a create, clone, update, toggle, delete, sync, or mutation request when the first result is uncertain.
+
+## Roll out MCP workflows safely
+
+1. Keep approval mode set to prompt.
+2. Use `search` immediately before an unfamiliar operation.
+3. Review the complete `execute` function, including every helper call.
+4. Begin with an identity, store, or analytics read.
+5. Introduce one approved action at a time.
+6. Verify every action with the catalog's recommended read.
+
+Planning metadata is advisory, and one `execute` call can contain several helper calls. The client review must cover the complete function.
+
+## Define rollback criteria
+
+Roll back or disable the new path when:
+
+- the script fails to become ready;
+- the initial page view duplicates;
+- a high-value event is missing or fires before success;
+- a property changes type or contains unapproved customer data;
+- an API job crosses the intended organization or store boundary;
+- an MCP action differs from the reviewed function or verification result.
+
+Stop additional writes when verification disagrees with the requested state.
+
+## Post-release review
+
+Within the first stable review window:
+
+- compare expected product outcomes with observed Bily events;
+- inspect samples across signed-out, signed-in, and consent states;
+- review API errors by status and request ID;
+- review MCP actions and their verification reads;
+- remove temporary credentials and test-only event paths;
+- update the event catalog with the final production contract.
+
+<CardGroup cols={2}>
+  <Card title="Validation and debugging" icon="list-check" href="/guides/validation-debugging" />
+  <Card title="Migration guide" icon="arrow-right-arrow-left" href="/migrations/2-0" />
+</CardGroup>

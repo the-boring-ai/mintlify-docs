@@ -1,0 +1,58 @@
+---
+title: "MCP quickstart"
+sidebarTitle: "Quickstart"
+description: "Connect Codex to Bily MCP, sign in through Bily Connect, and discover your first operation."
+---
+
+This quickstart uses Bily Connect, the recommended sign-in path. It keeps credentials out of the client configuration and applies the signed-in user's Bily organization and store memberships.
+
+<Steps>
+  <Step title="Open Bily MCP settings">
+    Sign in to [Bily](https://app.bily.ai), then open **Settings > MCP**. The selected store matters only if you later create a fallback key; Bily Connect uses the signed-in user's current memberships.
+  </Step>
+
+  <Step title="Add the Codex configuration">
+    Add this block to `~/.codex/config.toml`:
+
+    ```toml
+    [mcp_servers.bily]
+    url = "https://api-dispatcher.bily.ai/mcp"
+    default_tools_approval_mode = "prompt"
+    tool_timeout_sec = 120
+    ```
+
+    No access key belongs in this configuration.
+  </Step>
+
+  <Step title="Complete Bily Connect">
+    Restart or reload the client. When it asks to connect Bily, sign in and approve MCP access.
+
+    Bily Connect uses the `mcp_access` scope. Bily still checks the signed-in user's organization and store memberships for every requested operation.
+  </Step>
+
+  <Step title="Verify discovery">
+    Ask the client:
+
+    ```text
+    Use Bily to show my authenticated identity, organizations, and accessible stores.
+    Search for the right operations first. Do not make changes.
+    ```
+
+    The client should use `search`, then `execute` with `bily.context()` for one-call discovery.
+  </Step>
+
+  <Step title="Inspect a store operation">
+    Continue with a read-only request:
+
+    ```text
+    For store.example.com, find the Bily operation for a revenue trend comparison.
+    Explain its required dates and verification guidance before executing it.
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  Keep approval mode set to `prompt`. An `execute` call can contain more than one helper call, so review the complete function before approving it.
+</Warning>
+
+If your client cannot complete Bily Connect, use the [store-scoped access key fallback](/mcp/authentication#access-key-fallback).

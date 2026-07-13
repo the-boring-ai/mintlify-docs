@@ -129,7 +129,8 @@ const components = {
       type: "apiKey",
       in: "header",
       name: "x-api-key",
-      description: "A server-side Bily API key created in Bily settings.",
+      description:
+        "A server-side Bily API key created under Settings > MCP > Access key fallback. Select the intended store before creating it.",
     },
     BearerAuth: {
       type: "http",
@@ -143,7 +144,7 @@ const components = {
       name: "storeUrl",
       in: "path",
       required: true,
-      description: "The exact store URL returned by GET /stores.",
+      description: "The exact store URL returned by GET /context or GET /stores.",
       schema: { type: "string", example: "store.example.com" },
     },
     OrganizationId: {
@@ -151,7 +152,7 @@ const components = {
       in: "header",
       required: false,
       description:
-        "An organization ID returned by GET /organizations. Required for GET /stores and optional for store-scoped paths.",
+        "An organization ID returned by GET /context or GET /organizations. Required for GET /stores and optional for store-scoped paths.",
       schema: { type: "string", example: "org_01J8W7T9G3E6ZQ4M2K5N8P1R0S" },
     },
     PixelId: {
@@ -171,7 +172,7 @@ const components = {
       ["Conflict", "The request conflicts with the current resource state."],
       ["TooManyRequests", "The request rate is too high."],
       ["ServerError", "Bily could not complete the request."],
-      ["BadGateway", "A dependent capability was temporarily unavailable."],
+      ["BadGateway", "A dependent Bily operation was temporarily unavailable."],
       ["GatewayTimeout", "Bily did not complete the request before its timeout."],
     ].map(([name, description]) => [name, jsonResponse(description, ref("Error"))]),
   ),
@@ -242,6 +243,29 @@ const components = {
       type: "object",
       required: ["stores"],
       properties: { stores: arrayOf(ref("Store")) },
+    },
+    ContextOrganization: {
+      type: "object",
+      required: ["id", "name", "slug", "createdAt", "stores"],
+      properties: {
+        id: { type: "string" },
+        name: { type: "string" },
+        slug: { type: "string" },
+        role: {
+          type: "string",
+          description: "The authenticated user's organization role when membership supplies one.",
+        },
+        createdAt: { type: ["string", "integer"], description: "Organization creation time." },
+        stores: arrayOf(ref("Store")),
+      },
+    },
+    ContextResponse: {
+      type: "object",
+      required: ["user", "organizations"],
+      properties: {
+        user: ref("User"),
+        organizations: arrayOf(ref("ContextOrganization")),
+      },
     },
     StoreProfile: {
       type: "object",
@@ -1189,6 +1213,22 @@ const components = {
 };
 
 const paths = {
+  "/context": {
+    get: operation({
+      tag: "Identity",
+      summary: "Get customer context",
+      description:
+        "Returns the authenticated user with accessible organizations and their nested stores in one request. A store-scoped API key is narrowed automatically; use organizationId only to explicitly select an accessible organization.",
+      operationId: "getContext",
+      parameters: [
+        stringQuery(
+          "organizationId",
+          "An explicitly selected accessible organization. Omit this parameter for an ordinary store-scoped API key; Bily uses the organization and store recorded on the key.",
+        ),
+      ],
+      responseSchema: ref("ContextResponse"),
+    }),
+  },
   "/me": {
     get: operation({
       tag: "Identity",
@@ -1277,7 +1317,7 @@ const paths = {
     get: operation({
       tag: "Store data",
       summary: "Get data readiness",
-      description: "Returns connection and account-selection readiness for the store's supported capabilities.",
+      description: "Returns connection and account-selection readiness for the store's supported data and actions.",
       operationId: "getDataReadiness",
       parameters: storeParameters,
       responseSchema: { type: "object", additionalProperties: true },
@@ -1569,9 +1609,9 @@ const paths = {
   },
   "/platform/{storeUrl}/support": {
     get: operation({
-      tag: "Capabilities",
+      tag: "Connections",
       summary: "Get platform support",
-      description: "Returns connected accounts and the exact read and write capabilities available for the store.",
+      description: "Returns connected accounts and the exact supported reads and actions available for the store.",
       operationId: "getPlatformSupport",
       parameters: storeParameters,
       responseSchema: ref("PlatformSupportResponse"),
@@ -1580,7 +1620,7 @@ const paths = {
   },
   "/platform/{storeUrl}/assets": {
     get: operation({
-      tag: "Capabilities",
+      tag: "Connections",
       summary: "List advertising assets",
       description: "Lists normalized campaigns, ad sets, and ads for enabled accounts in the store.",
       operationId: "listPlatformAssets",
@@ -1607,7 +1647,7 @@ const paths = {
   },
   "/platform/{storeUrl}/actions/sync-ad-accounts": {
     post: operation({
-      tag: "Capability actions",
+      tag: "Supported actions",
       summary: "Synchronize advertising accounts",
       description: "Refreshes enabled advertising connections and their account metadata. Omit platforms to synchronize all enabled connections.",
       operationId: "syncAdAccounts",
@@ -1619,7 +1659,7 @@ const paths = {
   },
   "/platform/{storeUrl}/actions/update-asset": {
     post: operation({
-      tag: "Capability actions",
+      tag: "Supported actions",
       summary: "Update an advertising asset",
       description: "Updates supported name, status, or budget fields. Read platform support and the asset's supportedWrites before submitting a change.",
       operationId: "updatePlatformAsset",
@@ -1847,7 +1887,7 @@ const spec = {
     title: "Bily API",
     version: "1.0.0",
     description:
-      "The stable customer API for Bily identity, stores, analytics, commerce, capabilities, and explicitly authorized actions.",
+      "The stable customer API for Bily identity, stores, analytics, commerce, connected data, and explicitly authorized actions.",
     contact: {
       name: "Bily support",
       email: "support@bily.ai",
@@ -1868,8 +1908,8 @@ const spec = {
     { name: "Analytics", description: "Read normalized advertising, attribution, product, customer, and cohort metrics." },
     { name: "Analytics SQL", description: "Run constrained read-only SQL over store-scoped Bily datasets." },
     { name: "Customer journeys", description: "Read customer touchpoints within an authenticated store scope." },
-    { name: "Capabilities", description: "Inspect available connections, support, and advertising assets." },
-    { name: "Capability actions", description: "Synchronize connections and update supported advertising assets." },
+    { name: "Connections", description: "Inspect available connections, support, and advertising assets." },
+    { name: "Supported actions", description: "Synchronize connections and update supported advertising assets." },
     { name: "Campaign actions", description: "Create or clone supported advertising campaign resources." },
     { name: "Tracking connections", description: "List and manage store-scoped tracking connections without returning credential secrets." },
   ],

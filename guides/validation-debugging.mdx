@@ -1,0 +1,139 @@
+---
+title: "Validate and debug an implementation"
+sidebarTitle: "Validation and debugging"
+description: "Prove Bily loading, event behavior, payloads, API requests, and MCP operations with focused evidence."
+---
+
+Debug one boundary at a time. First prove that Bily loaded, then that the application called the intended event, then that the payload and selected Bily scope are correct.
+
+## Define the expected observation
+
+Before opening developer tools, write one sentence describing what should happen.
+
+```text
+After a successful checkout, one Order Completed event should contain order_789,
+two products, USD 73 total, and no private payment fields.
+```
+
+This makes duplicates, missing fields, and premature events easier to identify than a broad “tracking is broken” report.
+
+## Validate the browser installation
+
+For `@bilyai/js`, enable lifecycle diagnostics temporarily:
+
+```typescript
+import { init, ready } from "@bilyai/js";
+
+init({
+  scriptUrl: "https://tracking.example.com/b.js?shop=store.example.com",
+  debug: true,
+});
+
+await ready();
+```
+
+Check these boundaries in order:
+
+1. The page contains exactly one Bily script.
+2. Its full URL matches **Bily > Settings > Apps > More settings > Install tracking**, including query parameters.
+3. The browser requests that URL once.
+4. `ready()` resolves in client-mounted browser code.
+5. The application reaches the intended `track()` call once.
+6. The event appears with the expected name and safe payload in the selected Bily store.
+
+`ready()` proves the browser runtime can accept queued calls. It does not acknowledge a particular event or prove ingestion.
+
+## Validate page views separately
+
+Run this sequence:
+
+| Action | Expected result |
+| --- | --- |
+| Direct page load | One automatic `PageView` |
+| Browser reload | One new automatic `PageView` |
+| Later SPA navigation | One explicit `PageView` |
+| Component rerender without URL change | No new page view |
+| Back or forward navigation | One event per committed URL change |
+
+If the direct load produces two events, search for both installation paths and remove the manual page-view call from the initial mount.
+
+## Validate event payloads
+
+Compare the observed payload with the event plan, not just the TypeScript type.
+
+- Is the event name spelled and capitalized exactly?
+- Did it fire only after the outcome succeeded?
+- Are IDs stable and from the intended environment?
+- Are numbers finite and in the expected unit?
+- Are product quantity and order totals correct?
+- Is the customer context permitted for this event?
+- Are secrets, raw errors, and unreviewed form values absent?
+
+For order events, use `order.total` when it is authoritative. Otherwise, the SDK calculates the total from `order.products`.
+
+## Interpret SDK diagnostics correctly
+
+| Observation | Meaning |
+| --- | --- |
+| `ready()` times out | The script did not provide a usable Bily runtime before the configured timeout |
+| `track()` returns | The call was accepted locally; it is not an ingestion receipt |
+| Debug warning about delivery | The browser delivery attempt failed |
+| `getBilyTrackingId()` returns `null` on the server | Expected server-rendering behavior |
+| Oldest early event is missing | The bounded pre-load queue may have reached `maxQueueSize` |
+
+The default queue holds 100 calls and can be configured from 1 to 1,000. The default load timeout is 15 seconds and can be configured from 1,000 to 60,000 milliseconds.
+
+## Validate API requests
+
+Start with discovery before a store-specific endpoint:
+
+1. `GET /context` without `organizationId` for an ordinary store-scoped key
+2. An exact `organizations[].stores[].url` from the response
+3. A read-only store endpoint using that returned store URL
+
+Use the optional `organizationId` query only when the authenticated identity can access multiple organizations and the workload intentionally selects one.
+
+Preserve `x-request-id` from every response.
+
+| Status | First check |
+| --- | --- |
+| `400` | Path, query, body, organization header, and store URL format |
+| `401` | Missing, expired, revoked, or invalid credential |
+| `403` | Permission and organization/store scope; regenerate an older settings-generated key when the response requires store scope |
+| `404` | Returned resource ID or accessible store scope |
+| `429` | Request rate and retry backoff |
+| `500`, `502`, `504` | Request ID, safe retry policy, and requested range |
+
+Do not automatically retry a write until a read proves whether the first request took effect.
+
+## Validate MCP requests
+
+For MCP, separate discovery from execution:
+
+1. Confirm the endpoint is exactly `https://api-dispatcher.bily.ai/mcp`.
+2. Confirm the client completed Bily Connect or uses one valid fallback key.
+3. Call `search` with the outcome, store URL when relevant, and a limit from 1 to 20.
+4. Inspect the returned helper, schema, risk guidance, and verification step.
+5. Review the complete async function before approving `execute`.
+6. Verify any write with the recommended read.
+
+An `execute` function can contain several helper calls, has no direct outbound network access, and can run for at most 20 seconds.
+
+## Build a useful support report
+
+Include:
+
+- environment and selected Bily store;
+- SDK or client version;
+- exact safe event or operation name;
+- expected and observed result;
+- minimal reproduction steps;
+- timestamp and Bily request ID when available;
+- browser or client error text with customer data removed.
+
+Never attach credentials, raw customer payloads, session data, or full request headers.
+
+<CardGroup cols={2}>
+  <Card title="SDK troubleshooting" icon="screwdriver-wrench" href="/troubleshooting" />
+  <Card title="Customer FAQ" icon="circle-question" href="/troubleshooting/faqs" />
+</CardGroup>

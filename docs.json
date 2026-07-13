@@ -2,16 +2,14 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Bily developer docs",
-  "description": "Install Bily capabilities, track reliable browser events, and build authenticated server workflows.",
+  "description": "Connect website data to Bily, activate Bily Apps, and build trusted browser, server, and AI workflows.",
   "seo": {
     "metatags": {
       "canonical": "https://docs.bily.ai"
     }
   },
   "colors": {
-    "primary": "#4F46E5",
-    "light": "#818CF8",
-    "dark": "#4F46E5"
+    "primary": "#000000"
   },
   "favicon": "/favicon.svg",
   "logo": {
@@ -29,7 +27,19 @@
             "pages": [
               "index",
               "concepts/what-is-bily",
+              "concepts/bily-apps",
+              "concepts/glossary",
               "quickstart"
+            ]
+          },
+          {
+            "group": "Plan and launch",
+            "pages": [
+              "guides/implementation-planning",
+              "guides/event-data-model",
+              "guides/identity-attribution",
+              "guides/api-mcp-selection",
+              "guides/production-rollout"
             ]
           },
           {
@@ -54,8 +64,11 @@
           {
             "group": "Operate safely",
             "pages": [
+              "guides/validation-debugging",
+              "guides/privacy-governance",
               "privacy/data-safety",
               "troubleshooting",
+              "troubleshooting/faqs",
               "migrations/2-0"
             ]
           }
@@ -111,6 +124,35 @@
             }
           }
         ]
+      },
+      {
+        "tab": "Bily MCP",
+        "icon": "robot",
+        "groups": [
+          {
+            "group": "Connect",
+            "pages": [
+              "mcp/overview",
+              "mcp/quickstart",
+              "mcp/client-configuration",
+              "mcp/authentication"
+            ]
+          },
+          {
+            "group": "Build",
+            "pages": [
+              "mcp/tools",
+              "mcp/examples"
+            ]
+          },
+          {
+            "group": "Operate safely",
+            "pages": [
+              "mcp/safety",
+              "mcp/troubleshooting"
+            ]
+          }
+        ]
       }
     ],
     "global": {
@@ -146,7 +188,8 @@
   },
   "api": {
     "playground": {
-      "display": "simple"
+      "display": "interactive",
+      "proxy": false
     },
     "examples": {
       "languages": [
@@ -158,6 +201,10 @@
     }
   },
   "redirects": [
+    {
+      "source": "/mcp",
+      "destination": "/mcp/overview"
+    },
     {
       "source": "/development",
       "destination": "/quickstart"

@@ -1,0 +1,75 @@
+---
+title: "MCP client configuration"
+sidebarTitle: "Client configuration"
+description: "Configure a Streamable HTTP MCP client for Bily Connect or a store-scoped access key."
+---
+
+## Connection values
+
+| Setting | Value |
+| --- | --- |
+| Server name | `bily` |
+| URL | `https://api-dispatcher.bily.ai/mcp` |
+| OAuth resource | `https://api-dispatcher.bily.ai/mcp` |
+| Transport | Streamable HTTP with JSON responses |
+| OAuth scope | `mcp_access` |
+| Recommended approval mode | Prompt before tool calls |
+| Recommended client timeout | 120 seconds |
+
+## Codex
+
+Use the no-key configuration shown in Bily under **Settings > MCP**:
+
+```toml
+[mcp_servers.bily]
+url = "https://api-dispatcher.bily.ai/mcp"
+default_tools_approval_mode = "prompt"
+tool_timeout_sec = 120
+```
+
+Codex discovers Bily Connect from the endpoint and opens the sign-in flow when needed.
+
+## Other OAuth-capable clients
+
+Configure a remote Streamable HTTP MCP server with this URL:
+
+```text
+https://api-dispatcher.bily.ai/mcp
+```
+
+The client must support dynamic public-client registration, Authorization Code with PKCE using `S256`, the `mcp_access` scope, and refresh tokens. Bily publishes discovery metadata at:
+
+- `https://api-dispatcher.bily.ai/.well-known/oauth-authorization-server`
+- `https://api-dispatcher.bily.ai/.well-known/openid-configuration`
+- `https://api-dispatcher.bily.ai/.well-known/oauth-protected-resource`
+- `https://api-dispatcher.bily.ai/.well-known/oauth-protected-resource/mcp`
+
+Compatible clients should discover these values from the unauthenticated challenge instead of hard-coding the authorization and token URLs.
+
+## Access key clients
+
+Use an access key only when the client cannot complete Bily Connect. Create the key in **Settings > MCP** while the intended store is selected, then copy the one-time JSON configuration shown by Bily.
+
+A typical client shape is:
+
+```json
+{
+  "mcpServers": {
+    "bily": {
+      "url": "https://api-dispatcher.bily.ai/mcp",
+      "headers": {
+        "x-api-key": "<key shown once by Bily>"
+      }
+    }
+  }
+}
+```
+
+Store the full key only in the client's secret-aware configuration. Do not commit it, place it in browser code, or include it in prompts.
+
+## What not to configure
+
+- Do not use `https://app.bily.ai/mcp`; it is not the MCP endpoint.
+- Do not send both Bily Connect credentials and an access key.
+- Do not configure separate tools for every operation. The server exposes only `search` and `execute`.
+- Do not use `llms.txt` or `llms-full.txt` as an MCP URL. They contain documentation only.

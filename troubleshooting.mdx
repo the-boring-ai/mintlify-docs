@@ -7,7 +7,7 @@ Start with the [verification checklist](/guides/verification). Enable `debug: tr
 
 <AccordionGroup>
   <Accordion title="ready() times out">
-    Confirm that `init()` ran in client-mounted browser code. Then compare the entire `scriptUrl` with **Bily > Settings > Tracking**.
+    Confirm that `init()` ran in client-mounted browser code. Then compare the entire `scriptUrl` with **Bily > Settings > Apps > More settings > Install tracking**.
 
     Check the browser **Network** panel for a blocked or failed script request. Review your content security policy, privacy tools, browser extensions, and network restrictions.
 
@@ -76,3 +76,12 @@ Start with the [verification checklist](/guides/verification). Enable `debug: tr
 ## Still blocked?
 
 Collect the exact script URL with private credentials removed, the SDK version, the failing event name, the browser error, and the steps to reproduce. Contact [Bily support](mailto:support@bily.ai) without attaching customer payloads or secrets.
+
+<CardGroup cols={2}>
+  <Card title="Validation and debugging" icon="list-check" href="/guides/validation-debugging">
+    Isolate loader, event, payload, API, and MCP boundaries.
+  </Card>
+  <Card title="Customer FAQ" icon="circle-question" href="/troubleshooting/faqs">
+    Review direct answers to common implementation questions.
+  </Card>
+</CardGroup>

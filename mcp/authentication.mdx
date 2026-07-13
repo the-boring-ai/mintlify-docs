@@ -1,0 +1,66 @@
+---
+title: "MCP authentication and scoping"
+sidebarTitle: "Authentication and scoping"
+description: "Understand Bily Connect, access key fallback, and server-enforced organization and store boundaries."
+---
+
+Bily MCP supports two customer authentication paths. Use one path per connection.
+
+## Bily Connect
+
+Bily Connect is the recommended path for clients that support MCP OAuth.
+
+- The client discovers Bily's public authorization metadata.
+- The client can register dynamically as a public client.
+- The user signs in to Bily and grants the `mcp_access` scope.
+- The client uses Authorization Code with PKCE and can refresh the connection.
+- Bily resolves the signed-in identity and checks that user's current organization and store memberships.
+
+The OAuth token is not permanently narrowed to one store. A signed-in user can request stores that remain available through their Bily memberships. Removing a membership removes that access.
+
+## Access key fallback
+
+Use a fallback key only for clients that cannot complete Bily Connect.
+
+1. Select the intended store in Bily.
+2. Open **Settings > MCP**.
+3. Under **Access key fallback**, choose a name and expiration.
+4. Create the key and copy the full value immediately.
+5. Send it in the `x-api-key` header.
+
+The full key is shown once. A key created for a selected store carries a default store and organization scope. Requests for another store or organization are rejected by Bily.
+
+<Warning>
+  Replace an older settings-generated fallback key that lacks store scope. Select the intended store, create a new key, update the client, verify `bily.context()`, and then revoke the older key. An unscoped older key is rejected rather than widened automatically.
+</Warning>
+
+<Tip>
+  Use one fallback key per client, environment, and store. Short expirations and descriptive names make rotation and revocation easier.
+</Tip>
+
+## Scope behavior
+
+| Connection | Effective scope |
+| --- | --- |
+| Bily Connect | The signed-in user's current Bily organization and store memberships |
+| Store-scoped access key | The default store and organization recorded when the key is created |
+
+For either path:
+
+- `storeUrl` must identify a store available to the authenticated identity.
+- `organizationId` must identify an accessible organization.
+- A scoped key cannot override its recorded store or organization in `search` or `execute`.
+- Scope checks apply on the server, not only in the client prompt.
+
+## Authentication failures
+
+- `401 Unauthorized` means the connection is missing, expired, revoked, or invalid.
+- `403 Forbidden` means the identity is authenticated but the requested store, organization, permission, or action is outside its allowed scope.
+
+If a `403` says the API key must be reissued with a store scope, regenerate the fallback key after selecting the intended store.
+
+Never solve a `403` by broadening a key without reviewing why the request needs more access.
+
+## Rotate or revoke a key
+
+Create a replacement before revoking a key used by an active client. Update the client, verify a read-only request, then revoke the old key from **Settings > MCP**.

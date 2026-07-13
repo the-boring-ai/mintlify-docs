@@ -1,0 +1,119 @@
+---
+title: "Identity and attribution"
+sidebarTitle: "Identity and attribution"
+description: "Use Bily browser IDs, authenticated user context, and acquisition fields without overstating identity or attribution behavior."
+---
+
+Bily accepts browser, customer, and acquisition context, but each value has a different role. Keep those roles explicit in your event plan.
+
+## Browser identity
+
+`getBilyTrackingId()` returns the Bily identifier for the current browser context.
+
+```typescript
+import { getBilyTrackingId } from "@bilyai/js";
+
+const trackingId = getBilyTrackingId();
+```
+
+The SDK keeps this value stable in browser storage when storage is available. If storage is blocked, it can keep an in-memory value stable for the page session. During server rendering, the method returns `null`.
+
+The browser tracking ID:
+
+- is not a login identity;
+- is not a secret;
+- does not authorize a request;
+- can change when browser storage is cleared or unavailable.
+
+Use your verified server session for authorization.
+
+## Authenticated customer context
+
+Attach your stable account identifier with `client.userId` on events that need it.
+
+```typescript
+track("subscription_updated", {
+  client: {
+    userId: session.user.id,
+    userGroup: session.user.plan,
+  },
+  subscription_id: "subscription_123",
+});
+```
+
+The public JavaScript SDK does not expose `identify()`, `alias()`, or `reset()` methods. Do not describe `client.userId` as an identity-merge command. It is approved customer context on the event payload.
+
+If the same person uses more than one browser or device, use the same stable internal user ID when your consent and data policy allow it. Do not use email as authorization or assume matching contact fields merge records.
+
+## Signed-out and signed-in events
+
+Plan the transition explicitly:
+
+1. Track signed-out behavior without authenticated customer fields.
+2. After your application verifies the login, include the stable internal user ID on later events that need it.
+3. Stop attaching the previous account's context immediately after logout.
+4. Test shared-device login and logout flows.
+
+The browser tracking ID may remain stable across that transition. It still represents the browser context, not the authenticated account.
+
+## Page and acquisition inputs
+
+The SDK accepts fields that preserve where an event occurred and where the browser came from:
+
+| Field | Use |
+| --- | --- |
+| `sourceUrl` | Current page URL for an explicit event |
+| `pageTitle` | Current page title |
+| `referrer` | Referring URL when your policy permits it |
+| `category` | Controlled event or content category |
+| Custom properties | Approved campaign IDs or channel labels from your application |
+
+```typescript
+track("PageView", {
+  sourceUrl: window.location.href,
+  pageTitle: document.title,
+  referrer: document.referrer,
+  campaign_id: "spring_launch",
+});
+```
+
+Do not place credentials, session values, or unreviewed query parameters in these fields.
+
+## Attribution boundaries
+
+Bily's public API and MCP expose normalized analytics and customer-journey reads where available. Use the fields returned by those operations as the reporting contract.
+
+The JavaScript SDK contract does not define:
+
+- an automatic first-touch or last-touch rule;
+- cross-domain browser-ID sharing;
+- anonymous-to-known identity merging;
+- exactly-once delivery from an `event_id`.
+
+If one of these behaviors is necessary for a business decision, document the requirement and verify the relevant Bily analytics output before relying on it in production.
+
+## Event IDs and correlation
+
+The SDK generates `event_id` when it is absent. Provide your own stable value when the same logical outcome can be observed by more than one system.
+
+```typescript
+track("billing_checkout_completed", {
+  event_id: "checkout_session_01J2M8YQ7B",
+  checkout_id: "checkout_123",
+});
+```
+
+Keep one event ID for one logical outcome. An event ID supports correlation; it is not an ingestion receipt.
+
+## Identity review checklist
+
+- Browser IDs and authenticated user IDs have separate names and purposes.
+- Protected actions always use your verified session or server credential.
+- Customer fields appear only on events that require them.
+- Login, logout, shared-device, storage-cleared, and consent-denied flows are tested.
+- Attribution rules come from verified analytics output, not assumptions about the SDK.
+
+<CardGroup cols={2}>
+  <Card title="Browser ID reference" icon="fingerprint" href="/api-reference/get-bily-tracking-id" />
+  <Card title="Privacy governance" icon="shield-check" href="/guides/privacy-governance" />
+</CardGroup>

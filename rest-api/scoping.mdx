@@ -8,6 +8,20 @@ Bily uses two customer-facing boundaries: organizations and stores.
 
 An organization represents the team that owns access. A store represents one connected commerce or web property inside that organization.
 
+## Store-scoped API keys
+
+An API key created under **Settings > MCP > Access key fallback** carries the store selected at creation and that store's organization. Discovery responses are limited to that scope, and the key cannot request another store or organization.
+
+Create a separate key when another workload needs a different store. Do not reuse one customer key as a multi-store credential.
+
+An older settings-generated fallback key without both organization and store scope is rejected. Select the intended store and regenerate the key before using the customer API or MCP.
+
+## Discover the allowed context
+
+Call `GET /context` without an organization parameter for an ordinary store-scoped key. Bily returns the authenticated user and a scoped `organizations` array with each visible store nested under its organization.
+
+Use the optional `organizationId` query only when an identity can access multiple organizations and the request explicitly selects one. The supplied organization must remain inside the credential's allowed scope.
+
 ## Organization-scoped requests
 
 `GET /stores` requires the organization header:
@@ -16,11 +30,11 @@ An organization represents the team that owns access. A store represents one con
 x-bily-organization-id: org_01J8W7T9G3E6ZQ4M2K5N8P1R0S
 ```
 
-Get valid organization IDs from `GET /organizations`. Bily verifies that the authenticated identity belongs to the supplied organization.
+Get valid organization IDs from `GET /context` or `GET /organizations`. Bily verifies that the authenticated identity belongs to the supplied organization.
 
 ## Store-scoped requests
 
-Store-scoped paths include `{storeUrl}`. Use the exact `url` returned by `GET /stores`, encoded as a URL path segment when necessary.
+Store-scoped paths include `{storeUrl}`. Use the exact `url` returned by `GET /context` or `GET /stores`, encoded as a URL path segment when necessary.
 
 ```text
 GET /ad-metrics/store.example.com?startDate=2026-07-01&endDate=2026-07-07
@@ -53,4 +67,4 @@ For scheduled and multi-tenant jobs, store these values together:
 }
 ```
 
-Re-discover accessible organizations and stores after membership or connection changes. Do not copy identifiers between customer accounts.
+Re-run `GET /context` after membership or connection changes. Do not copy identifiers between customer accounts.

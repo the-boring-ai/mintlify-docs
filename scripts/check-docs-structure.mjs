@@ -5,6 +5,23 @@ import { fileURLToPath } from "node:url";
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const config = JSON.parse(await readFile(resolve(root, "docs.json"), "utf8"));
 
+if (config.theme !== "mint") {
+  throw new Error("The public docs must keep the original Mint layout.");
+}
+if (
+  config.colors?.primary !== "#000000" ||
+  Object.hasOwn(config.colors ?? {}, "light") ||
+  Object.hasOwn(config.colors ?? {}, "dark")
+) {
+  throw new Error("The public docs must use black as the only custom color.");
+}
+if (config.api?.playground?.display !== "interactive") {
+  throw new Error("The API reference must keep the interactive playground enabled.");
+}
+if (config.api?.playground?.proxy !== false) {
+  throw new Error("The API playground must send requests directly to Bily.");
+}
+
 function collectNavigationPages(value, pages = []) {
   if (Array.isArray(value)) {
     for (const item of value) collectNavigationPages(item, pages);
@@ -67,6 +84,43 @@ function pageForFile(file) {
 
 const navigationPages = collectNavigationPages(config.navigation);
 const openApiSources = collectOpenApiSources(config.navigation);
+const expectedMcpPages = [
+  "mcp/overview",
+  "mcp/quickstart",
+  "mcp/client-configuration",
+  "mcp/authentication",
+  "mcp/tools",
+  "mcp/examples",
+  "mcp/safety",
+  "mcp/troubleshooting",
+];
+const missingMcpPages = expectedMcpPages.filter(page => !navigationPages.includes(page));
+if (missingMcpPages.length > 0) {
+  throw new Error(`MCP pages missing from navigation: ${missingMcpPages.join(", ")}`);
+}
+
+const expectedCustomerPages = [
+  "concepts/glossary",
+  "guides/implementation-planning",
+  "guides/event-data-model",
+  "guides/identity-attribution",
+  "guides/api-mcp-selection",
+  "guides/validation-debugging",
+  "guides/privacy-governance",
+  "guides/production-rollout",
+  "troubleshooting/faqs",
+];
+const missingCustomerPages = expectedCustomerPages.filter(page => !navigationPages.includes(page));
+if (missingCustomerPages.length > 0) {
+  throw new Error(`Customer guide pages missing from navigation: ${missingCustomerPages.join(", ")}`);
+}
+
+const currentInstallPath = ["Settings", "Apps", "More settings", "Install tracking"].join(" > ");
+const quickstartContents = await readFile(resolve(root, "quickstart.mdx"), "utf8");
+if (!quickstartContents.includes(currentInstallPath)) {
+  throw new Error("The quickstart must point to the current in-app tracking installation path.");
+}
+
 const duplicates = navigationPages.filter((page, index) => navigationPages.indexOf(page) !== index);
 if (duplicates.length > 0) {
   throw new Error(`Duplicate navigation pages: ${[...new Set(duplicates)].join(", ")}`);
@@ -109,6 +163,11 @@ for (const redirect of config.redirects ?? []) {
   }
 }
 
+const mcpRedirect = (config.redirects ?? []).find(redirect => redirect.source === "/mcp");
+if (mcpRedirect?.destination !== "/mcp/overview") {
+  throw new Error("The /mcp redirect must point to /mcp/overview.");
+}
+
 const openApiOperations = [];
 for (const source of openApiSources) {
   const relativeSource = source.replace(/^\//, "");
@@ -131,11 +190,28 @@ for (const source of openApiSources) {
   }
 }
 
-const expectedOpenApiOperations = 50;
+const expectedOpenApiOperations = 51;
 if (openApiOperations.length !== expectedOpenApiOperations) {
   throw new Error(
     `Expected ${expectedOpenApiOperations} OpenAPI operations, found ${openApiOperations.length}.`,
   );
+}
+
+const contextOperation = openApiOperations.find(
+  operation => operation.method === "GET" && operation.path === "/context",
+);
+if (contextOperation?.operationId !== "getContext") {
+  throw new Error("The OpenAPI reference must include GET /context as getContext.");
+}
+
+const apiQuickstartContents = await readFile(resolve(root, "rest-api/quickstart.mdx"), "utf8");
+if (!apiQuickstartContents.includes("/api/customer/v1/context")) {
+  throw new Error("The API quickstart must use one-call customer context discovery.");
+}
+
+const mcpExamplesContents = await readFile(resolve(root, "mcp/examples.mdx"), "utf8");
+if (!mcpExamplesContents.includes("bily.context()")) {
+  throw new Error("The MCP examples must use the one-call context helper.");
 }
 
 const duplicateOperationIds = openApiOperations
