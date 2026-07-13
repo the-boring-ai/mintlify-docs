@@ -1,8 +1,13 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Bily JavaScript SDK",
-  "description": "Install Bily and track reliable browser events with the official JavaScript SDK.",
+  "name": "Bily developer docs",
+  "description": "Install Bily capabilities, track reliable browser events, and build authenticated server workflows.",
+  "seo": {
+    "metatags": {
+      "canonical": "https://docs.bily.ai"
+    }
+  },
   "colors": {
     "primary": "#4F46E5",
     "light": "#818CF8",
@@ -23,6 +28,7 @@
             "group": "Getting started",
             "pages": [
               "index",
+              "concepts/what-is-bily",
               "quickstart"
             ]
           },
@@ -50,7 +56,7 @@
             "pages": [
               "privacy/data-safety",
               "troubleshooting",
-              "migrations/1-1"
+              "migrations/2-0"
             ]
           }
         ]
@@ -80,6 +86,29 @@
               "api-reference/events",
               "api-reference/payload"
             ]
+          }
+        ]
+      },
+      {
+        "tab": "Bily API",
+        "icon": "terminal",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "rest-api/overview",
+              "rest-api/authentication",
+              "rest-api/quickstart",
+              "rest-api/scoping",
+              "rest-api/errors"
+            ]
+          },
+          {
+            "group": "Endpoint reference",
+            "openapi": {
+              "source": "/openapi.json",
+              "directory": "rest-reference"
+            }
           }
         ]
       }
@@ -115,6 +144,19 @@
       "claude"
     ]
   },
+  "api": {
+    "playground": {
+      "display": "simple"
+    },
+    "examples": {
+      "languages": [
+        "curl",
+        "javascript",
+        "python"
+      ],
+      "defaults": "required"
+    }
+  },
   "redirects": [
     {
       "source": "/development",
@@ -135,6 +177,10 @@
     {
       "source": "/api-reference/endpoint/:slug*",
       "destination": "/api-reference/overview"
+    },
+    {
+      "source": "/migrations/1-1",
+      "destination": "/migrations/2-0"
     }
   ]
 }

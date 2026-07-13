@@ -7,7 +7,9 @@ This repository contains the public documentation for the Bily browser script an
 Run the public-language guard before previewing or submitting changes:
 
 ```bash
+node scripts/build-openapi.mjs
 node scripts/check-public-language.mjs
+node scripts/check-docs-structure.mjs
 ```
 
 Install the Mintlify CLI, then validate links and redirects:
@@ -28,6 +30,7 @@ The preview is available at `http://localhost:3000` by default.
 ## Documentation rules
 
 - Keep every example aligned with the exported `@bilyai/js` contract.
+- Keep `openapi.json` generated from `scripts/build-openapi.mjs`. Update the route definition and regenerate the file together.
 - Copy the exact Bily script URL. Never remove, reorder, decode, or rebuild its query string.
 - Use one installation path per website surface: a raw script tag for plain HTML or the SDK for application frameworks.
 - Treat the initial page view as automatic. Track only later client-side route changes manually.

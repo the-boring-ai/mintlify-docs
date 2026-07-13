@@ -1,18 +1,18 @@
 ---
-title: "Migrate to 1.1"
-description: "Prepare an existing @bilyai/js integration for the 1.1 initialization, readiness, payload, and event contract."
+title: "Migrate to 2.0"
+description: "Prepare an existing @bilyai/js integration for the 2.0 initialization, readiness, payload, and event contract."
 ---
 
-Version 1.1.0 is the next SDK release. Confirm that `1.1.0` is available from your package registry before updating a production dependency.
+Version 2.0.0 modernizes the SDK while retaining compatibility overloads for older initialization code. Confirm that `2.0.0` is available from your package registry before updating a production dependency.
 
 ```bash
 npm view @bilyai/js version
 ```
 
-When the registry reports `1.1.0` or newer, install the release:
+When the registry reports `2.0.0` or newer, install the release:
 
 ```bash
-npm install @bilyai/js@^1.1.0
+npm install @bilyai/js@^2.0.0
 ```
 
 ## Move to the exact script URL
@@ -23,7 +23,7 @@ Earlier integrations commonly passed only a tracking origin:
 init("https://tracking.example.com", { verbose: false });
 ```
 
-In 1.1, prefer the exact URL copied from **Bily > Settings > Tracking**:
+In 2.0, prefer the exact URL copied from **Bily > Settings > Tracking**:
 
 ```typescript
 init({
@@ -74,11 +74,11 @@ try {
 }
 ```
 
-Version 1.1 adds bounded queuing, a configurable load timeout, script load errors, and retry support after a terminal load failure.
+Version 2.0 adds bounded queuing, a configurable load timeout, script load errors, and retry support after a terminal load failure.
 
 ## Review payload changes
 
-Version 1.1:
+Version 2.0:
 
 - Supports top-level `products` payloads.
 - Defaults an omitted product quantity to `1`.
@@ -105,7 +105,7 @@ if (trackingId) {
 
 ## Import public types from the package root
 
-Version 1.1 exports the complete public payload types:
+Version 2.0 exports the complete public payload types:
 
 ```typescript
 import type {
