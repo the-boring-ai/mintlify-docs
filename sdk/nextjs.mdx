@@ -11,6 +11,17 @@ Initialize the SDK from one client component. Do not use `next/script` or add a 
 npm install @bilyai/js
 ```
 
+## Configure the store URL
+
+Copy the complete SDK URL from **Bily > Settings > Apps > More settings > Install tracking** into the app's public
+build-time settings. The URL is public installation data; it does not contain a private token.
+
+```dotenv .env.local
+NEXT_PUBLIC_BILY_SCRIPT_URL=https://tracking.example.com/b.js?shop=store.example.com
+```
+
+Keep the value unchanged, including its query string. Restart the development server after changing `.env.local`.
+
 ## Create a client tracking component
 
 The browser script records the initial page view. This component saves the initial URL and tracks only later App Router transitions.
@@ -22,8 +33,7 @@ import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { init, track } from "@bilyai/js";
 
-const BILY_SCRIPT_URL =
-  "https://tracking.example.com/b.js?shop=store.example.com";
+const BILY_SCRIPT_URL = process.env.NEXT_PUBLIC_BILY_SCRIPT_URL;
 
 export function BilyTracking() {
   const pathname = usePathname();
@@ -32,6 +42,9 @@ export function BilyTracking() {
   const previousUrl = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!BILY_SCRIPT_URL) {
+      throw new Error("NEXT_PUBLIC_BILY_SCRIPT_URL is required");
+    }
     init({ scriptUrl: BILY_SCRIPT_URL });
   }, []);
 
@@ -80,7 +93,7 @@ export default function RootLayout({
 }
 ```
 
-Keep the full script URL in a public build-time setting if environments use different Bily URLs. Read that value unchanged. Do not construct it from a hostname or add query parameters in code.
+Use a separate complete URL for each environment. Do not construct it from a hostname or add query parameters in code.
 
 ## Track client actions
 
