@@ -9,12 +9,17 @@ Use a Bily API key for server-to-server requests. Never embed an API key in brow
 ## Create a key
 
 1. Sign in to [Bily](https://app.bily.ai).
-2. Open **Settings**.
-3. Open **MCP**.
-4. Under **Access key fallback**, enter a descriptive name and expiration.
-5. Create the key and copy its full value immediately.
+2. Select the store this workload may access.
+3. Open **Settings**.
+4. Open **MCP**.
+5. Under **Access key fallback**, enter a descriptive name and expiration.
+6. Create the key and copy its full value immediately.
 
-Bily shows the full key once. Store it in your deployment platform's secret manager.
+Bily shows the full key once. Store it in your deployment platform's secret manager. The key carries the selected store and its organization as its default API scope.
+
+<Warning>
+  Replace an older settings-generated fallback key that was created without store scope. Select the intended store, create a new key, update the workload, and revoke the older key after the replacement passes a read-only `GET /context` check.
+</Warning>
 
 <Tip>
   Use one key per environment and workload. Names such as `reporting-production` and `catalog-sync-staging` make rotation and audit review easier.
@@ -26,7 +31,7 @@ The recommended header is `x-api-key`:
 
 ```bash
 curl --request GET \
-  --url https://app.bily.ai/api/customer/v1/me \
+  --url https://app.bily.ai/api/customer/v1/context \
   --header "x-api-key: $BILY_API_KEY"
 ```
 
@@ -48,10 +53,10 @@ Send one authentication method per request.
 
 ## Permission failures
 
-Keys created in Bily include the permissions available through the stable customer API. An action can still return `403` when the caller lacks the required permission or organization membership.
+Keys created in Bily include the permissions available through the stable customer API and the selected store and organization scope. Requests for another store or organization are rejected. An action can also return `403` when the caller lacks its required permission.
 
-Treat `401` as a missing, expired, revoked, or invalid key. Treat `403` as an authenticated request that is not allowed to access the requested operation or scope.
+Treat `401` as a missing, expired, revoked, or invalid key. Treat `403` as an authenticated request that is not allowed to access the requested operation or scope. If the error says the key must be reissued with a store scope, regenerate it after selecting the intended store.
 
 <Card title="Make your first request" icon="arrow-right" href="/rest-api/quickstart">
-  Verify the key, select an organization, and list its stores.
+  Discover the authenticated user, organization, and store in one request.
 </Card>

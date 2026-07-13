@@ -1,0 +1,102 @@
+---
+title: "MCP tools and operations"
+sidebarTitle: "Tools and operations"
+description: "Use Bily MCP search and execute, inspect planning guidance, and choose current Bily operations."
+---
+
+Bily MCP exposes exactly two tools. It does not expose MCP resources or prompts.
+
+## `search`
+
+Search the live Bily operation catalog before constructing an execution.
+
+| Input | Type | Required | Behavior |
+| --- | --- | --- | --- |
+| `query` | string | Yes | Operation, action, or user intent to find |
+| `storeUrl` | string | No | Filters results using the accessible store context |
+| `limit` | integer | No | Returns from 1 to 20 matches |
+
+Example tool input:
+
+```json
+{
+  "query": "compare revenue with the previous period and explain the drivers",
+  "storeUrl": "store.example.com",
+  "limit": 8
+}
+```
+
+Each result can include:
+
+- a stable operation ID, title, description, category, method, and Bily helper;
+- whether a store is required and whether the operation can write;
+- supported connected platforms when relevant;
+- planning metadata such as risk tier, approval policy, preconditions, verification, rollback hints, and input or output schemas;
+- focused usage examples.
+
+The current catalog contains 64 operations: 45 read-oriented operations and 19 write operations.
+
+## Start with customer context
+
+Use the discovery helper before store-specific work:
+
+```javascript
+async () => {
+  return bily.context();
+}
+```
+
+It returns the authenticated user and accessible `organizations[]`, with each organization's stores nested under `stores[]`. A store-scoped fallback key is narrowed automatically. With Bily Connect, set the optional `organizationId` input on `execute` only when the user explicitly selects one accessible organization.
+
+## Operation families
+
+| Family | Representative Bily helpers |
+| --- | --- |
+| Identity and scope | `bily.context()`, `bily.me()`, `bily.organizations()`, `bily.listStores(...)` |
+| Store context | `bily.getStoreData(...)`, `bily.getManagedAdAccounts(...)` |
+| Commerce reads | `bily.shopify.graphql(...)`, `bily.shopify.rest(...)` |
+| Metrics and analytics | `bily.analytics.getOverview(...)`, `bily.analytics.getRevenueTrend(...)`, `bily.analytics.queryDataset(...)` |
+| Breakdowns and reports | `bily.analytics.getProductMetrics(...)`, `bily.analytics.getCountryMetrics(...)`, `bily.analytics.getCohortMetrics(...)` |
+| Connected-platform reads | `bily.actions.getPlatformSupport(...)`, `bily.actions.listAssets(...)`, `bily.actions.listPixels(...)` |
+| Supported actions | `bily.actions.syncAdAccounts(...)`, `bily.actions.updateAsset(...)`, and the current creation or clone helpers returned by `search` |
+
+This table is a map, not an exhaustive reference. Use `search` to get the current helper signature and planning guidance.
+
+## `execute`
+
+Run a focused async arrow function with the helper returned by `search`.
+
+| Input | Type | Required | Behavior |
+| --- | --- | --- | --- |
+| `code` | string | Yes | Async arrow function, at most 20,000 characters |
+| `organizationId` | string | No | Default organization for helper requests, subject to server scope checks |
+
+Example tool input:
+
+```json
+{
+  "code": "async () => bily.context()"
+}
+```
+
+The function runs for at most 20 seconds. It has no direct outbound network access. Use `bily.*` helpers for Bily data and supported actions, and return JSON-serializable data.
+
+Successful output contains:
+
+```json
+{
+  "result": {},
+  "logs": [
+    {
+      "level": "log",
+      "message": "optional captured output"
+    }
+  ]
+}
+```
+
+`console.log`, `console.warn`, and `console.error` are captured in `logs`. A thrown error fails the tool call with its safe error message.
+
+<Warning>
+  Planning metadata is guidance for the client and user. It does not replace a client approval prompt. Review the complete `execute` function before approving any write.
+</Warning>

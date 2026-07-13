@@ -1,0 +1,164 @@
+---
+title: "Event and data model"
+sidebarTitle: "Event and data model"
+description: "Design stable Bily event names, payloads, products, orders, and custom properties."
+---
+
+Bily browser events have two customer-controlled parts: a stable event name and an optional payload. The JavaScript SDK prepares those values for delivery and adds a small amount of browser context.
+
+## Event anatomy
+
+```typescript
+track("checkout_completed", {
+  event_id: "checkout_01J2M8YQ7B",
+  ts: "2026-07-13T08:30:00.000Z",
+  checkout_id: "checkout_123",
+  plan: "growth",
+});
+```
+
+| Part | Purpose |
+| --- | --- |
+| Event name | Stable description of the outcome |
+| Typed fields | `client`, `products`, `order`, page, and search context |
+| Custom properties | Application-specific IDs, categories, and safe state |
+| `event_id` | Identifier for one logical outcome |
+| `ts` | ISO timestamp for the event |
+
+When `event_id` or `ts` is absent, the SDK creates it. A generated event ID is useful for correlation, but `track()` does not return an ingestion acknowledgment or promise exactly-once delivery.
+
+## Choose event names
+
+Use Bily's current title-case names for ecommerce events and stable snake_case names for application events.
+
+Good application event names:
+
+- `workspace_created`
+- `integration_connected`
+- `billing_checkout_completed`
+- `product_error_encountered`
+
+Avoid names containing a customer ID, timestamp, translated label, or UI position. Put changing context in properties.
+
+Event names are case-sensitive. The SDK accepts documented compatibility aliases, but new code should use the current names in the [event reference](/api-reference/events).
+
+## Track outcomes at the source
+
+Fire an event only after the state it names is true.
+
+```typescript
+const workspace = await createWorkspace(input);
+
+track("workspace_created", {
+  workspace_id: workspace.id,
+  plan: workspace.plan,
+});
+```
+
+Do not infer a completed outcome from a button click if the operation can still fail. If failures are useful to analyze, send a separate event with a small safe error vocabulary.
+
+## Use typed commerce objects
+
+Use `products` for product, cart, and checkout activity. Every product requires `id`, `name`, `price`, and `currency`.
+
+```typescript
+track("Product Added", {
+  products: [
+    {
+      id: "product_123",
+      name: "Everyday Tee",
+      price: 39,
+      currency: "USD",
+      quantity: 2,
+    },
+  ],
+});
+```
+
+Use `order` when the event represents one order. Put the products for that order in `order.products`.
+
+```typescript
+track("Order Completed", {
+  order: {
+    id: "order_789",
+    currency: "USD",
+    total: 78,
+    products: [
+      {
+        id: "product_123",
+        name: "Everyday Tee",
+        price: 39,
+        currency: "USD",
+        quantity: 2,
+      },
+    ],
+  },
+});
+```
+
+When `order.total` is absent, the SDK calculates it from product price and quantity. Zero remains a valid total, tax, discount, or shipping value.
+
+## Add customer context deliberately
+
+The optional `client` object applies to the event being sent.
+
+```typescript
+track("user_signed_in", {
+  client: {
+    userId: "user_123",
+    userGroup: "growth",
+  },
+});
+```
+
+Prefer a stable internal `userId` over extra contact fields. Add email, phone, address, date of birth, or gender only with a documented need and permission.
+
+## Add page and acquisition context
+
+Use typed page fields when an explicit event needs them:
+
+```typescript
+track("PageView", {
+  sourceUrl: window.location.href,
+  pageTitle: document.title,
+  referrer: document.referrer,
+});
+```
+
+`sourceUrl` and `referrer` are inputs. They do not by themselves define a public first-touch or last-touch attribution rule. Treat Bily's returned analytics fields as the contract for reporting, and do not infer identity merging or attribution behavior that is not documented.
+
+## Keep property types stable
+
+For every property, choose one meaning and one type.
+
+| Property | Recommended value |
+| --- | --- |
+| IDs | Stable string or documented numeric ID |
+| Currency | Consistent currency code string |
+| Money | Finite number in the unit your event plan defines |
+| Flags | Boolean, not `"true"` or `"false"` |
+| Time | ISO timestamp string in `ts` |
+| Category | Small controlled vocabulary |
+
+Avoid changing a property from a number to a formatted string after release. Add a new clearly named property when the meaning changes.
+
+## Keep the contract reviewable
+
+Maintain an event catalog with:
+
+- the exact name and owner;
+- the successful trigger;
+- required and optional fields;
+- field types and allowed values;
+- customer-data classification;
+- an example payload;
+- a test and expected result.
+
+<CardGroup cols={2}>
+  <Card title="Payload reference" icon="brackets-curly" href="/api-reference/payload">
+    Review every typed SDK field.
+  </Card>
+  <Card title="Validate the model" icon="list-check" href="/guides/validation-debugging">
+    Prove names, payloads, and firing behavior before release.
+  </Card>
+</CardGroup>

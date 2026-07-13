@@ -27,12 +27,12 @@ Unexpected server errors can also include the request ID:
 | --- | --- | --- |
 | `400` | Invalid path, query, or request body | Fix the request. Do not retry unchanged. |
 | `401` | Missing or invalid authentication | Replace or rotate the API key. |
-| `403` | The identity or key lacks access | Verify key permissions and organization scope. |
-| `404` | The scoped resource was not found | Refresh organizations, stores, or resource IDs. |
+| `403` | The identity or key lacks access | Verify key permissions and scope. Regenerate an older settings-generated key when the error requires a store scope. |
+| `404` | The scoped resource was not found | Refresh customer context or resource IDs. |
 | `409` | The request conflicts with current state | Read the resource and disambiguate or update the request. |
 | `429` | Too many requests | Retry with exponential backoff and jitter. |
 | `500` | Bily could not complete the request | Retry safe reads; investigate before retrying writes. |
-| `502` | A dependent capability was temporarily unavailable | Retry safe reads after a short delay. |
+| `502` | A dependent Bily operation was temporarily unavailable | Retry safe reads after a short delay. |
 | `504` | The request did not complete before its timeout | Retry safe reads after a short delay or reduce the requested range. |
 
 ## Preserve the request ID
@@ -42,7 +42,7 @@ Every response includes `x-request-id`. You may send your own safe correlation v
 ```typescript
 const requestId = crypto.randomUUID();
 const response = await fetch(
-  "https://app.bily.ai/api/customer/v1/organizations",
+  "https://app.bily.ai/api/customer/v1/context",
   {
     headers: {
       "x-api-key": process.env.BILY_API_KEY!,

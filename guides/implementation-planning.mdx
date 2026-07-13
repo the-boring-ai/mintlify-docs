@@ -1,0 +1,118 @@
+---
+title: "Plan a Bily implementation"
+sidebarTitle: "Implementation planning"
+description: "Turn business outcomes into a scoped Bily event plan, ownership model, and release checklist before writing code."
+---
+
+A reliable Bily implementation starts with a small, reviewed contract. Decide what you need to learn or operate, where each event should fire, and who owns the result before choosing framework code.
+
+## Start with decisions, not events
+
+Write down the business decisions the implementation should support. Examples include:
+
+- which product journeys lead to checkout;
+- where customers leave a conversion flow;
+- which campaign and store results need regular review;
+- which operational actions may be performed through the API or MCP.
+
+Each decision should map to a small set of observable outcomes. Avoid tracking every render, click, or state change merely because it is available.
+
+## Create an event plan
+
+Use one row per event. Keep this plan in the same review process as the product code.
+
+| Field | Question to answer |
+| --- | --- |
+| Event name | What stable outcome occurred? |
+| Trigger | What exact successful state causes the event? |
+| Owner | Which team owns the event contract? |
+| Required properties | Which fields are necessary to interpret it? |
+| Customer data | Which approved identity fields, if any, are needed? |
+| Event ID | Can the same outcome be reported by more than one system? |
+| Verification | How will a tester prove the event fired once with the right payload? |
+
+For ecommerce activity, start with Bily's [recognized event names](/guides/ecommerce). For application-specific outcomes, use stable snake_case [custom event names](/guides/custom-events).
+
+## Choose one browser installation path
+
+| Website architecture | Installation path |
+| --- | --- |
+| Plain HTML or a site-managed script field | The exact raw script copied from Bily |
+| Browser application with an npm build | `@bilyai/js` |
+| React single-page application | One root-level React integration |
+| Next.js App Router | One client component mounted from the root layout |
+
+Do not combine the raw script and npm SDK on the same website surface. Both install Bily and can duplicate the initial page view.
+
+## Define page-view ownership
+
+The browser script records the initial document page view. Applications that change routes without loading a new document must send one explicit `PageView` after each later committed route.
+
+Choose one router integration as the owner of those later page views. It should:
+
+1. skip the initial route callback;
+2. wait for the final committed URL;
+3. include the current URL and page title;
+4. ignore repeated notifications for the same URL.
+
+Review the [page-view guide](/guides/pageviews) before adding component-level tracking.
+
+## Decide identity and privacy boundaries
+
+Keep three concepts separate:
+
+- the Bily browser tracking ID identifies a browser context;
+- `client.userId` carries your approved authenticated account ID on an event;
+- your server session authorizes protected product actions.
+
+The browser tracking ID is never authorization. Include customer fields only when they have a documented purpose and the visitor's consent state allows them.
+
+Create a field review for every event:
+
+| Classification | Examples | Default action |
+| --- | --- | --- |
+| Operational | page name, product ID, plan, safe status code | Include when needed |
+| Customer | user ID, email, phone, address | Include only with purpose and permission |
+| Secret | password, session token, API key, payment data | Never include |
+
+Continue with [identity and attribution](/guides/identity-attribution) and [privacy governance](/guides/privacy-governance).
+
+## Plan read and action surfaces separately
+
+The browser SDK sends website events. It is not a server API client.
+
+Use the versioned Bily API for deterministic backend integrations and scheduled workloads. Use Bily MCP for compatible AI clients that should discover current Bily operations through `search` and run focused work through `execute`.
+
+The [API or MCP selection guide](/guides/api-mcp-selection) explains when to use each surface and when a customer workflow needs more than one.
+
+## Define environments and release gates
+
+At minimum, define:
+
+- which Bily store and script URL each environment uses;
+- where test events are allowed;
+- who can create or revoke server credentials;
+- which checks must pass before production;
+- how to disable the new tracking code without changing unrelated application behavior.
+
+Never initialize a placeholder URL and replace it later. Select the environment-specific exact script URL before the first `init()` call.
+
+## Planning exit criteria
+
+Implementation can begin when:
+
+- every event has an owner, trigger, required fields, and verification step;
+- the team selected exactly one browser installation path;
+- initial and SPA page-view ownership is explicit;
+- optional customer fields have privacy approval;
+- API and MCP credentials remain outside browser code;
+- staging and production stores, URLs, and release gates are documented.
+
+<CardGroup cols={2}>
+  <Card title="Model events and payloads" icon="diagram-project" href="/guides/event-data-model">
+    Turn the plan into a stable event contract.
+  </Card>
+  <Card title="Prepare the rollout" icon="rocket" href="/guides/production-rollout">
+    Release in stages with evidence and rollback criteria.
+  </Card>
+</CardGroup>

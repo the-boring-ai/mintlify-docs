@@ -1,15 +1,18 @@
 ---
 title: "Bily developer documentation"
-description: "Install governed web capabilities, send browser events, and build trusted server workflows with Bily."
+description: "Connect website data to Bily and build trusted browser, server, and AI workflows."
 ---
 
-Bily is an app store for the internet: one trusted place to install, govern, and evolve reusable web capabilities. Connect a site once, use the SDK for browser events, and use the API for authenticated server workflows.
+Bily is the programmable customer data and activation layer for websites. Connect once to collect and normalize events, route trusted data, and run governed work across browser, server, and AI surfaces.
 
-Installing a capability should feel like installing an app: review its permissions, configure it, enable it, and later update or revoke it from one place.
+**Bily Apps — install capabilities, not scripts.** Bily Apps is the installable capability layer of Bily. Discover a capability, review its permissions, configure it for a site, then install, observe, update, or revoke it without rebuilding the website connection.
 
 <CardGroup cols={2}>
   <Card title="What is Bily?" icon="sparkles" href="/concepts/what-is-bily">
-    See how installable capabilities, governance, first-party delivery, and extensibility fit together.
+    Understand the customer data and activation layer behind every Bily developer surface.
+  </Card>
+  <Card title="Explore Bily Apps" icon="puzzle-piece" href="/concepts/bily-apps">
+    Install capabilities, not scripts, through the website connection you already govern.
   </Card>
   <Card title="Install in minutes" icon="bolt" href="/quickstart">
     Choose the one installation path that matches your website.
@@ -24,17 +27,39 @@ Installing a capability should feel like installing an app: review its permissio
     Review every exported method, event type, and payload type.
   </Card>
   <Card title="Build with the Bily API" icon="terminal" href="/rest-api/overview">
-    Access scoped stores, analytics, integrations, and supported actions from trusted servers.
+    Discover the user, organization, and store in one request, then build trusted server workflows.
+  </Card>
+  <Card title="Connect an AI client" icon="robot" href="/mcp/overview">
+    Discover supported Bily operations and run scoped analytics or actions through MCP.
   </Card>
 </CardGroup>
 
-## One product, two developer surfaces
+## One layer, three developer surfaces
 
 The SDK is the browser contract. It installs Bily and sends page, commerce, and custom events.
 
-The API is the server contract. It authenticates your backend, applies organization and store boundaries, and exposes the Bily capabilities available to your account.
+The API is the server contract. It authenticates your backend, applies organization and store boundaries, and exposes Bily data and supported actions.
 
-Both surfaces keep the customer-facing integration stable while Bily capabilities improve over time.
+MCP is the AI-client contract. It discovers the current Bily operation catalog and runs scoped work through two stable tools.
+
+All three surfaces connect to the same Bily data and activation layer. Bily Apps can evolve without asking every website team to replace its integration.
+
+## Plan, validate, and launch
+
+<CardGroup cols={2}>
+  <Card title="Plan the implementation" icon="clipboard-list" href="/guides/implementation-planning">
+    Define outcomes, event ownership, identity boundaries, and release gates before writing code.
+  </Card>
+  <Card title="Model events and data" icon="diagram-project" href="/guides/event-data-model">
+    Keep names, payloads, products, orders, and custom fields stable.
+  </Card>
+  <Card title="Validate each boundary" icon="list-check" href="/guides/validation-debugging">
+    Prove loading, event behavior, API scope, and MCP execution separately.
+  </Card>
+  <Card title="Read the customer FAQ" icon="circle-question" href="/troubleshooting/faqs">
+    Get direct answers about implementation, identity, attribution, privacy, API, and MCP behavior.
+  </Card>
+</CardGroup>
 
 ## Choose one installation path
 

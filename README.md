@@ -4,6 +4,8 @@ This repository contains the public documentation for the Bily browser script an
 
 ## Local checks
 
+Use Node.js 22 LTS for local documentation checks.
+
 Run the public-language guard before previewing or submitting changes:
 
 ```bash

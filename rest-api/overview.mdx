@@ -26,12 +26,13 @@ The `/v1` segment is part of the contract. Do not omit it.
 
 ## Start with discovery
 
-Call the endpoints in this order when you do not already know the organization and store:
+Start with one request when you do not already know the organization and store:
 
-1. `GET /me` confirms the identity attached to the key.
-2. `GET /organizations` returns accessible organizations.
-3. `GET /stores` with `x-bily-organization-id` returns stores in one organization.
-4. Use a returned store URL in store-scoped endpoints.
+1. `GET /context` returns the authenticated user, accessible organizations, and each organization's nested stores.
+2. Use an exact `organizations[].stores[].url` value in store-scoped endpoints.
+3. Add the optional `organizationId` query only when the identity can access multiple organizations and the workload explicitly selects one. A store-scoped API key needs no parameter.
+
+`GET /me`, `GET /organizations`, and `GET /stores` remain available when a workload needs one focused part of the discovery response.
 
 <CardGroup cols={2}>
   <Card title="Authentication" icon="key" href="/rest-api/authentication">
@@ -57,3 +58,7 @@ Every response includes an `x-request-id` header. Preserve it in logs and suppor
 <Info>
   The endpoint reference is generated from Bily's OpenAPI specification. The specification is the source of truth for paths, parameters, request bodies, and stable response fields.
 </Info>
+
+<Card title="Choose the API or MCP" icon="arrows-split-up-and-left" href="/guides/api-mcp-selection">
+  Compare deterministic server workflows with interactive AI-client work.
+</Card>

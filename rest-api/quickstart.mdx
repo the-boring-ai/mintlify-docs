@@ -1,7 +1,7 @@
 ---
 title: "API quickstart"
 sidebarTitle: "Quickstart"
-description: "Verify a Bily API key, select an organization, and list its stores."
+description: "Discover the authenticated user, organization, and store in one Bily API request."
 ---
 
 This quickstart uses a server-side API key. Create one by following the [authentication guide](/rest-api/authentication).
@@ -15,35 +15,46 @@ This quickstart uses a server-side API key. Create one by following the [authent
     ```
   </Step>
 
-  <Step title="Verify the identity">
+  <Step title="Discover customer context">
     ```bash
     curl --fail-with-body \
-      --url https://app.bily.ai/api/customer/v1/me \
+      --url https://app.bily.ai/api/customer/v1/context \
       --header "x-api-key: $BILY_API_KEY"
     ```
 
-    A successful response contains the user attached to the key.
-  </Step>
+    The response nests every visible store under its organization:
 
-  <Step title="List organizations">
-    ```bash
-    curl --fail-with-body \
-      --url https://app.bily.ai/api/customer/v1/organizations \
-      --header "x-api-key: $BILY_API_KEY"
+    ```json
+    {
+      "user": {
+        "id": "usr_01J8W6T2QF4M7Z9A3K5N1P0R8S",
+        "email": "developer@example.com",
+        "emailVerified": true,
+        "name": "Bily Developer",
+        "image": null
+      },
+      "organizations": [
+        {
+          "id": "org_01J8W7T9G3E6ZQ4M2K5N8P1R0S",
+          "name": "Example organization",
+          "slug": "example-organization",
+          "createdAt": "2026-07-01T00:00:00.000Z",
+          "stores": [
+            {
+              "id": "store_01J8W8D5GSPN3XQYF4K2A6M7RT",
+              "url": "store.example.com",
+              "type": "shopify",
+              "currency": "USD",
+              "createdAt": "2026-07-01T00:00:00.000Z",
+              "updatedAt": "2026-07-14T00:00:00.000Z"
+            }
+          ]
+        }
+      ]
+    }
     ```
 
-    Copy an `organizations[].id` value from the response.
-  </Step>
-
-  <Step title="List stores">
-    ```bash
-    curl --fail-with-body \
-      --url https://app.bily.ai/api/customer/v1/stores \
-      --header "x-api-key: $BILY_API_KEY" \
-      --header "x-bily-organization-id: org_01J8W7T9G3E6ZQ4M2K5N8P1R0S"
-    ```
-
-    Use the exact `stores[].url` value in store-scoped endpoints.
+    An ordinary settings-generated key is already store-scoped, so do not add an organization parameter. Use the exact `organizations[].stores[].url` value in store-scoped endpoints.
   </Step>
 
   <Step title="Read a store profile">
@@ -54,6 +65,23 @@ This quickstart uses a server-side API key. Create one by following the [authent
     ```
   </Step>
 </Steps>
+
+<Warning>
+  If an older key created under **Settings > MCP** returns `403` and asks to be reissued with a store scope, select the intended store and replace it with a newly generated scoped key.
+</Warning>
+
+## Select one organization explicitly
+
+Use `organizationId` only when the authenticated identity can access multiple organizations and the workload intentionally selects one:
+
+```bash
+curl --fail-with-body --get \
+  --url https://app.bily.ai/api/customer/v1/context \
+  --header "x-api-key: $BILY_API_KEY" \
+  --data-urlencode "organizationId=org_01J8W7T9G3E6ZQ4M2K5N8P1R0S"
+```
+
+The selected organization must be inside the credential's allowed scope. Store-scoped keys should omit this parameter.
 
 ## JavaScript example
 
@@ -83,24 +111,27 @@ async function bilyRequest<T>(path: string, init: RequestInit = {}): Promise<T> 
   return response.json() as Promise<T>;
 }
 
-const { organizations } = await bilyRequest<{
-  organizations: Array<{ id: string; name: string }>;
-}>("/organizations");
+const context = await bilyRequest<{
+  user: { id: string; email: string; name: string };
+  organizations: Array<{
+    id: string;
+    name: string;
+    stores: Array<{ id: string; url: string }>;
+  }>;
+}>("/context");
 
-const organizationId = organizations[0]?.id;
-if (!organizationId) {
-  throw new Error("No accessible Bily organization found");
+const store = context.organizations[0]?.stores[0];
+if (!store) {
+  throw new Error("No accessible Bily store found");
 }
 
-const { stores } = await bilyRequest<{
-  stores: Array<{ id: string; url: string }>;
-}>("/stores", {
-  headers: { "x-bily-organization-id": organizationId },
-});
+const profile = await bilyRequest<Record<string, unknown>>(
+  `/store-data/${encodeURIComponent(store.url)}`,
+);
 
-console.log(stores);
+console.log({ user: context.user, store, profile });
 ```
 
 <Card title="Browse all endpoints" icon="list" href="/rest-api/overview">
-  Continue to the generated endpoint reference in the **Bily API** tab.
+  Continue to the generated endpoint reference, including `GET /context`, in the **Bily API** tab.
 </Card>

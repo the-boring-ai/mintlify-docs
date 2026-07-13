@@ -1,0 +1,62 @@
+---
+title: "MCP safety and permissions"
+sidebarTitle: "Safety and permissions"
+description: "Use Bily MCP with explicit scope, client approval, focused execution, and post-action verification."
+---
+
+Bily enforces identity, organization, and store access on the server. Safe operation also depends on how the client plans and approves each request.
+
+## Keep approval visible
+
+Configure the client to prompt before MCP tool calls. `search` is read-oriented, but `execute` can contain reads, writes, or several helper calls.
+
+Before approving an `execute` call:
+
+1. Read the complete async function.
+2. Confirm the intended store and organization.
+3. Identify every helper that can write.
+4. Check the matching `search` result's planning metadata.
+5. Confirm the verification step and any rollback hint.
+
+Planning metadata is advisory. It helps clients prepare a safer request, but it is not proof that a human approved the action.
+
+## Understand risk guidance
+
+The catalog can classify an operation as:
+
+- `read` for identity, store, analytics, and connected-platform reads;
+- `draft_write` for supported creation, clone, synchronization, and configuration actions;
+- `spend_affecting` for actions that can change delivery or budget behavior;
+- `destructive` for deletion.
+
+Approval guidance can be `none`, `required_before_write`, or `required_before_spend`. Treat the strongest value returned by any helper in the function as the minimum review level for the entire execution.
+
+## Keep execution focused
+
+- Use `search` immediately before an unfamiliar operation.
+- Prefer one business action per `execute` call.
+- Do not place credentials inside `code`; Bily helpers already use the connection's authentication.
+- Return only the fields needed for the task.
+- Do not attempt arbitrary network requests; direct outbound network access is unavailable.
+- Break long analyses into smaller calls so each execution stays within its 20-second runtime.
+
+## Verify writes
+
+After an approved write, call the appropriate read helper and return both the action result and the observed state. Do not report success from an action request alone when the catalog provides a verification step.
+
+If verification disagrees with the requested change:
+
+1. Stop additional writes.
+2. Report the action and verification results separately.
+3. Follow a catalog rollback hint only after another explicit approval.
+
+## Protect credentials
+
+- Prefer Bily Connect so no long-lived key appears in client configuration.
+- Create fallback keys only for clients that need them.
+- Select the intended store before creating a fallback key.
+- Use a descriptive name and expiration.
+- Never paste a key into a prompt, execution function, log, issue, or repository.
+- Revoke a key immediately if it may have been exposed.
+
+Continue with [authentication and scoping](/mcp/authentication) for the exact connection boundaries.

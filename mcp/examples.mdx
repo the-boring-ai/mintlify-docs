@@ -1,0 +1,110 @@
+---
+title: "MCP examples"
+sidebarTitle: "Examples"
+description: "Discover Bily operations, run scoped reads, and prepare verifiable actions."
+---
+
+Use `search` first, then pass a focused async arrow function to `execute`.
+
+## Discover identity and stores
+
+Search input:
+
+```json
+{
+  "query": "show the authenticated identity, organizations, and stores",
+  "limit": 6
+}
+```
+
+Execution code:
+
+```javascript
+async () => {
+  return bily.context();
+}
+```
+
+The result contains `user` and `organizations[]`, with accessible stores nested under each organization. An ordinary store-scoped fallback key needs no organization input.
+
+With Bily Connect, supply `organizationId` on the `execute` tool only when the user explicitly selects one accessible organization:
+
+```json
+{
+  "organizationId": "org_01J8W7T9G3E6ZQ4M2K5N8P1R0S",
+  "code": "async () => bily.context()"
+}
+```
+
+## Compare revenue periods
+
+Search for the operation:
+
+```json
+{
+  "query": "compare revenue to the preceding period and explain traffic, conversion, and order value",
+  "storeUrl": "store.example.com",
+  "limit": 5
+}
+```
+
+Then execute the returned revenue trend helper with real calendar dates:
+
+```javascript
+async () => {
+  return bily.analytics.getRevenueTrend({
+    storeUrl: "store.example.com",
+    filters: {
+      startDate: "2026-07-01",
+      endDate: "2026-07-07",
+    },
+    comparisonFilters: {
+      startDate: "2026-06-24",
+      endDate: "2026-06-30",
+    },
+  });
+}
+```
+
+Review returned readiness, warning, and sample-size fields before making a business recommendation.
+
+## Inspect available analytics data
+
+```javascript
+async () => {
+  const datasets = await bily.analytics.listDatasets({
+    storeUrl: "store.example.com",
+  });
+
+  console.log("Catalog loaded");
+  return datasets;
+}
+```
+
+The returned data appears in `result`; the message appears in `logs`.
+
+## Perform a supported action safely
+
+For a request such as refreshing connected advertising accounts:
+
+1. Call `search` for the exact intent and store.
+2. Inspect `riskTier`, `approvalPolicy`, preconditions, and verification guidance.
+3. Show the proposed function to the user.
+4. Obtain explicit approval in the client.
+5. Run one focused action and verify it with a read.
+
+```javascript
+async () => {
+  const refresh = await bily.actions.syncAdAccounts({
+    storeUrl: "store.example.com",
+  });
+
+  const accounts = await bily.getManagedAdAccounts({
+    storeUrl: "store.example.com",
+  });
+
+  return { refresh, accounts };
+}
+```
+
+Do not silently add other writes to the same function. If a request expands, present the expanded function for approval again.

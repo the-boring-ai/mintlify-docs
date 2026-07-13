@@ -1,0 +1,73 @@
+---
+title: "MCP troubleshooting"
+sidebarTitle: "Troubleshooting"
+description: "Resolve Bily MCP connection, authentication, scope, search, execution, and action errors."
+---
+
+<AccordionGroup>
+  <Accordion title="The client cannot connect">
+    Confirm the URL is exactly `https://api-dispatcher.bily.ai/mcp` and the client supports remote Streamable HTTP MCP servers.
+
+    Do not use `https://app.bily.ai/mcp`, `llms.txt`, or `llms-full.txt` as the endpoint. Reload the client after changing its configuration.
+  </Accordion>
+
+  <Accordion title="Bily Connect does not open">
+    Confirm the client supports MCP OAuth discovery, Authorization Code with PKCE `S256`, refresh tokens, and the `mcp_access` scope.
+
+    The MCP endpoint responds to an unauthenticated request with the discovery challenge. Compatible clients should follow that challenge automatically. If the client cannot complete this flow, use an access key fallback.
+  </Accordion>
+
+  <Accordion title="The server returns 401">
+    The credential is missing, invalid, expired, or revoked. Reconnect through Bily Connect or replace the fallback key.
+
+    Do not send a Bily Connect credential and `x-api-key` together.
+  </Accordion>
+
+  <Accordion title="Bily Connect asks me to sign in again">
+    Reconnect through Bily Connect. For security, refresh credentials are rotated. Reusing an older refresh credential, or losing the latest refresh response, can invalidate the connection.
+
+    Do not paste credentials into the client or keep retrying an older credential.
+  </Accordion>
+
+  <Accordion title="The server returns 403">
+    The connection is authenticated, but the requested organization, store, permission, or action is outside its allowed scope.
+
+    With Bily Connect, confirm the signed-in user still belongs to the organization that owns the store. With a fallback key, use only the default store and organization recorded when the key was created. If the response says the key must be reissued with store scope, select the intended store and create a replacement key under **Settings > MCP**.
+  </Accordion>
+
+  <Accordion title="search returns no useful operation">
+    Describe the outcome, resource, and intended read or write. Add an accessible `storeUrl` when the request depends on connected store operations. Set `limit` from 1 to 20.
+
+    Do not guess a helper name when `search` does not return it.
+  </Accordion>
+
+  <Accordion title="execute says the code is invalid">
+    Pass a string containing an async arrow function:
+
+    ```javascript
+    async () => {
+      return bily.context();
+    }
+    ```
+
+    Keep the code at or below 20,000 characters and return JSON-serializable data.
+  </Accordion>
+
+  <Accordion title="execute times out">
+    One execution can run for at most 20 seconds. Split broad work into smaller calls, reduce query ranges or result limits, and return only the fields needed for the next decision.
+  </Accordion>
+
+  <Accordion title="A write needs approval">
+    This is expected for write, spend-affecting, and destructive operations. Review the function, store, proposed changes, planning metadata, and verification step in the client.
+
+    Bily's planning metadata does not replace the client approval prompt.
+  </Accordion>
+
+  <Accordion title="The result is missing expected data">
+    Use `search` again and inspect the operation's preconditions, input schema, verification guidance, and connected-store requirements. Confirm dates are real calendar dates and the requested store is correct.
+  </Accordion>
+</AccordionGroup>
+
+## Contact support
+
+Record the client name and version, safe error message, timestamp, tool name, and store URL. Remove credentials and customer payloads before contacting [Bily support](mailto:support@bily.ai).
