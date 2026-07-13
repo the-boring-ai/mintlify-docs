@@ -13,14 +13,24 @@ npm install @bilyai/js
 
 ## Configure the store URL
 
-Copy the complete SDK URL from **Bily > Settings > Apps > More settings > Install tracking** into the app's public
+Copy the exact, complete SDK URL from **Bily > Settings > Apps > More settings > Install tracking** into the app's public
 build-time settings. The URL is public installation data; it does not contain a private token.
 
+Use `.env.local` only for local development; it is normally not committed.
+
 ```dotenv .env.local
-NEXT_PUBLIC_BILY_SCRIPT_URL=https://tracking.example.com/b.js?shop=store.example.com
+NEXT_PUBLIC_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
 ```
 
-Keep the value unchanged, including its query string. Restart the development server after changing `.env.local`.
+Keep the double quotes: they prevent `#` from starting a comment; if the exact Bily-provided URL contains a literal dollar
+sign, escape only that character as `\$` in `.env.local` and deployment build environments so Next.js preserves it.
+
+For every preview and production deployment, set the same variable in the deployment build environment before running
+`next build`. Next.js inlines `NEXT_PUBLIC_` values into the browser bundle at build time, so rebuild and redeploy after
+changing the value.
+
+Aside from that escape, keep the URL unchanged, including its query string. Restart the local development server after
+changing `.env.local`.
 
 ## Create a client tracking component
 
@@ -38,7 +48,7 @@ const BILY_SCRIPT_URL = process.env.NEXT_PUBLIC_BILY_SCRIPT_URL;
 export function BilyTracking() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const search = searchParams.toString();
+  const search = searchParams?.toString() ?? "";
   const previousUrl = useRef<string | null>(null);
 
   useEffect(() => {
@@ -69,6 +79,9 @@ export function BilyTracking() {
 }
 ```
 
+The null-safe search value also supports applications that still contain a `pages/` directory while migrating to the
+App Router. URL comparison prevents that compatibility transition from creating a duplicate initial page view.
+
 ## Mount it in the root layout
 
 Wrap the component in `Suspense` because it reads the current search parameters.
@@ -92,6 +105,34 @@ export default function RootLayout({
   );
 }
 ```
+
+## Optional: cover remaining Pages Router routes
+
+The App Router root layout does not wrap routes that still live in `pages/`. During a hybrid migration, mount the same
+component once in the Pages Router root too.
+
+If `pages/_app.tsx` already exists, add only the Bily mount and preserve all existing imports, providers, layouts, global
+CSS, data hooks, and error boundaries. Use the minimal example below only when the app does not already have a Custom App.
+
+```tsx pages/_app.tsx
+import type { AppProps } from "next/app";
+import { Suspense } from "react";
+import { BilyTracking } from "../app/bily-tracking";
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <BilyTracking />
+      </Suspense>
+      <Component {...pageProps} />
+    </>
+  );
+}
+```
+
+Mount `BilyTracking` only once within each route tree. The root layout covers App Router routes; `_app.tsx` covers Pages
+Router routes.
 
 Use a separate complete URL for each environment. Do not construct it from a hostname or add query parameters in code.
 
