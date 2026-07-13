@@ -1,0 +1,131 @@
+---
+title: "Ecommerce events"
+description: "Track products, carts, checkouts, and orders with Bily's typed ecommerce payloads."
+---
+
+Use Bily's title-case event names for product and order activity. The SDK recognizes these events and maps typed products and orders to the Bily event contract.
+
+## Product viewed
+
+```typescript
+import { track } from "@bilyai/js";
+
+track("Product Viewed", {
+  products: [
+    {
+      id: "product_123",
+      name: "Everyday Tee",
+      price: 39,
+      currency: "USD",
+      quantity: 1,
+      sku: "TEE-NAVY-M",
+      category: "Tops",
+      brand: "Everyday",
+      image: "https://cdn.example.com/products/everyday-tee.jpg",
+    },
+  ],
+});
+```
+
+`quantity` defaults to `1` when omitted.
+
+## Product added
+
+```typescript
+track("Product Added", {
+  products: [
+    {
+      id: "product_123",
+      name: "Everyday Tee",
+      price: 39,
+      currency: "USD",
+      quantity: 2,
+      sku: "TEE-NAVY-M",
+    },
+  ],
+});
+```
+
+## Checkout started
+
+```typescript
+track("Checkout Started", {
+  products: [
+    {
+      id: "product_123",
+      name: "Everyday Tee",
+      price: 39,
+      currency: "USD",
+      quantity: 2,
+    },
+  ],
+  checkout_id: "checkout_456",
+});
+```
+
+## Order completed
+
+Use `order` when the event represents one order. The SDK uses `order.total` when provided or calculates the total from product price and quantity.
+
+```typescript
+track("Order Completed", {
+  order: {
+    id: "order_789",
+    currency: "USD",
+    total: 73,
+    tax: 4,
+    discount: 10,
+    discountCode: "WELCOME10",
+    shippingFees: 1,
+    products: [
+      {
+        id: "product_123",
+        name: "Everyday Tee",
+        price: 39,
+        currency: "USD",
+        quantity: 2,
+      },
+    ],
+  },
+});
+```
+
+Zero is a valid value for totals, tax, discounts, and shipping fees.
+
+## Recognized ecommerce names
+
+- `Product List Viewed`
+- `Products Searched`
+- `Product Clicked`
+- `Product Added`
+- `Product Added to Wishlist`
+- `Product Removed`
+- `Product Removed From Cart`
+- `Product Removed From Wishlist`
+- `Product Viewed`
+- `Cart Viewed`
+- `Checkout Started`
+- `Checkout Step Viewed`
+- `Checkout Step Completed`
+- `Payment Info Entered`
+- `Shipping Info Entered`
+- `AddShippingInfo`
+- `AddContactInfo`
+- `Checkout Address Info Submitted`
+- `Order Completed`
+- `Order Updated`
+- `Order Refunded`
+- `Order Cancelled`
+- `Clicked Promotion`
+- `Viewed Promotion`
+- `ViewCategory`
+
+Use the spelling and capitalization shown above. Review [event names](/api-reference/events) for accepted legacy aliases.
+
+## Required product fields
+
+Every product needs `id`, `name`, `price`, and `currency`. Add `quantity`, `sku`, `category`, `brand`, and `image` when available.
+
+<Card title="Payload reference" icon="brackets-curly" href="/api-reference/payload">
+  Review the complete `BilyProduct` and `BilyOrder` types.
+</Card>

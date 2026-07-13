@@ -1,0 +1,95 @@
+---
+title: "init()"
+description: "Initialize Bily with an exact script URL and configure loading behavior."
+---
+
+`init()` loads Bily once in a browser document. The preferred object form accepts the exact script URL copied from Bily.
+
+## Signature
+
+```typescript
+function init(options: BilyInitOptions): void;
+
+function init(
+  trackingDomainOrScriptUrl: string,
+  options?: BilyLegacyInitOptions,
+): void;
+```
+
+## Preferred initialization
+
+```typescript
+import { init } from "@bilyai/js";
+
+init({
+  scriptUrl: "https://tracking.example.com/b.js?shop=store.example.com",
+});
+```
+
+The SDK copies `scriptUrl` onto the browser script without removing or rebuilding its query string.
+
+<Warning>
+  Pass the whole URL shown in **Bily > Settings > Tracking**. Query parameters and encoded characters are required parts of the URL.
+</Warning>
+
+## Options
+
+| Option | Type | Default | Behavior |
+| --- | --- | --- | --- |
+| `scriptUrl` | `string` | Required in the preferred form | Exact Bily script URL |
+| `debug` | `boolean` | `false` | Logs lifecycle diagnostics without logging event payloads |
+| `maxQueueSize` | `number` | `100` | Retains between 1 and 1,000 early calls and discards the oldest when full |
+| `loadTimeoutMs` | `number` | `15000` | Waits between 1,000 and 60,000 milliseconds before rejecting readiness |
+| `nonce` | `string` | — | Copies your content-security-policy nonce onto the injected script |
+| `trackingDomain` | `string` | — | Compatibility form that loads `/b.js` from the supplied origin |
+| `verbose` | `boolean` | `false` | Deprecated alias for `debug` |
+
+`scriptUrl` and `trackingDomain` are mutually exclusive in `BilyInitOptions`.
+
+## Full configuration
+
+```typescript
+init({
+  scriptUrl: "https://tracking.example.com/b.js?shop=store.example.com",
+  debug: false,
+  maxQueueSize: 250,
+  loadTimeoutMs: 20_000,
+  nonce: document.querySelector<HTMLMetaElement>(
+    'meta[name="csp-nonce"]',
+  )?.content,
+});
+```
+
+## URL requirements
+
+- Production script URLs must use HTTPS.
+- Local development may use HTTP on `localhost`, `127.0.0.1`, or `[::1]`.
+- The object form preserves the exact script URL.
+- The compatibility domain form constructs a `/b.js` URL from the supplied value. Prefer `scriptUrl` so the SDK can use the exact URL Bily provided.
+
+## Repeated calls
+
+Calling `init()` again with the same URL does not insert another script. If the page already contains a script with the same URL, the SDK reuses it.
+
+If Bily is loading or ready and a later call supplies a different URL, the SDK ignores the different URL. Keep one source of configuration for each page.
+
+After a terminal load failure, you can call `init()` again to retry.
+
+## Server rendering
+
+`init()` returns without accessing browser globals when it runs during server rendering. Call it from client-mounted code so browser tracking can start.
+
+## Compatibility form
+
+Existing applications can continue to use the string overload while migrating:
+
+```typescript
+init("https://tracking.example.com", { verbose: false });
+```
+
+New integrations should use `{ scriptUrl }` so the exact URL remains intact.
+
+<CardGroup cols={2}>
+  <Card title="ready()" icon="circle-check" href="/api-reference/ready" />
+  <Card title="Migrate to 2.0" icon="arrow-up" href="/migrations/2-0" />
+</CardGroup>

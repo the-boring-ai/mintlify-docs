@@ -1,0 +1,106 @@
+---
+title: "API quickstart"
+sidebarTitle: "Quickstart"
+description: "Verify a Bily API key, select an organization, and list its stores."
+---
+
+This quickstart uses a server-side API key. Create one by following the [authentication guide](/rest-api/authentication).
+
+<Steps>
+  <Step title="Set the key in your shell">
+    Keep the value out of shell history when possible. Use your local secret manager or a temporary protected environment variable.
+
+    ```bash
+    export BILY_API_KEY="<your-key>"
+    ```
+  </Step>
+
+  <Step title="Verify the identity">
+    ```bash
+    curl --fail-with-body \
+      --url https://app.bily.ai/api/customer/v1/me \
+      --header "x-api-key: $BILY_API_KEY"
+    ```
+
+    A successful response contains the user attached to the key.
+  </Step>
+
+  <Step title="List organizations">
+    ```bash
+    curl --fail-with-body \
+      --url https://app.bily.ai/api/customer/v1/organizations \
+      --header "x-api-key: $BILY_API_KEY"
+    ```
+
+    Copy an `organizations[].id` value from the response.
+  </Step>
+
+  <Step title="List stores">
+    ```bash
+    curl --fail-with-body \
+      --url https://app.bily.ai/api/customer/v1/stores \
+      --header "x-api-key: $BILY_API_KEY" \
+      --header "x-bily-organization-id: org_01J8W7T9G3E6ZQ4M2K5N8P1R0S"
+    ```
+
+    Use the exact `stores[].url` value in store-scoped endpoints.
+  </Step>
+
+  <Step title="Read a store profile">
+    ```bash
+    curl --fail-with-body \
+      --url https://app.bily.ai/api/customer/v1/store-data/store.example.com \
+      --header "x-api-key: $BILY_API_KEY"
+    ```
+  </Step>
+</Steps>
+
+## JavaScript example
+
+```typescript bily-api.ts
+const apiKey = process.env.BILY_API_KEY;
+
+if (!apiKey) {
+  throw new Error("BILY_API_KEY is required");
+}
+
+async function bilyRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await fetch(`https://app.bily.ai/api/customer/v1${path}`, {
+    ...init,
+    headers: {
+      accept: "application/json",
+      "x-api-key": apiKey,
+      ...init.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const requestId = response.headers.get("x-request-id");
+    const detail = await response.text();
+    throw new Error(`Bily request failed (${response.status}, request ${requestId}): ${detail}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+const { organizations } = await bilyRequest<{
+  organizations: Array<{ id: string; name: string }>;
+}>("/organizations");
+
+const organizationId = organizations[0]?.id;
+if (!organizationId) {
+  throw new Error("No accessible Bily organization found");
+}
+
+const { stores } = await bilyRequest<{
+  stores: Array<{ id: string; url: string }>;
+}>("/stores", {
+  headers: { "x-bily-organization-id": organizationId },
+});
+
+console.log(stores);
+```
+
+<Card title="Browse all endpoints" icon="list" href="/rest-api/overview">
+  Continue to the generated endpoint reference in the **Bily API** tab.
+</Card>

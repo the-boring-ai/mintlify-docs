@@ -1,0 +1,57 @@
+---
+title: "API authentication"
+sidebarTitle: "Authentication"
+description: "Create and use a Bily API key without exposing it in browser code, logs, or repositories."
+---
+
+Use a Bily API key for server-to-server requests. Never embed an API key in browser JavaScript, mobile application code, a public repository, or a client-visible environment variable.
+
+## Create a key
+
+1. Sign in to [Bily](https://app.bily.ai).
+2. Open **Settings**.
+3. Open **MCP**.
+4. Under **Access key fallback**, enter a descriptive name and expiration.
+5. Create the key and copy its full value immediately.
+
+Bily shows the full key once. Store it in your deployment platform's secret manager.
+
+<Tip>
+  Use one key per environment and workload. Names such as `reporting-production` and `catalog-sync-staging` make rotation and audit review easier.
+</Tip>
+
+## Send the key
+
+The recommended header is `x-api-key`:
+
+```bash
+curl --request GET \
+  --url https://app.bily.ai/api/customer/v1/me \
+  --header "x-api-key: $BILY_API_KEY"
+```
+
+Bearer authentication is also accepted:
+
+```http
+Authorization: Bearer <BILY_API_KEY>
+```
+
+Send one authentication method per request.
+
+## Protect and rotate keys
+
+- Keep keys only in server-side secret storage.
+- Do not log request headers that may contain a key.
+- Set an expiration that matches the workload's lifecycle.
+- Create a replacement before revoking a production key.
+- Revoke a key immediately if it may have been exposed.
+
+## Permission failures
+
+Keys created in Bily include the permissions available through the stable customer API. An action can still return `403` when the caller lacks the required permission or organization membership.
+
+Treat `401` as a missing, expired, revoked, or invalid key. Treat `403` as an authenticated request that is not allowed to access the requested operation or scope.
+
+<Card title="Make your first request" icon="arrow-right" href="/rest-api/quickstart">
+  Verify the key, select an organization, and list its stores.
+</Card>

@@ -1,69 +1,114 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Bily developer docs",
+  "description": "Install Bily capabilities, track reliable browser events, and build authenticated server workflows.",
+  "seo": {
+    "metatags": {
+      "canonical": "https://docs.bily.ai"
+    }
+  },
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#4F46E5",
+    "light": "#818CF8",
+    "dark": "#4F46E5"
   },
   "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
   "navigation": {
     "tabs": [
       {
         "tab": "Guides",
+        "icon": "book-open",
         "groups": [
           {
             "group": "Getting started",
             "pages": [
               "index",
-              "quickstart",
-              "development"
+              "concepts/what-is-bily",
+              "quickstart"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Install Bily",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "sdk/html",
+              "sdk/javascript",
+              "sdk/react",
+              "sdk/nextjs"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Track events",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "guides/verification",
+              "guides/pageviews",
+              "guides/custom-events",
+              "guides/ecommerce",
+              "guides/client-data"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Operate safely",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "privacy/data-safety",
+              "troubleshooting",
+              "migrations/2-0"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "SDK reference",
+        "icon": "brackets-curly",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Reference",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/overview"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Methods",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/init",
+              "api-reference/track",
+              "api-reference/ready",
+              "api-reference/get-bily-tracking-id"
             ]
+          },
+          {
+            "group": "Types",
+            "pages": [
+              "api-reference/events",
+              "api-reference/payload"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Bily API",
+        "icon": "terminal",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "rest-api/overview",
+              "rest-api/authentication",
+              "rest-api/quickstart",
+              "rest-api/scoping",
+              "rest-api/errors"
+            ]
+          },
+          {
+            "group": "Endpoint reference",
+            "openapi": {
+              "source": "/openapi.json",
+              "directory": "rest-reference"
+            }
           }
         ]
       }
@@ -71,52 +116,71 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Bily",
+          "href": "https://bily.ai",
+          "icon": "house"
         }
       ]
     }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
   },
   "navbar": {
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:support@bily.ai"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "Open Bily",
+      "href": "https://app.bily.ai"
     }
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude"
+    ]
   },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+  "api": {
+    "playground": {
+      "display": "simple"
+    },
+    "examples": {
+      "languages": [
+        "curl",
+        "javascript",
+        "python"
+      ],
+      "defaults": "required"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/development",
+      "destination": "/quickstart"
+    },
+    {
+      "source": "/essentials/:slug*",
+      "destination": "/quickstart"
+    },
+    {
+      "source": "/ai-tools/:slug*",
+      "destination": "/quickstart"
+    },
+    {
+      "source": "/api-reference/introduction",
+      "destination": "/api-reference/overview"
+    },
+    {
+      "source": "/api-reference/endpoint/:slug*",
+      "destination": "/api-reference/overview"
+    },
+    {
+      "source": "/migrations/1-1",
+      "destination": "/migrations/2-0"
+    }
+  ]
 }

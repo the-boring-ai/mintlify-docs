@@ -1,0 +1,101 @@
+---
+title: "Event names"
+description: "Review known Bily event names, custom event support, and normalized compatibility aliases."
+---
+
+`BilyEvent` provides autocomplete for known events while accepting any custom string.
+
+```typescript
+type BilyEvent = KnownBilyEvent | (string & Record<never, never>);
+```
+
+Event names are case-sensitive. Prefer the exact capitalization below for Bily events and stable snake_case for application events.
+
+## Known event type
+
+```typescript
+type KnownBilyEvent =
+  | "AddContactInfo"
+  | "AddShippingInfo"
+  | "Checkout Address Info Submitted"
+  | "Contact"
+  | "New Customer Purchase"
+  | "PageView"
+  | "Pageview"
+  | "Product Removed From Cart"
+  | "Product Removed From Wishlist"
+  | "ViewCategory"
+  | "Product List Viewed"
+  | "Products Searched"
+  | "Product Clicked"
+  | "Product Added"
+  | "Product Added to Wishlist"
+  | "Product Removed"
+  | "Product Viewed"
+  | "Checkout Step Viewed"
+  | "Checkout Step Completed"
+  | "Shipping Info Entered"
+  | "Order Refunded"
+  | "Clicked Promotion"
+  | "Viewed Promotion"
+  | "Category Viewed"
+  | "Checkout Started"
+  | "Payment Info Entered"
+  | "Payment Add Contact Info"
+  | "Payment Add Shipping Info"
+  | "Payment Add Address Info"
+  | "Subscription"
+  | "New Customer Order"
+  | "New Customer Subscription"
+  | "Order Completed"
+  | "Cart Viewed"
+  | "Remove from Cart"
+  | "Cart Updated"
+  | "Order Updated"
+  | "Order Cancelled"
+  | "Lead"
+  | "Login"
+  | "Logout"
+  | "Search"
+  | "Add to Wishlist"
+  | "Remove from Wishlist"
+  | "View Wishlist"
+  | "Newsletter"
+  | "Contact Form Submitted"
+  | "Subscription Cancelled"
+  | "Subscription Updated"
+  | "Subscription Renewed";
+```
+
+## Preferred ecommerce names
+
+For new ecommerce tracking, use the current names in the [ecommerce guide](/guides/ecommerce). The SDK accepts these compatibility names and normalizes them before delivery:
+
+| Compatibility name | Current name |
+| --- | --- |
+| `Pageview` | `PageView` |
+| `Add to Wishlist` | `Product Added to Wishlist` |
+| `Category Viewed` | `ViewCategory` |
+| `Contact Form Submitted` | `Contact` |
+| `New Customer Order` | `New Customer Purchase` |
+| `Payment Add Address Info` | `Checkout Address Info Submitted` |
+| `Payment Add Contact Info` | `AddContactInfo` |
+| `Payment Add Shipping Info` | `AddShippingInfo` |
+| `Product Added To Wishlist` | `Product Added to Wishlist` |
+| `Remove from Cart` | `Product Removed From Cart` |
+| `Remove from Wishlist` | `Product Removed From Wishlist` |
+| `Search` | `Products Searched` |
+
+## Custom application events
+
+```typescript
+track("workspace_created", {
+  workspace_id: "workspace_456",
+});
+```
+
+Custom event names must contain at least one non-whitespace character. Keep a small internal event catalog so spelling does not drift across components.
+
+<Card title="Track custom events" icon="wave-pulse" href="/guides/custom-events">
+  Design stable event names and safe properties.
+</Card>

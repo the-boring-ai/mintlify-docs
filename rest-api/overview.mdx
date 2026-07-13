@@ -1,0 +1,59 @@
+---
+title: "Bily API overview"
+sidebarTitle: "Overview"
+description: "Use the Bily API to access organization-scoped stores, analytics, integrations, and supported actions."
+---
+
+The Bily API gives your backend services and trusted workflows a versioned interface to Bily. Every endpoint is authenticated and every store request is checked against the caller's organization access.
+
+Use the API to:
+
+- discover the organizations and stores available to a key;
+- query advertising, attribution, product, customer, and cohort analytics;
+- inspect store readiness, connected accounts, assets, and tracking connections;
+- run read-only store commerce queries;
+- synchronize supported connections and perform explicit platform actions.
+
+## Base URL
+
+All stable customer endpoints share this base URL:
+
+```text
+https://app.bily.ai/api/customer/v1
+```
+
+The `/v1` segment is part of the contract. Do not omit it.
+
+## Start with discovery
+
+Call the endpoints in this order when you do not already know the organization and store:
+
+1. `GET /me` confirms the identity attached to the key.
+2. `GET /organizations` returns accessible organizations.
+3. `GET /stores` with `x-bily-organization-id` returns stores in one organization.
+4. Use a returned store URL in store-scoped endpoints.
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/rest-api/authentication">
+    Create, store, send, and revoke an API key safely.
+  </Card>
+  <Card title="Scoping" icon="building" href="/rest-api/scoping">
+    Understand organization and store access boundaries.
+  </Card>
+  <Card title="API quickstart" icon="rocket" href="/rest-api/quickstart">
+    Make a request and list your first store.
+  </Card>
+  <Card title="Errors and request IDs" icon="triangle-exclamation" href="/rest-api/errors">
+    Handle failures and preserve diagnostic context.
+  </Card>
+</CardGroup>
+
+## Response format
+
+Successful responses are JSON. Resource collections use a named object when the contract needs context, such as `{ "stores": [...] }`, or an array for analytics rows.
+
+Every response includes an `x-request-id` header. Preserve it in logs and support requests.
+
+<Info>
+  The endpoint reference is generated from Bily's OpenAPI specification. The specification is the source of truth for paths, parameters, request bodies, and stable response fields.
+</Info>

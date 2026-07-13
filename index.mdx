@@ -1,97 +1,70 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Bily developer documentation"
+description: "Install governed web capabilities, send browser events, and build trusted server workflows with Bily."
 ---
 
-## Setting up
+Bily is an app store for the internet: one trusted place to install, govern, and evolve reusable web capabilities. Connect a site once, use the SDK for browser events, and use the API for authenticated server workflows.
 
-Get your documentation site up and running in minutes.
+Installing a capability should feel like installing an app: review its permissions, configure it, enable it, and later update or revoke it from one place.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="What is Bily?" icon="sparkles" href="/concepts/what-is-bily">
+    See how installable capabilities, governance, first-party delivery, and extensibility fit together.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Install in minutes" icon="bolt" href="/quickstart">
+    Choose the one installation path that matches your website.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Track page views" icon="window" href="/guides/pageviews">
+    Capture the initial page automatically and later SPA routes explicitly.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Track product activity" icon="cart-shopping" href="/guides/ecommerce">
+    Send products, carts, checkouts, and completed orders with typed payloads.
   </Card>
-</Columns>
+  <Card title="Use the SDK reference" icon="brackets-curly" href="/api-reference/overview">
+    Review every exported method, event type, and payload type.
+  </Card>
+  <Card title="Build with the Bily API" icon="terminal" href="/rest-api/overview">
+    Access scoped stores, analytics, integrations, and supported actions from trusted servers.
+  </Card>
+</CardGroup>
 
-## Create beautiful pages
+## One product, two developer surfaces
 
-Everything you need to create world-class documentation.
+The SDK is the browser contract. It installs Bily and sends page, commerce, and custom events.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+The API is the server contract. It authenticates your backend, applies organization and store boundaries, and exposes the Bily capabilities available to your account.
 
-## Need inspiration?
+Both surfaces keep the customer-facing integration stable while Bily capabilities improve over time.
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
+## Choose one installation path
+
+<CardGroup cols={2}>
+  <Card title="HTML" icon="code" href="/sdk/html">
+    Add the exact Bily script tag to a site that does not use an application bundler.
+  </Card>
+  <Card title="JavaScript" icon="js" href="/sdk/javascript">
+    Initialize Bily from a browser application built with npm.
+  </Card>
+  <Card title="React" icon="react" href="/sdk/react">
+    Mount one SDK integration inside your router.
+  </Card>
+  <Card title="Next.js" icon="n" href="/sdk/nextjs">
+    Initialize from one App Router client component.
+  </Card>
+</CardGroup>
+
+<Warning>
+  Do not combine the raw script tag and `@bilyai/js` on the same website surface. Both installation paths load Bily, so combining them can duplicate the initial page view.
+</Warning>
+
+## What the SDK handles
+
+- It preserves the exact script URL and every query parameter you copy from Bily.
+- It safely queues calls while Bily loads.
+- It generates an event ID and timestamp when you do not provide them.
+- It gives known Bily events autocomplete while accepting your own event names.
+- It remains safe to import during server rendering.
+
+<Card title="Start with the quickstart" icon="arrow-right" href="/quickstart">
+  Install Bily and verify your first event.
 </Card>

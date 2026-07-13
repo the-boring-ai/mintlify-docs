@@ -1,0 +1,78 @@
+---
+title: "Troubleshooting"
+description: "Resolve Bily loading errors, changed URLs, duplicate page views, missing SPA routes, and payload issues."
+---
+
+Start with the [verification checklist](/guides/verification). Enable `debug: true` temporarily for SDK lifecycle diagnostics.
+
+<AccordionGroup>
+  <Accordion title="ready() times out">
+    Confirm that `init()` ran in client-mounted browser code. Then compare the entire `scriptUrl` with **Bily > Settings > Tracking**.
+
+    Check the browser **Network** panel for a blocked or failed script request. Review your content security policy, privacy tools, browser extensions, and network restrictions.
+
+    The default timeout is 15 seconds. You can adjust `loadTimeoutMs` from 1,000 to 60,000 milliseconds, but increasing it does not fix a blocked request.
+  </Accordion>
+
+  <Accordion title="The script URL lost query parameters">
+    Pass the exact URL through `init({ scriptUrl })`. Do not extract its origin, append `/b.js`, decode it, or rebuild it with a URL helper.
+
+    ```typescript
+    init({
+      scriptUrl: "https://tracking.example.com/b.js?shop=store.example.com",
+    });
+    ```
+
+    Migrate away from the compatibility domain form when your Bily URL contains a query string.
+  </Accordion>
+
+  <Accordion title="The initial page view appears twice">
+    Remove any `track("PageView")` call from the initial mount. The browser script records the initial event automatically.
+
+    Also confirm that the page does not use both a raw script tag and `@bilyai/js`, and that the exact script appears only once in the document.
+  </Accordion>
+
+  <Accordion title="SPA route changes are missing">
+    The automatic page view covers only the initial document. Connect `track("PageView", ...)` to your router's committed-navigation callback.
+
+    Send the current `window.location.href` and final `document.title`. Skip the initial callback and deduplicate repeated notifications for the same URL.
+  </Accordion>
+
+  <Accordion title="A second init() URL has no effect">
+    The SDK ignores a different URL after Bily starts loading or becomes ready. Keep one configuration owner and one exact script URL for the page.
+
+    If environments use different URLs, select the environment value before the first `init()` call. Do not initialize a placeholder and replace it later.
+  </Accordion>
+
+  <Accordion title="Early events are missing">
+    Ensure the application eventually calls `init()`. `track()` can queue before initialization, but delivery cannot start until Bily loads.
+
+    Check `maxQueueSize`. When the bounded queue is full, the SDK discards the oldest call. Avoid firing high-volume render or input events during startup.
+  </Accordion>
+
+  <Accordion title="getBilyTrackingId() returns null">
+    `null` is expected during server rendering. Call the method in browser code and handle its nullable type.
+
+    If browser storage is blocked, the SDK can still keep an in-memory identifier stable for the page session.
+  </Accordion>
+
+  <Accordion title="ready() resolves during server rendering">
+    This is expected. Public SDK calls remain safe without browser globals. Server resolution does not mean a browser script loaded. Initialize Bily from client-mounted code.
+  </Accordion>
+
+  <Accordion title="An ecommerce total is wrong">
+    Provide `order.total` when it is authoritative. Otherwise, the SDK calculates the value from `order.products` using each price and quantity.
+
+    Put products inside `order.products` for order events. Do not provide an `order` and expect top-level `products` to replace its products.
+  </Accordion>
+
+  <Accordion title="A custom event does not appear">
+    Confirm the name contains a non-whitespace character and stays consistent across calls. Verify that the success path actually reached `track()`.
+
+    Calls do not throw when browser delivery fails. Enable `debug: true` temporarily and use `ready()` to diagnose loading separately.
+  </Accordion>
+</AccordionGroup>
+
+## Still blocked?
+
+Collect the exact script URL with private credentials removed, the SDK version, the failing event name, the browser error, and the steps to reproduce. Contact [Bily support](mailto:support@bily.ai) without attaching customer payloads or secrets.

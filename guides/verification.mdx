@@ -1,0 +1,83 @@
+---
+title: "Verify your installation"
+description: "Confirm Bily loads once, records the initial page view, and tracks later events without duplicates."
+---
+
+Verify the installation in a development or staging environment before releasing it to customers.
+
+## Expected result
+
+| Check | Expected behavior |
+| --- | --- |
+| Browser script | One request and one script element |
+| Initial document | One automatic `PageView` |
+| SPA navigation | One explicit `PageView` after each later committed route |
+| Action event | One event after the action succeeds |
+| Console | No Bily load errors |
+| Built assets | No credentials or private tokens |
+
+## Verify an SDK installation
+
+Temporarily enable lifecycle diagnostics and wait for the explicit readiness signal.
+
+```typescript verify-bily.ts
+import { init, ready, track } from "@bilyai/js";
+
+init({
+  scriptUrl: "https://tracking.example.com/b.js?shop=store.example.com",
+  debug: true,
+});
+
+try {
+  await ready();
+  track("installation_verified", { test_run: "staging" });
+} catch (error) {
+  console.error("Bily failed to load", error);
+}
+```
+
+`debug` logs lifecycle diagnostics. It does not log event payloads. Remove it or set it to `false` after verification.
+
+<Note>
+  Normal `track()` calls do not need to await `ready()`. Calls made while the script loads stay in the bounded SDK queue.
+</Note>
+
+## Verify a plain HTML installation
+
+Open browser developer tools, then:
+
+1. Open the **Elements** panel and search for the exact script URL.
+2. Confirm the document contains one matching script element.
+3. Open the **Network** panel and reload the document.
+4. Confirm the browser requests the exact URL once, including its query string.
+5. Confirm Bily shows one initial `PageView` for that document.
+
+Do not call SDK methods on this installation path. Plain HTML uses only the raw script.
+
+## Test page-view behavior
+
+Run these checks in order:
+
+1. Load a page directly. Expect one automatic `PageView`.
+2. Reload it. Expect one new `PageView` for the new document load.
+3. In an SPA, navigate to a different route. Expect one explicit `PageView`.
+4. Trigger a component rerender without changing the URL. Expect no new page view.
+5. Navigate back and forward. Expect one event for each committed URL change.
+
+If the initial load produces two events, remove the manual page-view call from the initial mount and check for a second installation.
+
+## Inspect the exact URL
+
+Do not compare only the hostname. Compare the full URL character for character with the value shown in Bily. Query parameters and encoded characters are part of the installation contract.
+
+## Production checklist
+
+- Disable temporary diagnostics.
+- Confirm your consent controls run before optional customer data is sent.
+- Search built browser assets for credentials and private tokens.
+- Confirm failed operations do not emit success events.
+- Verify the same action does not fire from both a container and a nested component.
+
+<Card title="Troubleshoot a failed check" icon="screwdriver-wrench" href="/troubleshooting">
+  Diagnose timeouts, duplicate page views, missing routes, and changed script URLs.
+</Card>

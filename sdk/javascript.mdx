@@ -1,0 +1,89 @@
+---
+title: "JavaScript"
+description: "Install @bilyai/js in a browser application and track later client-side routes."
+---
+
+Use the SDK in browser applications built with npm. The SDK loads the exact Bily script URL, queues early calls, and stays safe when imported during server rendering.
+
+## Install the package
+
+```bash
+npm install @bilyai/js
+```
+
+## Initialize once
+
+Create one application module and pass the exact script URL from **Bily > Settings > Tracking**.
+
+```typescript analytics.ts
+import { init, track } from "@bilyai/js";
+
+const BILY_SCRIPT_URL =
+  "https://tracking.example.com/b.js?shop=store.example.com";
+
+init({ scriptUrl: BILY_SCRIPT_URL });
+
+export { track };
+```
+
+Import this module once from your browser entry point.
+
+```typescript main.ts
+import "./analytics";
+import { startApplication } from "./application";
+
+startApplication();
+```
+
+Do not add a separate script tag. `init()` owns script loading for this installation path.
+
+## Track client-side route changes
+
+The browser script records the initial page view. Save that initial URL, then call this function only after your router completes a later navigation.
+
+```typescript analytics.ts
+import { init, track } from "@bilyai/js";
+
+init({
+  scriptUrl: "https://tracking.example.com/b.js?shop=store.example.com",
+});
+
+let previousUrl = window.location.href;
+
+export function trackCommittedRoute(): void {
+  const currentUrl = window.location.href;
+  if (currentUrl === previousUrl) return;
+
+  previousUrl = currentUrl;
+  track("PageView", {
+    sourceUrl: currentUrl,
+    pageTitle: document.title,
+  });
+}
+```
+
+Call `trackCommittedRoute()` from your router's after-navigation callback. Do not call it during the initial application mount.
+
+## Track an action
+
+```typescript create-workspace.ts
+import { track } from "./analytics";
+
+export async function createWorkspace(name: string) {
+  const workspace = await saveWorkspace({ name });
+
+  track("workspace_created", {
+    workspace_id: workspace.id,
+    workspace_name: workspace.name,
+  });
+
+  return workspace;
+}
+```
+
+Track successful outcomes after they happen. Avoid firing completion events when an operation starts.
+
+<CardGroup cols={2}>
+  <Card title="Track custom events" icon="wave-pulse" href="/guides/custom-events" />
+  <Card title="SDK method reference" icon="brackets-curly" href="/api-reference/overview" />
+</CardGroup>

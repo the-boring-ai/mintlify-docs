@@ -1,0 +1,72 @@
+---
+title: "Client data"
+description: "Attach approved customer and account context to individual Bily events."
+---
+
+Add a `client` object when an event needs customer context. The client data applies to that event payload.
+
+## Identify an authenticated customer
+
+Send only fields your privacy policy and consent state allow.
+
+```typescript
+import { track } from "@bilyai/js";
+
+track("user_signed_in", {
+  client: {
+    userId: "user_123",
+    email: "buyer@example.com",
+    firstname: "Ada",
+    lastname: "Lovelace",
+    userGroup: "growth",
+  },
+  organization_id: "organization_456",
+});
+```
+
+## Supported client fields
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `userId` | `string` | Your stable customer or account ID |
+| `email` | `string` | Customer email when permitted |
+| `phone` | `string` | Customer phone when permitted |
+| `firstname` | `string` | First name |
+| `lastname` | `string` | Last name |
+| `dateOfBirth` | `string` | Date of birth when strictly necessary and permitted |
+| `gender` | `string` | Gender when strictly necessary and permitted |
+| `userGroup` | `string` | Plan, segment, or account group |
+| `address` | `BilyAddress` | Approved city, state, postal code, and country fields |
+
+`BilyAddress` accepts `city`, `state`, `zip`, and `country`.
+
+<Warning>
+  Do not send customer data by default. Collect the minimum required fields and honor the visitor's consent and deletion choices.
+</Warning>
+
+## Browser tracking ID
+
+Use `getBilyTrackingId()` when you need Bily's stable browser identifier.
+
+```typescript
+import { getBilyTrackingId } from "@bilyai/js";
+
+const trackingId = getBilyTrackingId();
+if (trackingId) {
+  console.info("Bily browser ID is available");
+}
+```
+
+The return type is `string | null`. It returns `null` during server rendering. It is not an authenticated user ID, credential, or authorization value.
+
+## Keep identity roles separate
+
+- Use `client.userId` for your authenticated account identifier.
+- Use `getBilyTrackingId()` for the Bily browser identifier.
+- Never treat either value as proof that a request is authorized.
+- Do not place passwords, session tokens, or private keys in any event field.
+
+<CardGroup cols={2}>
+  <Card title="Tracking ID reference" icon="fingerprint" href="/api-reference/get-bily-tracking-id" />
+  <Card title="Data safety" icon="shield" href="/privacy/data-safety" />
+</CardGroup>

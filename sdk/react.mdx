@@ -1,0 +1,93 @@
+---
+title: "React"
+description: "Initialize Bily once in React and track later router transitions without duplicating the initial page view."
+---
+
+Use one client-mounted SDK component inside your router. Do not add a raw Bily script tag anywhere else in the application.
+
+## Install the package
+
+```bash
+npm install @bilyai/js
+```
+
+## Add the tracking component
+
+This example uses React Router. The saved URL skips the automatic initial `PageView` and prevents duplicate calls for the same URL.
+
+```tsx src/BilyTracking.tsx
+import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import { init, track } from "@bilyai/js";
+
+const BILY_SCRIPT_URL =
+  "https://tracking.example.com/b.js?shop=store.example.com";
+
+export function BilyTracking() {
+  const location = useLocation();
+  const previousUrl = useRef<string | null>(null);
+
+  useEffect(() => {
+    init({ scriptUrl: BILY_SCRIPT_URL });
+  }, []);
+
+  useEffect(() => {
+    const currentUrl = window.location.href;
+
+    if (previousUrl.current === null) {
+      previousUrl.current = currentUrl;
+      return;
+    }
+
+    if (currentUrl === previousUrl.current) return;
+    previousUrl.current = currentUrl;
+
+    track("PageView", {
+      sourceUrl: currentUrl,
+      pageTitle: document.title,
+    });
+  }, [location.pathname, location.search, location.hash]);
+
+  return null;
+}
+```
+
+Mount it once inside the router so `useLocation()` can observe committed routes.
+
+```tsx src/App.tsx
+import { BrowserRouter } from "react-router-dom";
+import { BilyTracking } from "./BilyTracking";
+import { AppRoutes } from "./AppRoutes";
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <BilyTracking />
+      <AppRoutes />
+    </BrowserRouter>
+  );
+}
+```
+
+Repeated `init()` calls with the same URL are safe, but keeping one component makes ownership clear. The URL guard also prevents React development checks from creating duplicate route events.
+
+## Track component actions
+
+Call `track()` after a user action succeeds.
+
+```tsx src/LaunchCampaignButton.tsx
+import { track } from "@bilyai/js";
+
+export function LaunchCampaignButton({ campaignId }: { campaignId: string }) {
+  async function handleClick() {
+    await launchCampaign(campaignId);
+    track("campaign_launched", { campaign_id: campaignId });
+  }
+
+  return <button onClick={handleClick}>Launch campaign</button>;
+}
+```
+
+<Card title="Verify React tracking" icon="circle-check" href="/guides/verification">
+  Check the initial view, later routes, and action events without duplicate loading.
+</Card>
