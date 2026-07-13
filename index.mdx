@@ -1,97 +1,54 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Bily JavaScript SDK"
+description: "Install Bily, capture page views, and send reliable browser events from any website or application."
 ---
 
-## Setting up
+Bily gives you one browser event contract across plain HTML, JavaScript, React, and Next.js. Use the raw browser script on static HTML. Use `@bilyai/js` in application frameworks.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Install in minutes" icon="bolt" href="/quickstart">
+    Choose the one installation path that matches your website.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Track page views" icon="window" href="/guides/pageviews">
+    Capture the initial page automatically and later SPA routes explicitly.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Track product activity" icon="cart-shopping" href="/guides/ecommerce">
+    Send products, carts, checkouts, and completed orders with typed payloads.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Use the SDK reference" icon="brackets-curly" href="/api-reference/overview">
+    Review every exported method, event type, and payload type.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Choose one installation path
 
-Everything you need to create world-class documentation.
+<CardGroup cols={2}>
+  <Card title="HTML" icon="code" href="/sdk/html">
+    Add the exact Bily script tag to a site that does not use an application bundler.
+  </Card>
+  <Card title="JavaScript" icon="js" href="/sdk/javascript">
+    Initialize Bily from a browser application built with npm.
+  </Card>
+  <Card title="React" icon="react" href="/sdk/react">
+    Mount one SDK integration inside your router.
+  </Card>
+  <Card title="Next.js" icon="n" href="/sdk/nextjs">
+    Initialize from one App Router client component.
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+<Warning>
+  Do not combine the raw script tag and `@bilyai/js` on the same website surface. Both installation paths load Bily, so combining them can duplicate the initial page view.
+</Warning>
 
-## Need inspiration?
+## What the SDK handles
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
+- It preserves the exact script URL and every query parameter you copy from Bily.
+- It safely queues calls while Bily loads.
+- It generates an event ID and timestamp when you do not provide them.
+- It gives known Bily events autocomplete while accepting your own event names.
+- It remains safe to import during server rendering.
+
+<Card title="Start with the quickstart" icon="arrow-right" href="/quickstart">
+  Install Bily and verify your first event.
 </Card>

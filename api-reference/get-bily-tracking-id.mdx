@@ -1,0 +1,47 @@
+---
+title: "getBilyTrackingId()"
+sidebarTitle: "getBilyTrackingId()"
+description: "Read or create the stable Bily browser identifier."
+---
+
+`getBilyTrackingId()` returns the identifier Bily uses for the current browser.
+
+## Signature
+
+```typescript
+function getBilyTrackingId(): string | null;
+```
+
+## Example
+
+```typescript
+import { getBilyTrackingId } from "@bilyai/js";
+
+const trackingId = getBilyTrackingId();
+
+if (trackingId) {
+  sendSafeCorrelationId(trackingId);
+}
+```
+
+## Browser behavior
+
+The SDK keeps the identifier stable in browser storage when storage is available. If storage is blocked, it keeps an in-memory identifier stable for the page session and can use an existing Bily identifier when available.
+
+You can call this method before or after `init()`.
+
+## Server behavior
+
+The method returns `null` during server rendering. Always handle the nullable return type.
+
+```typescript
+const trackingId: string | null = getBilyTrackingId();
+```
+
+## Security boundary
+
+The browser tracking ID is not a password, session token, or authenticated account ID. Never use it to authorize a request. Use your own verified session for authorization and `client.userId` for approved account context.
+
+<Card title="Client data" icon="user-shield" href="/guides/client-data">
+  Keep browser identity, authenticated users, and consent responsibilities separate.
+</Card>

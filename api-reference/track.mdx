@@ -1,0 +1,80 @@
+---
+title: "track()"
+description: "Send a known Bily event or a custom application event with an optional payload."
+---
+
+`track()` accepts a known Bily event name or your own non-empty string.
+
+## Signature
+
+```typescript
+function track(event: BilyEvent, payload?: BilyPayload): void;
+```
+
+## Known event
+
+```typescript
+import { track } from "@bilyai/js";
+
+track("Product Viewed", {
+  products: [
+    {
+      id: "product_123",
+      name: "Everyday Tee",
+      price: 39,
+      currency: "USD",
+    },
+  ],
+});
+```
+
+## Custom event
+
+```typescript
+track("integration_connected", {
+  integration_id: "integration_456",
+  integration_type: "crm",
+});
+```
+
+Use stable snake_case names for application-specific events. The SDK retains autocomplete for known Bily names without restricting custom strings.
+
+## Automatic payload fields
+
+The SDK adds these values when it prepares a browser event:
+
+- A Bily browser tracking ID when one is available.
+- An ISO timestamp when `ts` is not already a string.
+- A generated event ID when `event_id` is empty or absent.
+- The browser source for the event.
+
+Provide `event_id` when you need the same logical outcome to share an identifier across systems.
+
+## Queue behavior
+
+You can call `track()` before `init()` or while Bily loads. Calls remain in memory until loading succeeds. The default queue keeps 100 calls, and `init({ maxQueueSize })` can set a limit from 1 to 1,000.
+
+When the queue is full, the SDK removes the oldest call before adding the newest one.
+
+## Error behavior
+
+- An empty or whitespace-only event name is ignored.
+- A browser delivery failure does not throw from `track()`.
+- With `debug: true`, Bily logs a warning for delivery failures without logging the payload.
+- During server rendering, `track()` is a no-op.
+
+## Page views
+
+The first `PageView` is automatic. Use `track("PageView", ...)` only for later client-side route changes.
+
+```typescript
+track("PageView", {
+  sourceUrl: window.location.href,
+  pageTitle: document.title,
+});
+```
+
+<CardGroup cols={2}>
+  <Card title="Event names" icon="list" href="/api-reference/events" />
+  <Card title="Payload types" icon="brackets-curly" href="/api-reference/payload" />
+</CardGroup>

@@ -1,0 +1,77 @@
+---
+title: "Custom events"
+description: "Track stable application-specific event names and properties with @bilyai/js."
+---
+
+`track()` accepts known Bily event names and your own non-empty string names. Use custom events for meaningful application outcomes that are not covered by the ecommerce catalog.
+
+## Name events consistently
+
+Use stable snake_case names for application events:
+
+- `user_signed_in`
+- `workspace_created`
+- `integration_connected`
+- `contacts_imported`
+- `campaign_launched`
+- `billing_checkout_started`
+- `billing_checkout_completed`
+- `product_error_encountered`
+
+Avoid names that include IDs, timestamps, or translated labels. Put changing values in the payload.
+
+## Track successful outcomes
+
+```typescript workspace.ts
+import { track } from "@bilyai/js";
+
+const workspace = await createWorkspace({ name: "North America" });
+
+track("workspace_created", {
+  workspace_id: workspace.id,
+  workspace_name: workspace.name,
+  plan: "growth",
+});
+```
+
+Fire completion events only after the operation succeeds. Use a separate failure event if the failure is useful and safe to analyze.
+
+```typescript campaign.ts
+import { track } from "@bilyai/js";
+
+try {
+  const campaign = await launchCampaign();
+  track("campaign_launched", { campaign_id: campaign.id });
+} catch (error) {
+  track("product_error_encountered", {
+    operation: "campaign_launch",
+    error_code: getSafeErrorCode(error),
+  });
+  throw error;
+}
+```
+
+Do not include raw error objects. They can contain request data, stack traces, or customer content.
+
+## Add your own event ID
+
+The SDK creates `event_id` and `ts` values when you omit them. Provide your own stable event ID when the same business outcome can be reported by more than one system.
+
+```typescript
+track("billing_checkout_completed", {
+  event_id: "checkout_session_01J2M8YQ7B",
+  checkout_id: "checkout_123",
+  plan: "growth",
+});
+```
+
+Keep one `event_id` for one logical outcome. Do not reuse it for later outcomes.
+
+## Calls before loading
+
+You can call `track()` immediately after `init()`. The SDK retains calls while Bily loads and delivers them in order when ready.
+
+<CardGroup cols={2}>
+  <Card title="track() reference" icon="function" href="/api-reference/track" />
+  <Card title="Data safety" icon="shield" href="/privacy/data-safety" />
+</CardGroup>

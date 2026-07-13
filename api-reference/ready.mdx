@@ -1,0 +1,73 @@
+---
+title: "ready()"
+description: "Wait for Bily to finish loading when you need an explicit installation check."
+---
+
+`ready()` is a load verification hook. Normal event tracking does not need to wait for it because `track()` queues early calls.
+
+## Signature
+
+```typescript
+function ready(): Promise<void>;
+```
+
+## Verify loading
+
+Call `init()` before awaiting `ready()` in the browser.
+
+```typescript
+import { init, ready } from "@bilyai/js";
+
+init({
+  scriptUrl: "https://tracking.example.com/b.js?shop=store.example.com",
+  loadTimeoutMs: 15_000,
+});
+
+try {
+  await ready();
+  console.info("Bily is ready");
+} catch (error) {
+  console.error("Bily failed to load", error);
+}
+```
+
+## Resolution
+
+The promise resolves when Bily can accept the queued events. It also resolves immediately during server rendering because there is no browser script to load.
+
+## Rejection
+
+The promise rejects when:
+
+- The browser reports a script load error.
+- Bily does not become ready before `loadTimeoutMs`.
+- The script loads but does not expose a usable Bily browser API.
+
+The default timeout is 15 seconds. Configure a value from 1 to 60 seconds through `init()`.
+
+## Retry after a load failure
+
+Call `init()` again after a terminal load failure, then call `ready()` again for the new attempt.
+
+```typescript
+async function loadBily() {
+  const options = {
+    scriptUrl: "https://tracking.example.com/b.js?shop=store.example.com",
+  } as const;
+
+  init(options);
+
+  try {
+    await ready();
+  } catch {
+    init(options);
+    await ready();
+  }
+}
+```
+
+For repeated production failures, diagnose the URL, network policy, and duplicate installation instead of retrying indefinitely.
+
+<Card title="Troubleshooting" icon="screwdriver-wrench" href="/troubleshooting">
+  Resolve timeouts, script errors, and configuration conflicts.
+</Card>

@@ -1,0 +1,84 @@
+---
+title: "Data safety"
+description: "Protect customer data and keep secrets out of browser tracking payloads."
+---
+
+Browser events are visible to the person using the browser and to software running on the page. Treat every event field as public client data.
+
+## Never send secrets
+
+Do not send:
+
+- Passwords or password-reset values
+- Session cookies or authorization headers
+- Access tokens, refresh tokens, or private API keys
+- Payment card or bank-account details
+- Private message bodies or document contents
+- Full keystrokes or unredacted form submissions
+- Raw error objects, request objects, or stack traces
+
+The Bily browser script URL is public installation data. It does not need a private token. Preserve the exact URL, but never add a private credential to it.
+
+## Collect the minimum customer data
+
+Send a `client` field only when the event needs it and the visitor's consent state permits it.
+
+```typescript
+track("user_signed_in", {
+  client: {
+    userId: "user_123",
+    userGroup: "growth",
+  },
+});
+```
+
+Prefer your stable internal user ID over extra contact fields. Add email, phone, address, date of birth, or gender only when you have a documented purpose and permission.
+
+## Redact errors before tracking
+
+Map internal failures to a small safe vocabulary.
+
+```typescript
+type SafeErrorCode =
+  | "validation_failed"
+  | "network_unavailable"
+  | "permission_denied"
+  | "unknown";
+
+track("product_error_encountered", {
+  operation: "campaign_launch",
+  error_code: toSafeErrorCode(error),
+});
+```
+
+Do not attach `error`, `error.message`, request bodies, or user-generated content.
+
+## Respect consent and deletion choices
+
+- Start optional customer-data tracking only after the required consent state is available.
+- Stop sending optional fields when consent changes.
+- Keep your event catalog and privacy notice consistent.
+- Apply your retention and deletion process to the identifiers you send.
+- Review new custom properties before releasing them.
+
+## Keep browser identity in scope
+
+`getBilyTrackingId()` returns a browser identifier, not proof of account identity. Never use it for authorization. Use a verified session on your server for protected actions.
+
+## Content security policy
+
+`init({ nonce })` can copy your server-generated nonce onto the script element. A nonce is a browser policy control, not an event property. Do not send it through `track()`.
+
+## Release review
+
+Before shipping a tracking change:
+
+1. Inspect the exact event payload in a development environment.
+2. Remove fields that are not required for the stated analysis.
+3. Confirm no secret can enter through object spreading.
+4. Test signed-out, signed-in, and consent-denied states.
+5. Search the built browser assets for private tokens and credentials.
+
+<Card title="Client data guide" icon="user-shield" href="/guides/client-data">
+  Review the supported customer fields and identity boundaries.
+</Card>

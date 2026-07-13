@@ -1,0 +1,58 @@
+---
+title: "HTML"
+description: "Install the exact Bily browser script on a plain HTML website."
+---
+
+Use this installation only when the website does not bundle a JavaScript application. The browser script records a page view each time the browser loads a document.
+
+## Add the script once
+
+Copy the script tag from **Bily > Settings > Tracking** into the global `<head>` for your site.
+
+```html index.html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Everyday Store</title>
+    <script
+      src="https://tracking.example.com/b.js?shop=store.example.com"
+      referrerpolicy="strict-origin-when-cross-origin"
+    ></script>
+  </head>
+  <body>
+    <h1>Everyday Store</h1>
+  </body>
+</html>
+```
+
+<Warning>
+  Copy the exact `src` value from Bily. Do not shorten it to an origin, append a new path, remove query parameters, or decode encoded characters.
+</Warning>
+
+## Confirm each document includes it once
+
+Templated sites should place the script in the shared layout. Do not paste another copy into individual pages.
+
+Each full document load records its initial `PageView` automatically. Do not add another manual page-view call.
+
+## Applications that change routes in the browser
+
+Plain HTML installation does not provide the `@bilyai/js` application API. If the site becomes a single-page application, remove the raw script installation and follow the [JavaScript](/sdk/javascript), [React](/sdk/react), or [Next.js](/sdk/nextjs) guide instead.
+
+## Content security policy
+
+If your policy requires a script nonce, render the nonce that your server created on this script element. Keep the `src` unchanged.
+
+```html
+<script
+  nonce="SERVER_GENERATED_NONCE"
+  src="https://tracking.example.com/b.js?shop=store.example.com"
+  referrerpolicy="strict-origin-when-cross-origin"
+></script>
+```
+
+<Card title="Verify the installation" icon="circle-check" href="/guides/verification">
+  Confirm one initial page view and one script request per document.
+</Card>

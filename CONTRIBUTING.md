@@ -1,34 +1,14 @@
-> **Customize this file**: Tailor this template to your project by noting specific contribution types you're looking for, adding a Code of Conduct, or adjusting the writing guidelines to match your style.
+# Contribute to the Bily SDK documentation
 
-# Contribute to the documentation
+Keep changes concise, testable, and consistent with the current public SDK types.
 
-Thank you for your interest in contributing to our documentation! This guide will help you get started.
+## Before opening a pull request
 
-## How to contribute
+1. Update all affected guides and reference pages together.
+2. Use active voice and address the reader as "you."
+3. Preserve exact event names, option names, and payload keys.
+4. Run `node scripts/check-public-language.mjs`.
+5. Run `mint broken-links --check-redirects` when the Mintlify CLI is available.
+6. Preview the changed pages with `mint dev`.
 
-### Option 1: Edit directly on GitHub
-
-1. Navigate to the page you want to edit
-2. Click the "Edit this file" button (the pencil icon)
-3. Make your changes and submit a pull request
-
-### Option 2: Local development
-
-1. Fork and clone this repository
-2. Install the Mintlify CLI: `npm i -g mint`
-3. Create a branch for your changes
-4. Make changes
-5. Navigate to the docs directory and run `mint dev`
-6. Preview your changes at `http://localhost:3000`
-7. Commit your changes and submit a pull request
-
-For more details on local development, see our [development guide](development.mdx).
-
-## Writing guidelines
-
-- **Use active voice**: "Run the command" not "The command should be run"
-- **Address the reader directly**: Use "you" instead of "the user"
-- **Keep sentences concise**: Aim for one idea per sentence
-- **Lead with the goal**: Start instructions with what the user wants to accomplish
-- **Use consistent terminology**: Don't alternate between synonyms for the same concept
-- **Include examples**: Show, don't just tell
+Do not publish or deploy documentation from a feature branch.

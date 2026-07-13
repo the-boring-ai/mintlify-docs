@@ -1,0 +1,119 @@
+---
+title: "Payload types"
+description: "Review BilyPayload, client, address, product, and order fields exported by @bilyai/js."
+---
+
+`track()` accepts an optional `BilyPayload`. Known typed fields provide consistent mapping, and additional top-level keys remain available for application-specific properties.
+
+## BilyPayload
+
+```typescript
+type BilyPayload = {
+  client?: BilyClient;
+  order?: BilyOrder;
+  products?: BilyProduct[];
+  pageTitle?: string;
+  userAgent?: string;
+  ip?: string;
+  referrer?: string;
+  sourceUrl?: string;
+  source?: "app" | "web";
+  category?: string;
+  searchQuery?: string;
+  eventAlias?: string;
+  [key: string]: unknown;
+};
+```
+
+The browser SDK sets `source` to `web`. You do not need to provide it.
+
+Use `sourceUrl` and `pageTitle` for explicit SPA page views. Use `searchQuery` for product search events. Avoid supplying an IP address from browser code.
+
+## BilyClient and BilyAddress
+
+```typescript
+type BilyAddress = {
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+};
+
+type BilyClient = {
+  firstname?: string;
+  lastname?: string;
+  dateOfBirth?: string;
+  email?: string;
+  phone?: string;
+  gender?: string;
+  address?: BilyAddress;
+  userId?: string;
+  userGroup?: string;
+};
+```
+
+Client fields are optional. Send only the minimum customer data your consent state allows.
+
+## BilyProduct
+
+```typescript
+type BilyProduct = {
+  id: string | number;
+  name: string;
+  price: number;
+  currency: string;
+  quantity?: number;
+  sku?: string;
+  category?: string;
+  brand?: string;
+  image?: string;
+};
+```
+
+`quantity` defaults to `1`. The SDK preserves the product image when provided.
+
+## BilyOrder
+
+```typescript
+type BilyOrder = {
+  id: string | number;
+  products?: BilyProduct[];
+  currency?: string;
+  total?: number;
+  tax?: number;
+  discount?: number;
+  discountCode?: string;
+  shippingFees?: number;
+};
+```
+
+When `total` is absent, the SDK calculates it from each product's price and quantity. Zero remains a valid value for `total`, `tax`, `discount`, and `shippingFees`.
+
+If a payload contains `order`, put its products in `order.products`. Do not also rely on the top-level `products` field for the same event.
+
+## Custom properties
+
+Additional top-level keys pass through as event properties.
+
+```typescript
+track("workspace_created", {
+  workspace_id: "workspace_456",
+  organization_id: "organization_789",
+  plan: "growth",
+});
+```
+
+The SDK creates `event_id` and `ts` when absent. You can provide them as custom properties when you already have a stable event ID or timestamp.
+
+```typescript
+track("campaign_launched", {
+  event_id: "campaign_launch_01J2M91S2P",
+  ts: "2026-07-13T08:30:00.000Z",
+  campaign_id: "campaign_123",
+});
+```
+
+<CardGroup cols={2}>
+  <Card title="Ecommerce examples" icon="cart-shopping" href="/guides/ecommerce" />
+  <Card title="Data safety" icon="shield" href="/privacy/data-safety" />
+</CardGroup>

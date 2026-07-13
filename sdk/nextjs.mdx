@@ -1,0 +1,107 @@
+---
+title: "Next.js"
+description: "Install Bily in a Next.js App Router application with one client component."
+---
+
+Initialize the SDK from one client component. Do not use `next/script` or add a raw script tag alongside the SDK.
+
+## Install the package
+
+```bash
+npm install @bilyai/js
+```
+
+## Create a client tracking component
+
+The browser script records the initial page view. This component saves the initial URL and tracks only later App Router transitions.
+
+```tsx app/bily-tracking.tsx
+"use client";
+
+import { useEffect, useRef } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { init, track } from "@bilyai/js";
+
+const BILY_SCRIPT_URL =
+  "https://tracking.example.com/b.js?shop=store.example.com";
+
+export function BilyTracking() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
+  const previousUrl = useRef<string | null>(null);
+
+  useEffect(() => {
+    init({ scriptUrl: BILY_SCRIPT_URL });
+  }, []);
+
+  useEffect(() => {
+    const currentUrl = window.location.href;
+
+    if (previousUrl.current === null) {
+      previousUrl.current = currentUrl;
+      return;
+    }
+
+    if (currentUrl === previousUrl.current) return;
+    previousUrl.current = currentUrl;
+
+    track("PageView", {
+      sourceUrl: currentUrl,
+      pageTitle: document.title,
+    });
+  }, [pathname, search]);
+
+  return null;
+}
+```
+
+## Mount it in the root layout
+
+Wrap the component in `Suspense` because it reads the current search parameters.
+
+```tsx app/layout.tsx
+import { Suspense } from "react";
+import { BilyTracking } from "./bily-tracking";
+
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en">
+      <body>
+        <Suspense fallback={null}>
+          <BilyTracking />
+        </Suspense>
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+Keep the full script URL in a public build-time setting if environments use different Bily URLs. Read that value unchanged. Do not construct it from a hostname or add query parameters in code.
+
+## Track client actions
+
+Call `track()` from client code after the operation succeeds.
+
+```tsx app/workspaces/create-workspace-button.tsx
+"use client";
+
+import { track } from "@bilyai/js";
+
+export function CreateWorkspaceButton() {
+  async function handleCreate() {
+    const workspace = await createWorkspace();
+    track("workspace_created", { workspace_id: workspace.id });
+  }
+
+  return <button onClick={handleCreate}>Create workspace</button>;
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="Track page views" icon="window" href="/guides/pageviews" />
+  <Card title="Protect client data" icon="shield" href="/privacy/data-safety" />
+</CardGroup>
