@@ -15,8 +15,16 @@ Event names are case-sensitive. Prefer the exact capitalization below for Bily e
 
 ```typescript
 type KnownBilyEvent =
+  | "AddContactInfo"
+  | "AddShippingInfo"
+  | "Checkout Address Info Submitted"
+  | "Contact"
+  | "New Customer Purchase"
   | "PageView"
   | "Pageview"
+  | "Product Removed From Cart"
+  | "Product Removed From Wishlist"
+  | "ViewCategory"
   | "Product List Viewed"
   | "Products Searched"
   | "Product Clicked"
