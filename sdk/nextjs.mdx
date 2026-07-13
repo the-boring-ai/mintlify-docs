@@ -29,6 +29,9 @@ For every preview and production deployment, set the same variable in the deploy
 `next build`. In a deployment settings field, enter the exact raw URL without dotenv quotes or escapes. Next.js inlines
 `NEXT_PUBLIC_` values into the browser bundle at build time, so rebuild and redeploy after changing the value.
 
+If the production build reads `.env.production`, `.env.production.local`, or another `.env*` file, use the quoted dotenv
+form above instead.
+
 Aside from that escape, keep the URL unchanged, including its query string. Restart the local development server after
 changing `.env.local`.
 
