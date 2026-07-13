@@ -22,12 +22,15 @@ Use `.env.local` only for local development; it is normally not committed.
 NEXT_PUBLIC_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
 ```
 
-Keep the double quotes: they prevent `#` from starting a comment; if the exact Bily-provided URL contains a literal dollar
-sign, escape only that character as `\$` in `.env.local` and deployment build environments so Next.js preserves it.
+In dotenv files, keep the double quotes so `#` cannot start a comment. If the exact Bily-provided URL contains a literal
+dollar sign, escape only that character as `\$` in the dotenv file so Next.js preserves it.
 
 For every preview and production deployment, set the same variable in the deployment build environment before running
-`next build`. Next.js inlines `NEXT_PUBLIC_` values into the browser bundle at build time, so rebuild and redeploy after
-changing the value.
+`next build`. In a deployment settings field, enter the exact raw URL without dotenv quotes or escapes. Next.js inlines
+`NEXT_PUBLIC_` values into the browser bundle at build time, so rebuild and redeploy after changing the value.
+
+If the production build reads `.env.production`, `.env.production.local`, or another `.env*` file, use the quoted dotenv
+form above instead.
 
 Aside from that escape, keep the URL unchanged, including its query string. Restart the local development server after
 changing `.env.local`.
