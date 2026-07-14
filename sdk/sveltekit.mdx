@@ -1,0 +1,137 @@
+---
+title: "Svelte and SvelteKit"
+description: "Add Bily to a Svelte browser entry or track SvelteKit navigation from the root layout."
+---
+
+Use the browser entry for a Svelte application. In SvelteKit, mount one component from the root layout so `afterNavigate()` can observe every completed route.
+
+Do not add a raw Bily script tag alongside the SDK.
+
+## Install Bily
+
+```bash
+npm install @bilyai/js
+```
+
+## Add Bily to Svelte
+
+For a Svelte application built with Vite, store the complete tracking URL in a public build variable.
+
+```dotenv .env
+VITE_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
+```
+
+Start Bily from one browser module.
+
+```typescript src/bily.ts
+import { init } from "@bilyai/js";
+
+const BILY_SCRIPT_URL = import.meta.env.VITE_BILY_SCRIPT_URL;
+
+if (!BILY_SCRIPT_URL) {
+  throw new Error("VITE_BILY_SCRIPT_URL is required");
+}
+
+init({ scriptUrl: BILY_SCRIPT_URL });
+```
+
+Import the module once before your existing application mount.
+
+```typescript src/main.ts
+import "./bily";
+
+// Keep your existing Svelte application mount below this import.
+```
+
+The browser script records the initial document automatically. If your Svelte application uses a client router, call one route function from that router's committed-navigation callback. Follow the [Vanilla JavaScript route guard](/sdk/javascript) and compare the complete `window.location.href` before sending a later `PageView`.
+
+## Add Bily to SvelteKit
+
+Use a public static environment value when the URL belongs in the browser bundle.
+
+```dotenv .env
+PUBLIC_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
+```
+
+Create one component. `afterNavigate()` runs when the component first mounts and after later SvelteKit navigations.
+
+```svelte src/lib/BilyTracking.svelte
+<script lang="ts">
+  import { afterNavigate } from "$app/navigation";
+  import { PUBLIC_BILY_SCRIPT_URL } from "$env/static/public";
+  import { init, track } from "@bilyai/js";
+
+  let previousUrl: string | null = null;
+
+  afterNavigate(() => {
+    const currentUrl = window.location.href;
+
+    if (previousUrl === null) {
+      if (!PUBLIC_BILY_SCRIPT_URL) {
+        throw new Error("PUBLIC_BILY_SCRIPT_URL is required");
+      }
+
+      previousUrl = currentUrl;
+      init({ scriptUrl: PUBLIC_BILY_SCRIPT_URL });
+      return;
+    }
+
+    if (currentUrl === previousUrl) return;
+    previousUrl = currentUrl;
+
+    track("PageView", {
+      sourceUrl: currentUrl,
+      pageTitle: document.title,
+    });
+  });
+</script>
+```
+
+Mount it once from the root layout. Keep the layout's existing data, snippets, providers, and application shell.
+
+```svelte src/routes/+layout.svelte
+<script lang="ts">
+  import BilyTracking from "$lib/BilyTracking.svelte";
+
+  let { children } = $props();
+</script>
+
+<BilyTracking />
+{@render children()}
+```
+
+If your project uses legacy slot syntax, keep its existing `<slot />` and add only `<BilyTracking />` beside it.
+
+The first `afterNavigate()` call starts the SDK, so the browser script owns the initial page. Every later callback sends at most one event for the final URL.
+
+## Track successful actions
+
+```svelte src/lib/SubscribeButton.svelte
+<script lang="ts">
+  import { track } from "@bilyai/js";
+
+  async function subscribe() {
+    const subscription = await createSubscription();
+    track("subscription_created", {
+      subscription_id: subscription.id,
+    });
+  }
+</script>
+
+<button type="button" onclick={subscribe}>Subscribe</button>
+```
+
+Use your project's current event syntax. The Bily call stays the same.
+
+## Replace a bundled URL
+
+Both `VITE_` and `$env/static/public` values are included in built browser assets. Rebuild and redeploy after Bily validates a customer subdomain and gives you a new complete URL.
+
+<CardGroup cols={2}>
+  <Card title="Verify Svelte tracking" icon="circle-check" href="/guides/verification">
+    Confirm one initial page, one event per later URL, and no duplicate script.
+  </Card>
+  <Card title="Replace the tracking URL" icon="route" href="/guides/first-party-tracking">
+    Change the complete public value through one controlled deployment.
+  </Card>
+</CardGroup>

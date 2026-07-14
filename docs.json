@@ -9,7 +9,8 @@
     }
   },
   "colors": {
-    "primary": "#000000"
+    "primary": "#000000",
+    "dark": "#000000"
   },
   "favicon": "/favicon.svg",
   "logo": {
@@ -45,10 +46,18 @@
           {
             "group": "Install Bily",
             "pages": [
+              "sdk/overview",
               "sdk/html",
               "sdk/javascript",
               "sdk/react",
-              "sdk/nextjs"
+              "sdk/nextjs",
+              "sdk/vue",
+              "sdk/nuxt",
+              "sdk/sveltekit",
+              "sdk/angular",
+              "sdk/astro",
+              "sdk/react-router-framework",
+              "guides/first-party-tracking"
             ]
           },
           {
@@ -201,10 +210,6 @@
     }
   },
   "redirects": [
-    {
-      "source": "/mcp",
-      "destination": "/mcp/overview"
-    },
     {
       "source": "/development",
       "destination": "/quickstart"

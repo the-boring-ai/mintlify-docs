@@ -1,0 +1,116 @@
+---
+title: "Astro"
+description: "Add Bily through one Astro layout and support both document loads and client-side transitions."
+---
+
+Declare one reserved Bily browser script in the shared Astro layout, then initialize the SDK from that exact element. The SDK reuses it; it does not add a second loader. Full document loads record their initial page automatically. If the site uses Astro client routing, preserve the reserved script during document swaps and track later `astro:page-load` events.
+
+## Install Bily
+
+```bash
+npm install @bilyai/js
+```
+
+## Set one public build value
+
+Copy the complete tracking URL from **Bily > Settings > Apps > More settings > Install tracking**.
+
+```dotenv .env
+PUBLIC_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
+```
+
+Astro exposes `PUBLIC_` values to browser code. The tracking URL is public installation data, not a private token. Rebuild and redeploy whenever it changes.
+
+## Add Bily to the shared layout
+
+Add this processed script to the layout that wraps every tracked page. Keep the layout's existing metadata, styles, and optional `ClientRouter` component.
+
+```astro src/layouts/BaseLayout.astro
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const BILY_SCRIPT_URL = import.meta.env.PUBLIC_BILY_SCRIPT_URL;
+if (!BILY_SCRIPT_URL) {
+  throw new Error("PUBLIC_BILY_SCRIPT_URL is required");
+}
+---
+
+<html lang="en">
+  <head>
+    <title>{title}</title>
+    <script
+      id="bily-tracking-script"
+      src={BILY_SCRIPT_URL}
+      async
+      referrerpolicy="strict-origin-when-cross-origin"
+      transition:persist="bily-tracking-script"
+      is:inline
+    ></script>
+  </head>
+  <body>
+    <slot />
+
+    <script>
+      import { init, track } from "@bilyai/js";
+
+      const trackingScript = document.querySelector("#bily-tracking-script");
+      if (!(trackingScript instanceof HTMLScriptElement)) {
+        throw new Error("The Bily tracking script is missing");
+      }
+
+      let previousUrl = window.location.href;
+      init({ scriptUrl: trackingScript.src });
+
+      document.addEventListener("astro:page-load", () => {
+        const currentUrl = window.location.href;
+        if (currentUrl === previousUrl) return;
+
+        previousUrl = currentUrl;
+        track("PageView", {
+          sourceUrl: currentUrl,
+          pageTitle: document.title,
+        });
+      });
+    </script>
+  </body>
+</html>
+```
+
+Astro bundles the integration module and runs it once per document. When `ClientRouter` is active, it swaps the page head during navigation. The same reserved element appears in every incoming layout, so `transition:persist` keeps the active browser script instead of removing or re-executing it.
+
+`astro:page-load` then fires at the end of each client-side navigation. The URL guard skips its initial call and repeated notifications, including a route notification that leaves the complete URL unchanged.
+
+Without client routing, every navigation loads a new document. The Bily browser script records that document's page automatically, so the route callback has nothing extra to send.
+
+<Warning>
+  Keep the reserved `id`, `transition:persist`, and `is:inline` attributes on the external browser script. Do not add `data-astro-rerun` to the integration module. Re-running that module after each transition creates extra listeners and unclear ownership.
+</Warning>
+
+## Track successful actions
+
+Framework islands and browser scripts can import `track()` directly.
+
+```typescript src/scripts/newsletter.ts
+import { track } from "@bilyai/js";
+
+export async function subscribe(email: string) {
+  const subscription = await createSubscription(email);
+  track("newsletter_subscription_created", {
+    subscription_id: subscription.id,
+  });
+}
+```
+
+Keep customer data within your consent and data-minimization rules.
+
+<CardGroup cols={2}>
+  <Card title="Verify Astro tracking" icon="circle-check" href="/guides/verification">
+    Test direct loads, full reloads, client transitions, and browser history.
+  </Card>
+  <Card title="Replace the tracking URL" icon="route" href="/guides/first-party-tracking">
+    Rebuild once with the validated customer-subdomain URL.
+  </Card>
+</CardGroup>

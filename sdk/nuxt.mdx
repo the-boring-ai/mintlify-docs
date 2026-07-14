@@ -1,0 +1,115 @@
+---
+title: "Nuxt"
+description: "Add Bily through one Nuxt client plugin and track each successful route once."
+---
+
+Use one client-only Nuxt plugin. It starts Bily once, then observes every later route through Nuxt's Vue Router, including query-only navigation.
+
+Do not add a raw Bily script or another tracking plugin alongside the SDK.
+
+## Install Bily
+
+```bash
+npm install @bilyai/js
+```
+
+## Expose one public runtime value
+
+Copy the complete tracking URL from **Bily > Settings > Apps > More settings > Install tracking**.
+
+```dotenv .env
+NUXT_PUBLIC_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
+```
+
+Declare the matching public runtime value.
+
+```typescript nuxt.config.ts
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      bilyScriptUrl: "",
+    },
+  },
+});
+```
+
+The URL is visible in the browser by design. It is not a private token. Keep credentials out of `runtimeConfig.public`.
+
+## Add one client plugin
+
+In Nuxt 4, create `app/plugins/bily.client.ts`. In a Nuxt 3 project without the `app/` directory structure, create `plugins/bily.client.ts`.
+
+```typescript app/plugins/bily.client.ts
+import { init, track } from "@bilyai/js";
+import { nextTick } from "vue";
+
+export default defineNuxtPlugin(() => {
+  const config = useRuntimeConfig();
+  const scriptUrl = config.public.bilyScriptUrl;
+
+  if (typeof scriptUrl !== "string" || !scriptUrl) {
+    throw new Error("NUXT_PUBLIC_BILY_SCRIPT_URL is required");
+  }
+
+  init({ scriptUrl });
+  let previousUrl = window.location.href;
+
+  useRouter().afterEach(async (_to, _from, failure) => {
+    if (failure) return;
+    await nextTick();
+
+    const currentUrl = window.location.href;
+    if (currentUrl === previousUrl) return;
+    previousUrl = currentUrl;
+
+    track("PageView", {
+      sourceUrl: currentUrl,
+      pageTitle: document.title,
+    });
+  });
+});
+```
+
+The `.client` suffix keeps startup in the browser. The browser script records the initial page automatically.
+
+`useRouter().afterEach()` runs after Nuxt's router commits a navigation. Waiting for Vue's next update captures the new page title as well as the new URL. The hook also observes query-only changes when Nuxt reuses the current page component. Comparing the complete URL prevents repeated lifecycle notifications from creating duplicates.
+
+## Track successful actions
+
+Call `track()` from a component or composable after the named operation completes.
+
+```vue app/components/CompleteCheckoutButton.vue
+<script setup lang="ts">
+import { track } from "@bilyai/js";
+
+async function completeCheckout() {
+  const order = await submitCheckout();
+  track("Order Completed", {
+    order: {
+      id: order.id,
+      total: order.total,
+      currency: order.currency,
+    },
+  });
+}
+</script>
+
+<template>
+  <button type="button" @click="completeCheckout">Complete checkout</button>
+</template>
+```
+
+## Change the URL safely
+
+When Bily validates a customer subdomain, replace `NUXT_PUBLIC_BILY_SCRIPT_URL` with the new complete value. Update the deployment environment, then restart or redeploy as your hosting setup requires.
+
+Never run the old and new URLs together.
+
+<CardGroup cols={2}>
+  <Card title="Verify Nuxt tracking" icon="circle-check" href="/guides/verification">
+    Confirm the first page, path changes, and query-only routes appear once.
+  </Card>
+  <Card title="Move to first-party tracking" icon="route" href="/guides/first-party-tracking">
+    Validate, replace, deploy, and verify the customer-subdomain URL.
+  </Card>
+</CardGroup>

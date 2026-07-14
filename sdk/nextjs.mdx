@@ -42,7 +42,10 @@ server.
 
 The browser script records the initial page view automatically. This component remembers that URL and tracks only later client-side Next.js transitions.
 
-```tsx app/bily-tracking.tsx
+Create `components/bily-tracking.tsx` beside your `app/` or `pages/` directory. If your project uses both routers, the
+same component serves both. If your routes live under `src/`, place it at `src/components/bily-tracking.tsx` instead.
+
+```tsx components/bily-tracking.tsx
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -92,9 +95,13 @@ Comparing URLs prevents route notifications from duplicating the initial page vi
 
 Add the component to the root layout. Wrap it in `Suspense` because it reads the current search parameters.
 
+If `app/layout.tsx` already exists, add only the Bily mount. Keep its metadata exports, fonts, providers, global CSS,
+data hooks, error boundaries, and existing document markup. Use this complete example only when your application does
+not already have a root layout.
+
 ```tsx app/layout.tsx
 import { Suspense } from "react";
-import { BilyTracking } from "./bily-tracking";
+import { BilyTracking } from "../components/bily-tracking";
 
 export default function RootLayout({
   children,
@@ -123,7 +130,7 @@ data hooks, and error boundaries. Use this minimal example only when your applic
 ```tsx pages/_app.tsx
 import type { AppProps } from "next/app";
 import { Suspense } from "react";
-import { BilyTracking } from "../app/bily-tracking";
+import { BilyTracking } from "../components/bily-tracking";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -163,5 +170,5 @@ export function CreateWorkspaceButton() {
 
 <CardGroup cols={2}>
   <Card title="Track page views" icon="window" href="/guides/pageviews" />
-  <Card title="Protect client data" icon="shield" href="/privacy/data-safety" />
+  <Card title="Move to first-party tracking" icon="route" href="/guides/first-party-tracking" />
 </CardGroup>

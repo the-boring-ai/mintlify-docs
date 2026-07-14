@@ -8,10 +8,10 @@ const config = JSON.parse(await readFile(resolve(root, "docs.json"), "utf8"));
 if (config.theme !== "mint") {
   throw new Error("The public docs must keep the original Mint layout.");
 }
+const expectedColors = ["primary", "dark"];
 if (
-  config.colors?.primary !== "#000000" ||
-  Object.hasOwn(config.colors ?? {}, "light") ||
-  Object.hasOwn(config.colors ?? {}, "dark")
+  Object.keys(config.colors ?? {}).length !== expectedColors.length ||
+  expectedColors.some((key) => config.colors?.[key] !== "#000000")
 ) {
   throw new Error("The public docs must use black as the only custom color.");
 }
@@ -115,6 +115,25 @@ if (missingCustomerPages.length > 0) {
   throw new Error(`Customer guide pages missing from navigation: ${missingCustomerPages.join(", ")}`);
 }
 
+const expectedFrameworkPages = [
+  "sdk/overview",
+  "sdk/html",
+  "sdk/javascript",
+  "sdk/react",
+  "sdk/nextjs",
+  "sdk/vue",
+  "sdk/nuxt",
+  "sdk/sveltekit",
+  "sdk/angular",
+  "sdk/astro",
+  "sdk/react-router-framework",
+  "guides/first-party-tracking",
+];
+const missingFrameworkPages = expectedFrameworkPages.filter(page => !navigationPages.includes(page));
+if (missingFrameworkPages.length > 0) {
+  throw new Error(`Framework guides missing from navigation: ${missingFrameworkPages.join(", ")}`);
+}
+
 const currentInstallPath = ["Settings", "Apps", "More settings", "Install tracking"].join(" > ");
 const quickstartContents = await readFile(resolve(root, "quickstart.mdx"), "utf8");
 if (!quickstartContents.includes(currentInstallPath)) {
@@ -164,8 +183,8 @@ for (const redirect of config.redirects ?? []) {
 }
 
 const mcpRedirect = (config.redirects ?? []).find(redirect => redirect.source === "/mcp");
-if (mcpRedirect?.destination !== "/mcp/overview") {
-  throw new Error("The /mcp redirect must point to /mcp/overview.");
+if (mcpRedirect) {
+  throw new Error("The reserved /mcp machine endpoint must not be configured as a page redirect. Link to /mcp/overview instead.");
 }
 
 const openApiOperations = [];

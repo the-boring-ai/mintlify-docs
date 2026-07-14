@@ -1,0 +1,107 @@
+---
+title: "Move to first-party tracking"
+description: "Validate Bily, activate a customer subdomain, and replace the complete tracking URL without interrupting events."
+---
+
+Start with the tracking URL Bily provides. Prove the installation first. After Bily validates your customer subdomain, replace the entire URL with the new value shown in Bily.
+
+<Warning>
+  Do not change the hostname yourself. A customer subdomain is ready only after Bily confirms it and provides a new complete tracking URL.
+</Warning>
+
+## Validate the current URL first
+
+Complete the [installation checklist](/guides/verification) in staging or production before changing the URL.
+
+Confirm:
+
+- one browser-script request and one matching script element;
+- one automatic `PageView` for the initial document;
+- one explicit `PageView` for each later client-side route;
+- no Bily load error in the browser console; and
+- no private token or credential in browser configuration.
+
+This baseline separates an installation problem from a later DNS or deployment problem.
+
+## Activate the customer subdomain
+
+Follow the first-party tracking instructions shown for your Bily store. Add the DNS record exactly as provided. Do not invent the record name, target, or routing settings.
+
+Wait until Bily reports that the subdomain is active. Validation can take time while DNS changes become available.
+
+<Note>
+  A custom tracking subdomain changes where the browser loads Bily. It does not remove your responsibility to honor consent, data minimization, or your privacy notice.
+</Note>
+
+## Prepare your content security policy
+
+Update production policy allowlists before the URL switch:
+
+- Allow the validated tracking subdomain in `script-src`.
+- Allow the event destinations required by your Bily installation in `connect-src`.
+- Keep the existing destinations until rollback is no longer needed.
+
+A nonce can authorize the injected script element. It does not automatically authorize the script's network requests. Test the final policy in a report-only environment when your deployment process supports one.
+
+## Copy the new complete URL
+
+Open **Bily > Settings > Apps > More settings > Install tracking** after validation succeeds. Copy the new tracking URL exactly as Bily displays it.
+
+Treat it as a complete replacement:
+
+- Replace the old value in the one configuration source that owns Bily.
+- Keep the new path, query string, parameter order, and encoded characters unchanged.
+- Do not construct it from the customer subdomain.
+- Do not keep the old URL in a second script tag or a second `init()` call.
+
+The tracking URL is public installation data. It does not need a private token, and adding one would expose a credential to every visitor.
+
+## Redeploy the right configuration
+
+Some frameworks include public environment values in the browser bundle. Rebuild and redeploy whenever you change one of those values.
+
+| Configuration | What to do after replacement |
+| --- | --- |
+| Next.js `NEXT_PUBLIC_` | Rebuild and redeploy |
+| Vite `VITE_` | Rebuild and redeploy |
+| SvelteKit `$env/static/public` | Rebuild and redeploy |
+| Astro `PUBLIC_` | Rebuild and redeploy |
+| Angular compiled environment | Rebuild and redeploy |
+| Nuxt public runtime configuration | Update the deployment value, then restart or redeploy as your host requires |
+| A server-rendered runtime value | Restart or redeploy the process that serves the value |
+
+Changing only a local `.env` file does not update an existing production build.
+
+## Verify the new URL
+
+After deployment, open a new document with a full reload. Fast Refresh, hot module replacement, or a component remount cannot replace an active Bily URL because the SDK ignores a different URL after loading begins.
+
+Then:
+
+1. Open a page in a fresh browser tab.
+2. Confirm the browser requests the new complete URL once.
+3. Confirm the page contains one Bily script element and no old URL.
+4. Confirm one automatic initial `PageView`.
+5. Navigate through client-side routes and confirm one event for each committed URL.
+6. Trigger one safe test action and confirm its event once.
+
+Do not remove your rollback value until these checks pass.
+
+<Note>
+  The pre-load event queue lives in memory and does not cross the required reload. Test the new document from a known state. The Bily browser tracking ID remains stable when the site's browser storage is still available.
+</Note>
+
+## Roll back as one change
+
+If the new URL fails, restore the previous complete URL in the same configuration source. Rebuild or restart through the same deployment path, then repeat the verification checklist.
+
+Do not work around a failed subdomain by loading both URLs. Two installations can duplicate the initial page and split events between configurations.
+
+<CardGroup cols={2}>
+  <Card title="Choose your framework" icon="brackets-curly" href="/sdk/overview">
+    Find the exact file and route lifecycle for your application.
+  </Card>
+  <Card title="Troubleshoot loading" icon="screwdriver-wrench" href="/troubleshooting">
+    Diagnose timeouts, stale builds, incorrect URLs, and duplicate installations.
+  </Card>
+</CardGroup>

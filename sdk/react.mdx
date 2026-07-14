@@ -1,9 +1,9 @@
 ---
-title: "React"
+title: "React Router"
 description: "Add Bily to React and track each route without duplicating page views."
 ---
 
-Add one Bily component inside your router. It starts the SDK and tracks later route changes without duplicating the automatic initial page view.
+Add one Bily component inside your existing React Router. It starts the SDK and tracks later route changes without duplicating the automatic initial page view.
 
 Do not add a raw Bily script tag anywhere else in the application. `init()` loads the script for you.
 
@@ -17,7 +17,7 @@ npm install @bilyai/js
 
 This example uses React Router. It remembers the initial URL so it does not send a second `PageView`, then ignores repeated calls for the same URL.
 
-```tsx src/BilyTracking.tsx
+```tsx src/bily-tracking.tsx
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { init, track } from "@bilyai/js";
@@ -54,22 +54,22 @@ export function BilyTracking() {
 }
 ```
 
-Mount the component once inside the router so `useLocation()` can observe committed routes.
+Mount the component once in a component that your existing router already renders. This lets `useLocation()` observe committed routes without creating a second router.
 
-```tsx src/App.tsx
-import { BrowserRouter } from "react-router-dom";
-import { BilyTracking } from "./BilyTracking";
-import { AppRoutes } from "./AppRoutes";
+```tsx src/AppRoutes.tsx
+import { BilyTracking } from "./bily-tracking";
 
-export function App() {
+export function AppRoutes() {
   return (
-    <BrowserRouter>
+    <>
       <BilyTracking />
-      <AppRoutes />
-    </BrowserRouter>
+      {/* Keep your existing routes and application UI here. */}
+    </>
   );
 }
 ```
+
+This setup expects `react-router-dom` to be installed and a router to exist above `AppRoutes`. Do not add another `BrowserRouter`, `Router`, or `RouterProvider`.
 
 Repeated `init()` calls with the same URL are safe. One component keeps ownership clear, while the URL guard prevents React development checks from creating duplicate route events.
 
@@ -90,6 +90,11 @@ export function LaunchCampaignButton({ campaignId }: { campaignId: string }) {
 }
 ```
 
-<Card title="Verify React tracking" icon="circle-check" href="/guides/verification">
-  Check the initial view, later routes, and action events without duplicates.
-</Card>
+<CardGroup cols={2}>
+  <Card title="Verify React Router" icon="circle-check" href="/guides/verification">
+    Check the initial view, later routes, and action events without duplicates.
+  </Card>
+  <Card title="Use framework mode" icon="route" href="/sdk/react-router-framework">
+    Install Bily in a React Router framework mode or Remix root route.
+  </Card>
+</CardGroup>
