@@ -95,6 +95,10 @@ Comparing URLs prevents route notifications from duplicating the initial page vi
 
 Add the component to the root layout. Wrap it in `Suspense` because it reads the current search parameters.
 
+If `app/layout.tsx` already exists, add only the Bily mount. Keep its metadata exports, fonts, providers, global CSS,
+data hooks, error boundaries, and existing document markup. Use this complete example only when your application does
+not already have a root layout.
+
 ```tsx app/layout.tsx
 import { Suspense } from "react";
 import { BilyTracking } from "../components/bily-tracking";
