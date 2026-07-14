@@ -115,6 +115,25 @@ if (missingCustomerPages.length > 0) {
   throw new Error(`Customer guide pages missing from navigation: ${missingCustomerPages.join(", ")}`);
 }
 
+const expectedFrameworkPages = [
+  "sdk/overview",
+  "sdk/html",
+  "sdk/javascript",
+  "sdk/react",
+  "sdk/nextjs",
+  "sdk/vue",
+  "sdk/nuxt",
+  "sdk/sveltekit",
+  "sdk/angular",
+  "sdk/astro",
+  "sdk/react-router-framework",
+  "guides/first-party-tracking",
+];
+const missingFrameworkPages = expectedFrameworkPages.filter(page => !navigationPages.includes(page));
+if (missingFrameworkPages.length > 0) {
+  throw new Error(`Framework guides missing from navigation: ${missingFrameworkPages.join(", ")}`);
+}
+
 const currentInstallPath = ["Settings", "Apps", "More settings", "Install tracking"].join(" > ");
 const quickstartContents = await readFile(resolve(root, "quickstart.mdx"), "utf8");
 if (!quickstartContents.includes(currentInstallPath)) {

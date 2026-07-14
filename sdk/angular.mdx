@@ -1,0 +1,130 @@
+---
+title: "Angular"
+description: "Add Bily through one browser-only Angular service and track each successful Router navigation once."
+---
+
+Create one root service. It starts Bily in the browser and observes successful `NavigationEnd` events from the Angular Router.
+
+Do not add the raw Bily script to `index.html`. The SDK owns script loading for this installation path.
+
+## Install Bily
+
+```bash
+npm install @bilyai/js
+```
+
+## Keep one public configuration value
+
+Add the complete tracking URL to the public environment configuration your Angular build already uses.
+
+```typescript src/environments/environment.ts
+export const environment = {
+  bilyScriptUrl:
+    "https://tracking.example.com/b.js?shop=store.example.com",
+};
+```
+
+The URL is public installation data. It is not a private token. If your build replaces environment files, set the complete value for every preview and production target.
+
+## Observe successful navigation
+
+```typescript src/app/bily-tracking.service.ts
+import { isPlatformBrowser } from "@angular/common";
+import { inject, Injectable, PLATFORM_ID } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { NavigationEnd, Router } from "@angular/router";
+import { filter } from "rxjs";
+import { init, track } from "@bilyai/js";
+import { environment } from "../environments/environment";
+
+@Injectable({ providedIn: "root" })
+export class BilyTrackingService {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly router = inject(Router);
+
+  constructor() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (!environment.bilyScriptUrl) {
+      throw new Error("The Bily tracking URL is required");
+    }
+
+    init({ scriptUrl: environment.bilyScriptUrl });
+    let previousUrl = window.location.href;
+
+    this.router.events
+      .pipe(
+        filter(
+          (event): event is NavigationEnd => event instanceof NavigationEnd,
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => {
+        const currentUrl = window.location.href;
+        if (currentUrl === previousUrl) return;
+
+        previousUrl = currentUrl;
+        track("PageView", {
+          sourceUrl: currentUrl,
+          pageTitle: document.title,
+        });
+      });
+  }
+}
+```
+
+`isPlatformBrowser()` keeps initialization out of server rendering. `NavigationEnd` fires after a successful navigation updates the URL. `takeUntilDestroyed()` closes the subscription with its injection context.
+
+## Start the service once
+
+Inject the service from the root component. Keep the component's existing imports, template, providers, and application shell.
+
+```typescript src/app/app.component.ts
+import { Component } from "@angular/core";
+import { RouterOutlet } from "@angular/router";
+import { BilyTrackingService } from "./bily-tracking.service";
+
+@Component({
+  selector: "app-root",
+  standalone: true,
+  imports: [RouterOutlet],
+  template: "<router-outlet />",
+})
+export class AppComponent {
+  constructor(_bilyTracking: BilyTrackingService) {}
+}
+```
+
+If your root component already exists, add only the import and constructor parameter. Do not replace its metadata or template with this minimal example.
+
+The browser script records the initial page automatically. The URL guard skips the initial router event when it describes the same page and ignores repeated notifications.
+
+## Track successful actions
+
+```typescript src/app/save-profile.component.ts
+import { Component } from "@angular/core";
+import { track } from "@bilyai/js";
+
+@Component({
+  selector: "app-save-profile",
+  template: '<button type="button" (click)="save()">Save profile</button>',
+})
+export class SaveProfileComponent {
+  async save() {
+    const profile = await updateProfile();
+    track("profile_saved", { profile_id: profile.id });
+  }
+}
+```
+
+## Rebuild after a URL change
+
+Angular environment values are normally compiled into browser assets. After Bily validates a customer subdomain, replace the complete value and rebuild every affected target.
+
+<CardGroup cols={2}>
+  <Card title="Verify Angular tracking" icon="circle-check" href="/guides/verification">
+    Check server rendering, initial load, successful routes, and action events.
+  </Card>
+  <Card title="Move to first-party tracking" icon="route" href="/guides/first-party-tracking">
+    Replace the URL once, rebuild, deploy, and verify the new request.
+  </Card>
+</CardGroup>

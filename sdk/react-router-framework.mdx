@@ -1,0 +1,183 @@
+---
+title: "React Router framework mode and Remix"
+sidebarTitle: "Framework mode and Remix"
+description: "Add Bily to the root route and track every later framework navigation once."
+---
+
+Mount one Bily component in the existing root route. This supports React Router framework mode and Remix without replacing the document shell, providers, error boundaries, or route outlet.
+
+Do not add a raw Bily script tag. `init()` loads the script for you.
+
+## Install Bily
+
+```bash
+npm install @bilyai/js
+```
+
+## Set one public build value
+
+For a Vite build, copy the complete tracking URL into a public environment value.
+
+```dotenv .env
+VITE_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
+```
+
+The URL is public installation data, not a private token. Vite includes it in browser assets, so rebuild and redeploy when it changes.
+
+## Create the tracking component
+
+Choose the import that matches the framework. Both versions follow the same route contract.
+
+<Tabs>
+  <Tab title="React Router framework mode">
+    ```tsx app/bily-tracking.tsx
+    import { useEffect, useRef } from "react";
+    import { useLocation } from "react-router";
+    import { init, track } from "@bilyai/js";
+
+    const BILY_SCRIPT_URL = import.meta.env.VITE_BILY_SCRIPT_URL;
+
+    export function BilyTracking() {
+      const location = useLocation();
+      const previousUrl = useRef<string | null>(null);
+
+      useEffect(() => {
+        if (!BILY_SCRIPT_URL) {
+          throw new Error("VITE_BILY_SCRIPT_URL is required");
+        }
+        init({ scriptUrl: BILY_SCRIPT_URL });
+      }, []);
+
+      useEffect(() => {
+        const currentUrl = window.location.href;
+
+        if (previousUrl.current === null) {
+          previousUrl.current = currentUrl;
+          return;
+        }
+
+        if (currentUrl === previousUrl.current) return;
+        previousUrl.current = currentUrl;
+
+        track("PageView", {
+          sourceUrl: currentUrl,
+          pageTitle: document.title,
+        });
+      }, [location.pathname, location.search, location.hash]);
+
+      return null;
+    }
+    ```
+  </Tab>
+  <Tab title="Remix">
+    ```tsx app/bily-tracking.tsx
+    import { useEffect, useRef } from "react";
+    import { useLocation } from "@remix-run/react";
+    import { init, track } from "@bilyai/js";
+
+    const BILY_SCRIPT_URL = import.meta.env.VITE_BILY_SCRIPT_URL;
+
+    export function BilyTracking() {
+      const location = useLocation();
+      const previousUrl = useRef<string | null>(null);
+
+      useEffect(() => {
+        if (!BILY_SCRIPT_URL) {
+          throw new Error("VITE_BILY_SCRIPT_URL is required");
+        }
+        init({ scriptUrl: BILY_SCRIPT_URL });
+      }, []);
+
+      useEffect(() => {
+        const currentUrl = window.location.href;
+
+        if (previousUrl.current === null) {
+          previousUrl.current = currentUrl;
+          return;
+        }
+
+        if (currentUrl === previousUrl.current) return;
+        previousUrl.current = currentUrl;
+
+        track("PageView", {
+          sourceUrl: currentUrl,
+          pageTitle: document.title,
+        });
+      }, [location.pathname, location.search, location.hash]);
+
+      return null;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+The initial effect starts the SDK. The browser script records the initial page automatically. The second effect remembers that URL and sends only later location changes.
+
+Repeated `init()` calls with the same URL are safe, and the URL guard keeps development checks from duplicating route events.
+
+## Mount it in the existing root route
+
+Add `<BilyTracking />` inside the default root component, where `useLocation()` already has router context.
+
+<Tabs>
+  <Tab title="React Router framework mode">
+    ```tsx app/root.tsx
+    import { Outlet } from "react-router";
+    import { BilyTracking } from "./bily-tracking";
+
+    export default function App() {
+      return (
+        <>
+          <BilyTracking />
+          <Outlet />
+        </>
+      );
+    }
+    ```
+  </Tab>
+  <Tab title="Remix">
+    ```tsx app/root.tsx
+    import { Outlet } from "@remix-run/react";
+    import { BilyTracking } from "./bily-tracking";
+
+    export default function App() {
+      return (
+        <>
+          <BilyTracking />
+          <Outlet />
+        </>
+      );
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  These root examples show only the mount point. Keep your existing `Layout`, document elements, metadata, links, scripts, providers, hydration support, error boundaries, and other root-route behavior.
+</Warning>
+
+## Track successful actions
+
+Call `track()` from browser code after the operation succeeds.
+
+```tsx app/routes/settings.tsx
+import { track } from "@bilyai/js";
+
+export function SaveSettingsButton() {
+  async function save() {
+    const settings = await updateSettings();
+    track("settings_saved", { settings_version: settings.version });
+  }
+
+  return <button onClick={save}>Save settings</button>;
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="Verify framework routes" icon="circle-check" href="/guides/verification">
+    Check direct loads, nested routes, search changes, redirects, and browser history.
+  </Card>
+  <Card title="Move to first-party tracking" icon="route" href="/guides/first-party-tracking">
+    Replace the bundled URL after Bily validates the customer subdomain.
+  </Card>
+</CardGroup>

@@ -1,0 +1,83 @@
+---
+title: "Choose your framework"
+sidebarTitle: "Frameworks"
+description: "Install Bily once in your framework and track every committed route without duplicates."
+---
+
+The Bily JavaScript SDK works across browser applications because it owns one small contract: load one exact tracking URL, record the initial page automatically, and track only later client-side routes yourself.
+
+## Find your installation path
+
+| Website | Start Bily in | Observe later routes with |
+| --- | --- | --- |
+| Plain HTML | Shared `<head>` | A new document loads the script again |
+| Vanilla JavaScript | Browser entry module | Your router's committed-navigation callback |
+| React Router | One component inside the existing router | `useLocation()` |
+| Next.js | One shared client component | `usePathname()` and `useSearchParams()` |
+| Vue | Browser bootstrap after the router is ready | `router.afterEach()` |
+| Nuxt | One client plugin | `page:finish` |
+| Svelte | Browser entry module | Your router's committed-navigation callback |
+| SvelteKit | Root layout component | `afterNavigate()` |
+| Angular | One root service | `NavigationEnd` |
+| Astro | Shared layout script | `astro:page-load` when client routing is active |
+| React Router framework mode or Remix | One component in the root route | `useLocation()` |
+
+## Choose a guide
+
+<CardGroup cols={2}>
+  <Card title="Plain HTML" icon="code" href="/sdk/html">
+    Add the exact browser script to every document through one shared layout.
+  </Card>
+  <Card title="Vanilla JavaScript" icon="js" href="/sdk/javascript">
+    Initialize from a browser entry module and connect your router callback.
+  </Card>
+  <Card title="React Router" icon="route" href="/sdk/react">
+    Mount one tracking component inside the router you already use.
+  </Card>
+  <Card title="Next.js" icon="n" href="/sdk/nextjs">
+    Cover App Router, Pages Router, or both with one shared component.
+  </Card>
+  <Card title="Vue" icon="code" href="/sdk/vue">
+    Wait for the initial route, then observe successful navigations.
+  </Card>
+  <Card title="Nuxt" icon="layer-group" href="/sdk/nuxt">
+    Start Bily from one client plugin after the first page finishes.
+  </Card>
+  <Card title="Svelte and SvelteKit" icon="bolt" href="/sdk/sveltekit">
+    Use the browser entry for Svelte or the root layout for SvelteKit.
+  </Card>
+  <Card title="Angular" icon="diagram-project" href="/sdk/angular">
+    Subscribe once to successful Angular Router navigation.
+  </Card>
+  <Card title="Astro" icon="star" href="/sdk/astro">
+    Support full document loads and optional client-side transitions.
+  </Card>
+  <Card title="React Router framework mode and Remix" icon="code-branch" href="/sdk/react-router-framework">
+    Add one component to the root route without replacing its document shell.
+  </Card>
+</CardGroup>
+
+## Keep one contract everywhere
+
+Every framework follows the same rules:
+
+1. Copy the complete tracking URL from **Bily > Settings > Apps > More settings > Install tracking**.
+2. Install either the raw script or `@bilyai/js` on a website surface, never both.
+3. Let the browser script record the initial `PageView`.
+4. Send one explicit `PageView` after each later committed client-side route.
+5. Ignore repeated notifications when `window.location.href` has not changed.
+
+The package ships ESM, CommonJS, and TypeScript definitions with no runtime dependencies. Its public methods can be imported during server rendering; browser work starts only from client-mounted code.
+
+<Warning>
+  The tracking URL is public installation data, not a private token. Keep private credentials out of browser configuration and event payloads.
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="Verify the installation" icon="circle-check" href="/guides/verification">
+    Prove the script, initial page, later routes, and action events appear once.
+  </Card>
+  <Card title="Move to first-party tracking" icon="route" href="/guides/first-party-tracking">
+    Replace the complete tracking URL after Bily validates your customer subdomain.
+  </Card>
+</CardGroup>

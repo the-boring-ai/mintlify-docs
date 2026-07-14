@@ -1,0 +1,117 @@
+---
+title: "Nuxt"
+description: "Add Bily through one Nuxt client plugin and track each finished page once."
+---
+
+Use one client-only Nuxt plugin. It starts Bily when the first page finishes, then records each later `page:finish` once.
+
+Do not add a raw Bily script or another tracking plugin alongside the SDK.
+
+## Install Bily
+
+```bash
+npm install @bilyai/js
+```
+
+## Expose one public runtime value
+
+Copy the complete tracking URL from **Bily > Settings > Apps > More settings > Install tracking**.
+
+```dotenv .env
+NUXT_PUBLIC_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
+```
+
+Declare the matching public runtime value.
+
+```typescript nuxt.config.ts
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      bilyScriptUrl: "",
+    },
+  },
+});
+```
+
+The URL is visible in the browser by design. It is not a private token. Keep credentials out of `runtimeConfig.public`.
+
+## Add one client plugin
+
+In Nuxt 4, create `app/plugins/bily.client.ts`. In a Nuxt 3 project without the `app/` directory structure, create `plugins/bily.client.ts`.
+
+```typescript app/plugins/bily.client.ts
+import { init, track } from "@bilyai/js";
+
+export default defineNuxtPlugin((nuxtApp) => {
+  const config = useRuntimeConfig();
+  const scriptUrl = config.public.bilyScriptUrl;
+
+  if (typeof scriptUrl !== "string" || !scriptUrl) {
+    throw new Error("NUXT_PUBLIC_BILY_SCRIPT_URL is required");
+  }
+
+  let previousUrl: string | null = null;
+
+  nuxtApp.hook("page:finish", () => {
+    const currentUrl = window.location.href;
+
+    if (previousUrl === null) {
+      previousUrl = currentUrl;
+      init({ scriptUrl });
+      return;
+    }
+
+    if (currentUrl === previousUrl) return;
+    previousUrl = currentUrl;
+
+    track("PageView", {
+      sourceUrl: currentUrl,
+      pageTitle: document.title,
+    });
+  });
+});
+```
+
+The `.client` suffix keeps startup in the browser. Waiting for the first `page:finish` lets redirects and page metadata settle before the browser script records the automatic initial page view.
+
+Later `page:finish` calls represent completed Nuxt pages. The URL comparison prevents repeated lifecycle notifications from creating duplicates.
+
+## Track successful actions
+
+Call `track()` from a component or composable after the named operation completes.
+
+```vue app/components/CompleteCheckoutButton.vue
+<script setup lang="ts">
+import { track } from "@bilyai/js";
+
+async function completeCheckout() {
+  const order = await submitCheckout();
+  track("Order Completed", {
+    order: {
+      id: order.id,
+      total: order.total,
+      currency: order.currency,
+    },
+  });
+}
+</script>
+
+<template>
+  <button type="button" @click="completeCheckout">Complete checkout</button>
+</template>
+```
+
+## Change the URL safely
+
+When Bily validates a customer subdomain, replace `NUXT_PUBLIC_BILY_SCRIPT_URL` with the new complete value. Update the deployment environment, then restart or redeploy as your hosting setup requires.
+
+Never run the old and new URLs together.
+
+<CardGroup cols={2}>
+  <Card title="Verify Nuxt tracking" icon="circle-check" href="/guides/verification">
+    Confirm the first page and every later finished page appear once.
+  </Card>
+  <Card title="Move to first-party tracking" icon="route" href="/guides/first-party-tracking">
+    Validate, replace, deploy, and verify the customer-subdomain URL.
+  </Card>
+</CardGroup>

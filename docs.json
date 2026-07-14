@@ -45,10 +45,18 @@
           {
             "group": "Install Bily",
             "pages": [
+              "sdk/overview",
               "sdk/html",
               "sdk/javascript",
               "sdk/react",
-              "sdk/nextjs"
+              "sdk/nextjs",
+              "sdk/vue",
+              "sdk/nuxt",
+              "sdk/sveltekit",
+              "sdk/angular",
+              "sdk/astro",
+              "sdk/react-router-framework",
+              "guides/first-party-tracking"
             ]
           },
           {

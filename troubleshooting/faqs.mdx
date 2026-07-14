@@ -44,9 +44,14 @@ These answers reflect the public Bily SDK, API, and MCP contracts. Open the link
 
 <AccordionGroup>
   <Accordion title="Should I use the raw script or the npm package?">
-    Use the exact raw script for plain HTML or a site-managed script field. Use `@bilyai/js` for applications with an npm build, including React and Next.js.
+    Use the exact raw script for plain HTML or a site-managed script field. Use `@bilyai/js` for applications with an npm build.
 
     Install only one method on each website surface.
+  </Accordion>
+  <Accordion title="Which frameworks does the Bily SDK support?">
+    The SDK supports browser applications built with Vanilla JavaScript, React Router, Next.js, Vue, Nuxt, Svelte, SvelteKit, Angular, Astro, React Router framework mode, and Remix.
+
+    Each framework uses the same SDK contract and its own committed-navigation lifecycle. Choose the exact integration in [Framework guides](/sdk/overview).
   </Accordion>
   <Accordion title="Where do I find the tracking URL?">
     Select the intended store. Open **Bily > Settings > Apps > More settings > Install tracking**, choose the site's technology, and copy the complete script or SDK snippet.
@@ -57,6 +62,21 @@ These answers reflect the public Bily SDK, API, and MCP contracts. Open the link
     The full URL is the installation contract. Its query parameters and encoded characters can select the intended store or configuration.
 
     Passing only the origin or rebuilding the path can change the installation.
+  </Accordion>
+  <Accordion title="Does the tracking URL need a private token?">
+    No. The tracking URL is public installation data because every visitor's browser must load it.
+
+    Copy it exactly, but never add a private token, API key, session value, or authorization header to browser configuration.
+  </Accordion>
+  <Accordion title="When does the tracking URL change to my subdomain?">
+    Keep the provided URL while you validate the installation. After Bily validates your customer subdomain, copy the new complete URL from Bily and replace the old value as one deployment change.
+
+    Do not change only the hostname or run both URLs together. Follow [Move to first-party tracking](/guides/first-party-tracking).
+  </Accordion>
+  <Accordion title="Do I need to rebuild after changing the tracking URL?">
+    Yes when a public environment value is included in browser assets. This includes common `NEXT_PUBLIC_`, `VITE_`, `$env/static/public`, Astro `PUBLIC_`, and compiled Angular settings.
+
+    A runtime-served value may need only a restart or redeploy. Open a new document with a full reload after deployment; a hot update cannot replace the active Bily URL.
   </Accordion>
   <Accordion title="Does Bily track the first page automatically?">
     Yes. The browser script records the initial document `PageView` automatically. Do not send another page view from the initial mount.

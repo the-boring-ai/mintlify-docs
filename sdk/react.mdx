@@ -1,9 +1,9 @@
 ---
-title: "React"
+title: "React Router"
 description: "Add Bily to React and track each route without duplicating page views."
 ---
 
-Add one Bily component inside your router. It starts the SDK and tracks later route changes without duplicating the automatic initial page view.
+Add one Bily component inside your existing React Router. It starts the SDK and tracks later route changes without duplicating the automatic initial page view.
 
 Do not add a raw Bily script tag anywhere else in the application. `init()` loads the script for you.
 
@@ -90,6 +90,11 @@ export function LaunchCampaignButton({ campaignId }: { campaignId: string }) {
 }
 ```
 
-<Card title="Verify React tracking" icon="circle-check" href="/guides/verification">
-  Check the initial view, later routes, and action events without duplicates.
-</Card>
+<CardGroup cols={2}>
+  <Card title="Verify React Router" icon="circle-check" href="/guides/verification">
+    Check the initial view, later routes, and action events without duplicates.
+  </Card>
+  <Card title="Use framework mode" icon="route" href="/sdk/react-router-framework">
+    Install Bily in a React Router framework mode or Remix root route.
+  </Card>
+</CardGroup>

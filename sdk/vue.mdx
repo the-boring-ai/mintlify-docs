@@ -1,0 +1,112 @@
+---
+title: "Vue"
+description: "Add Bily to a Vue application after its first route is ready, then track each successful navigation once."
+---
+
+Start Bily after Vue Router resolves the initial route. Then observe successful later navigations from one global `afterEach()` hook.
+
+Do not add a raw Bily script tag. `init()` loads the exact tracking URL for this installation path.
+
+## Install Bily
+
+```bash
+npm install @bilyai/js
+```
+
+## Set the public tracking URL
+
+Copy the complete URL from **Bily > Settings > Apps > More settings > Install tracking**.
+
+```dotenv .env
+VITE_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
+```
+
+Vite includes `VITE_` values in the browser bundle. The value is public installation data, not a private token. Rebuild and redeploy when it changes.
+
+## Start after the initial route
+
+Create one module that waits for Vue Router to finish its initial navigation. Bily then records that final initial page automatically.
+
+```typescript src/bily.ts
+import { nextTick } from "vue";
+import type { Router } from "vue-router";
+import { init, track } from "@bilyai/js";
+
+const BILY_SCRIPT_URL = import.meta.env.VITE_BILY_SCRIPT_URL;
+
+export async function startBily(router: Router): Promise<void> {
+  if (!BILY_SCRIPT_URL) {
+    throw new Error("VITE_BILY_SCRIPT_URL is required");
+  }
+
+  await router.isReady();
+  init({ scriptUrl: BILY_SCRIPT_URL });
+
+  let previousUrl = window.location.href;
+
+  router.afterEach(async (_to, _from, failure) => {
+    if (failure) return;
+
+    await nextTick();
+    const currentUrl = window.location.href;
+    if (currentUrl === previousUrl) return;
+
+    previousUrl = currentUrl;
+    track("PageView", {
+      sourceUrl: currentUrl,
+      pageTitle: document.title,
+    });
+  });
+}
+```
+
+Call the module once from the browser bootstrap after installing your existing router.
+
+```typescript src/main.ts
+import { createApp } from "vue";
+import App from "./App.vue";
+import router from "./router";
+import { startBily } from "./bily";
+
+async function startApplication() {
+  const app = createApp(App);
+  app.use(router);
+
+  await startBily(router);
+  app.mount("#app");
+}
+
+void startApplication();
+```
+
+Keep your existing plugins, stores, error handlers, and application setup. Add only the Bily call at the matching point in your bootstrap.
+
+`router.isReady()` lets initial redirects settle before Bily loads. `afterEach()` runs after a navigation is confirmed. The URL guard ignores repeated notifications and failed navigations.
+
+## Track successful actions
+
+```vue src/components/SavePreferenceButton.vue
+<script setup lang="ts">
+import { track } from "@bilyai/js";
+
+async function savePreference() {
+  const preference = await updatePreference();
+  track("preference_saved", { preference_id: preference.id });
+}
+</script>
+
+<template>
+  <button type="button" @click="savePreference">Save preference</button>
+</template>
+```
+
+Send the event only after the operation succeeds.
+
+<CardGroup cols={2}>
+  <Card title="Verify Vue tracking" icon="circle-check" href="/guides/verification">
+    Check the initial page, successful routes, redirects, and action events.
+  </Card>
+  <Card title="Replace the tracking URL" icon="route" href="/guides/first-party-tracking">
+    Move to the validated customer subdomain as one deployment change.
+  </Card>
+</CardGroup>
