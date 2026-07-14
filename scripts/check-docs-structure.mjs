@@ -164,8 +164,8 @@ for (const redirect of config.redirects ?? []) {
 }
 
 const mcpRedirect = (config.redirects ?? []).find(redirect => redirect.source === "/mcp");
-if (mcpRedirect?.destination !== "/mcp/overview") {
-  throw new Error("The /mcp redirect must point to /mcp/overview.");
+if (mcpRedirect) {
+  throw new Error("The reserved /mcp machine endpoint must not be configured as a page redirect. Link to /mcp/overview instead.");
 }
 
 const openApiOperations = [];

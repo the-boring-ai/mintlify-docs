@@ -202,10 +202,6 @@
   },
   "redirects": [
     {
-      "source": "/mcp",
-      "destination": "/mcp/overview"
-    },
-    {
       "source": "/development",
       "destination": "/quickstart"
     },
