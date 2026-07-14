@@ -1,26 +1,26 @@
 ---
 title: "Bily glossary"
 sidebarTitle: "Glossary"
-description: "Definitions for Bily products, browser events, identity, API scoping, and MCP operations."
+description: "Clear definitions for Bily products, events, identity, analytics, API scope, and MCP operations."
 ---
 
-## Products and developer surfaces
+## Products and surfaces
 
 <AccordionGroup>
   <Accordion title="Bily">
-    The programmable customer data and activation layer for websites. Bily connects browser, server, and AI workflows around the same website, organization, and store context.
+    The programmable customer data and activation layer for websites. It keeps browser, server, and AI workflows aligned to the same website, organization, and store context.
   </Accordion>
   <Accordion title="Bily Apps">
-    The installable capability layer of Bily. Teams can review, configure, install, observe, update, or revoke a Bily App through the website connection they already govern.
+    Bily's installable capability layer. You can review, configure, install, observe, update, or revoke an App through the website connection you already control.
   </Accordion>
   <Accordion title="Bily JavaScript SDK">
-    The `@bilyai/js` browser package. It installs the exact Bily script URL, queues early calls, sends known or custom events, and exports browser-safe TypeScript methods and types.
+    The `@bilyai/js` browser package. It installs the exact Bily tracking URL, queues early calls, sends known and custom events, and exports browser-safe TypeScript methods and types.
   </Accordion>
   <Accordion title="Bily API">
-    The versioned HTTP interface for trusted server workflows. It exposes Bily identity, stores, analytics, connected data, and supported actions through authenticated endpoints.
+    A versioned HTTP interface for trusted server workflows. Authenticated endpoints expose Bily identity, stores, analytics, connected data, and supported actions.
   </Accordion>
   <Accordion title="Bily MCP">
-    The Streamable HTTP interface for compatible AI clients. It exposes two stable tools, `search` and `execute`, for current Bily operations.
+    A Streamable HTTP interface for compatible AI clients. Its two stable tools, `search` and `execute`, expose current Bily operations.
   </Accordion>
 </AccordionGroup>
 
@@ -28,54 +28,54 @@ description: "Definitions for Bily products, browser events, identity, API scopi
 
 <AccordionGroup>
   <Accordion title="Event">
-    A named outcome sent from the browser with an optional payload. Examples include `PageView`, `Product Viewed`, `Order Completed`, and `workspace_created`.
+    A named browser outcome with an optional payload. Examples include `PageView`, `Product Viewed`, `Order Completed`, and `workspace_created`.
   </Accordion>
   <Accordion title="Known event">
-    An event name included in `KnownBilyEvent`. Known names receive TypeScript autocomplete, while the SDK continues to accept custom non-empty strings.
+    An event name in `KnownBilyEvent`. TypeScript autocompletes known names, while the SDK also accepts custom non-empty strings.
   </Accordion>
   <Accordion title="Custom event">
-    An application-specific event name supplied by your code. Use stable snake_case names and keep changing values in the payload.
+    An application-specific event name from your code. Use stable snake_case names. Put changing values in the payload.
   </Accordion>
   <Accordion title="Payload">
-    The optional object passed to `track()`. It can contain typed client, product, order, page, and search fields plus reviewed custom properties.
+    The optional object passed to `track()`. It can include typed client, product, order, page, and search fields, plus reviewed custom properties.
   </Accordion>
   <Accordion title="event_id">
-    The identifier for one logical event outcome. The SDK generates one when it is missing. It supports correlation but is not an ingestion receipt or exactly-once guarantee.
+    The identifier for one logical outcome. The SDK generates it when missing. It supports correlation, but it is not an ingestion receipt or an exactly-once guarantee.
   </Accordion>
   <Accordion title="ts">
-    The event timestamp. The SDK generates an ISO timestamp when `ts` is not already provided as a string.
+    The event timestamp. The SDK generates an ISO timestamp unless you provide `ts` as a string.
   </Accordion>
   <Accordion title="PageView">
-    The current Bily page-view event name. The browser script records the initial document automatically; single-page applications send it explicitly for later committed routes.
+    Bily's current page-view event name. The browser script records the initial document automatically. Single-page applications send it for each later committed route.
   </Accordion>
   <Accordion title="Single-page application (SPA)">
-    A browser application that can change routes without loading a new document. Bily needs an explicit later `PageView` from the router integration for those route changes.
+    A browser application that changes routes without loading a new document. Its router integration sends an explicit `PageView` for each later route change.
   </Accordion>
   <Accordion title="Product">
-    A `BilyProduct` with required `id`, `name`, `price`, and `currency`, plus optional quantity, SKU, category, brand, and image.
+    A `BilyProduct` with required `id`, `name`, `price`, and `currency`, plus optional quantity, SKU, category, brand, and image fields.
   </Accordion>
   <Accordion title="Order">
-    A `BilyOrder` representing one order and its optional products, currency, total, tax, discount, discount code, and shipping fees.
+    A `BilyOrder` for one order. It can include products, currency, total, tax, discount, discount code, and shipping fees.
   </Accordion>
 </AccordionGroup>
 
-## Identity and acquisition context
+## Identity and acquisition
 
 <AccordionGroup>
   <Accordion title="Bily browser tracking ID">
-    The browser-context identifier returned by `getBilyTrackingId()`. It can persist in browser storage and is not an authenticated account ID or authorization value.
+    The browser-context identifier from `getBilyTrackingId()`. It can persist in browser storage, but it is not an authenticated account ID or authorization value.
   </Accordion>
   <Accordion title="client.userId">
-    Your stable authenticated customer or account ID attached to an event. It is event context, not a login command or proof of authorization.
+    Your stable authenticated customer or account ID on an event. It provides context. It does not log anyone in or prove authorization.
   </Accordion>
   <Accordion title="sourceUrl">
-    The current page URL supplied for an explicit event, especially an SPA page view.
+    The current page URL you include with an explicit event, especially an SPA page view.
   </Accordion>
   <Accordion title="referrer">
-    An optional referring URL supplied with an event when your privacy policy permits it.
+    An optional referring URL you include when your privacy policy permits it.
   </Accordion>
   <Accordion title="Attribution">
-    The association between observed customer activity and acquisition or advertising context. Use Bily's returned analytics fields as the reporting contract; the SDK does not define a public first-touch or last-touch rule.
+    The link between observed customer activity and acquisition or advertising context. Use Bily's returned analytics fields as the reporting contract. The SDK does not define a public first-touch or last-touch rule.
   </Accordion>
 </AccordionGroup>
 
@@ -83,58 +83,58 @@ description: "Definitions for Bily products, browser events, identity, API scopi
 
 <AccordionGroup>
   <Accordion title="Conversions">
-    Orders in Bily advertising analytics. Use `sum(conversions)` when aggregating order volume.
+    Orders in Bily advertising analytics. Aggregate order volume with `sum(conversions)`.
   </Accordion>
   <Accordion title="People">
-    Unique browser visitors in Bily advertising analytics. Use `sum(people)` as the visitor denominator only when the selected rows represent the complete traffic population for the requested grouping.
+    Unique browser visitors in Bily advertising analytics. Use `sum(people)` as the visitor denominator only when your selected rows contain the complete traffic population for that grouping.
   </Accordion>
   <Accordion title="Sessions">
-    Total 30-minute visits. Use `sum(sessions)` as the session denominator only when the selected rows represent the complete traffic population for the requested grouping.
+    Total 30-minute visits. Use `sum(sessions)` as the session denominator only when your selected rows contain the complete traffic population for that grouping.
   </Accordion>
   <Accordion title="Pageviews">
-    Tracked page-view events. Pageviews are event volume, not unique visitors or sessions.
+    Tracked page-view events. This is event volume, not unique visitors or sessions.
   </Accordion>
   <Accordion title="Conversion rate (CVR)">
-    Orders divided by a complete traffic denominator. Visitor CVR is `sum(conversions) / sum(people)`; session CVR is `sum(conversions) / sum(sessions)`. Do not use orders, revenue, customers, purchase-only sessions, or conversion-filtered rows as the denominator.
+    Orders divided by a complete traffic denominator. Visitor CVR is `sum(conversions) / sum(people)`; session CVR is `sum(conversions) / sum(sessions)`. Never use orders, revenue, customers, purchase-only sessions, or conversion-filtered rows as the denominator.
   </Accordion>
   <Accordion title="Return on ad spend (ROAS)">
-    Revenue divided by spend when spend is greater than zero. Bily's normalized channel and asset reports calculate this from the report's revenue and store-currency-normalized spend. Raw platform revenue and spend remain separate fields where available.
+    Revenue divided by spend when spend is greater than zero. Bily's normalized channel and asset reports use the report's revenue and store-currency-normalized spend. Raw platform revenue and spend remain separate where available.
   </Accordion>
   <Accordion title="Cost per acquisition (CPA)">
-    Spend divided by orders when orders are greater than zero. In Bily reports, CPA uses order volume rather than customer count.
+    Spend divided by orders when orders are greater than zero. Bily reports use order volume—not customer count—for CPA.
   </Accordion>
   <Accordion title="Customer acquisition cost (CAC)">
-    Spend divided by customers when customer count is greater than zero. CAC and CPA differ whenever one customer places more than one order.
+    Spend divided by customers when the customer count is greater than zero. CAC differs from CPA whenever one customer places more than one order.
   </Accordion>
   <Accordion title="Customer lifetime value (LTV)">
-    A customer's total lifetime revenue in the `customer_ltv` dataset. Average LTV is the average of customer `total_revenue`; net LTV subtracts customer refunds where that data is available. This is lifetime customer data, not period new-versus-returning revenue.
+    A customer's total lifetime revenue in the `customer_ltv` dataset. Average LTV is the average customer `total_revenue`. Net LTV subtracts customer refunds where available. This is lifetime customer data, not period new-versus-returning revenue.
   </Accordion>
   <Accordion title="Platform money">
-    Raw fields such as `p_spend` remain in the ad account's native `p_currency`. Group raw money aggregates by `p_currency`. Use normalized channel or asset reports when you need store-currency spend and efficiency metrics across accounts.
+    Raw fields such as `p_spend` stay in the ad account's native `p_currency`. Group raw money aggregates by `p_currency`. For store-currency spend and efficiency across accounts, use normalized channel or asset reports.
   </Accordion>
   <Accordion title="Product orders">
-    Product-order occurrences in the `product_metrics` dataset. Aggregate with `sum(orders)`. A row count is not a product-order count.
+    Product-order occurrences in the `product_metrics` dataset. Aggregate them with `sum(orders)`. Row count does not equal product-order count.
   </Accordion>
   <Accordion title="Units">
-    Product quantity in the `product_metrics` dataset. Aggregate with `sum(units)`. Units and product orders differ when an order contains more than one unit of a product.
+    Product quantity in the `product_metrics` dataset. Aggregate it with `sum(units)`. Units exceed product orders when an order contains more than one unit of a product.
   </Accordion>
   <Accordion title="Connection">
     A store-scoped link to a supported data or activation surface. Depending on the operation, Bily can expose tracking connections, catalog sync connections, connected advertising accounts, and enabled account selections.
   </Accordion>
   <Accordion title="Pixel">
-    The public API resource for a store-scoped tracking connection. A pixel record has an ID, name, channel, enabled state, settings, timestamps, and optional publish state.
+    The public API resource for a store-scoped tracking connection. Its record includes an ID, name, channel, enabled state, settings, timestamps, and optional publish state.
   </Accordion>
   <Accordion title="Ad account">
-    An advertising account mapped to a Bily store. Connected accounts are available through a store's connection; enabled accounts are selected for Bily reads or supported actions.
+    An advertising account mapped to a Bily store. A store connection exposes connected accounts. Enabled accounts are selected for Bily reads or supported actions.
   </Accordion>
   <Accordion title="Asset">
-    A normalized campaign, ad set, or ad belonging to an enabled ad account. Asset results identify the platform, account, asset type and ID, status, budget fields when available, and the fields Bily currently supports writing.
+    A normalized campaign, ad set, or ad from an enabled ad account. Results identify the platform, account, asset type and ID, status, available budget fields, and fields Bily currently supports writing.
   </Accordion>
   <Accordion title="Data readiness">
-    Per-platform connector and account-selection status for a store. It tells an operator whether to connect a source, select accounts, or wait before relying on the data.
+    A store's per-platform connector and account-selection status. It tells you whether to connect a source, select accounts, or wait before using the data.
   </Accordion>
   <Accordion title="Quality warning">
-    Structured analytics guidance with a code, severity, message, evidence, and recommended next step. A result marked `review_required` or carrying a blocking warning should be investigated before it drives channel, budget, creative, or attribution decisions.
+    Analytics guidance with a code, severity, message, evidence, and recommended next step. Investigate `review_required` results and blocking warnings before they influence channel, budget, creative, or attribution decisions.
   </Accordion>
 </AccordionGroup>
 
@@ -142,48 +142,48 @@ description: "Definitions for Bily products, browser events, identity, API scopi
 
 <AccordionGroup>
   <Accordion title="Organization">
-    The Bily team boundary that owns access. API and MCP requests verify the authenticated identity's organization access.
+    The Bily team boundary that owns access. API and MCP requests verify that the authenticated identity can access the organization.
   </Accordion>
   <Accordion title="Store">
-    A connected commerce or web property inside an organization. Store-scoped API paths use the exact URL returned by Bily discovery.
+    A connected commerce or web property within an organization. Store-scoped API paths use the exact URL returned by Bily discovery.
   </Accordion>
   <Accordion title="Scope">
     The organizations, stores, permissions, and actions available to an authenticated identity or key.
   </Accordion>
   <Accordion title="Customer context">
-    The authenticated Bily user plus accessible organizations and their nested stores. `GET /context` and `bily.context()` return this discovery shape in one request, filtered to the connection's allowed scope.
+    The authenticated Bily user, accessible organizations, and their stores. `GET /context` and `bily.context()` return this shape in one request, filtered to the connection's allowed scope.
   </Accordion>
   <Accordion title="API key">
-    A server-side credential accepted by the Bily API. A key created for a selected store carries that store and organization scope. Keep it in secret storage and never expose it in browser code, prompts, logs, or repositories.
+    A server-side credential for the Bily API. A key created for a selected store carries that store and organization scope. Keep it in secret storage. Never expose it in browser code, prompts, logs, or repositories.
   </Accordion>
   <Accordion title="Bily Connect">
     The recommended MCP sign-in path for compatible clients. It uses Bily's OAuth flow and the signed-in user's current organization and store memberships.
   </Accordion>
   <Accordion title="Fallback key">
-    A one-time-revealed access key for MCP clients that cannot complete Bily Connect. A key created for a selected store carries that default store and organization scope in MCP.
+    A one-time-revealed access key for MCP clients that cannot complete Bily Connect. A key created for a selected store gives MCP that default store and organization scope.
   </Accordion>
   <Accordion title="Request ID">
-    A safe correlation value returned in the Bily API `x-request-id` response header. Preserve it when diagnosing an API failure.
+    A safe correlation value in the Bily API `x-request-id` response header. Save it when you diagnose an API failure.
   </Accordion>
 </AccordionGroup>
 
-## MCP terms
+## MCP operations
 
 <AccordionGroup>
   <Accordion title="Operation catalog">
-    The current set of Bily reads and actions discoverable through MCP `search`. It includes helper signatures, schemas, and planning guidance.
+    The current set of Bily reads and actions discoverable through MCP `search`, including helper signatures, schemas, and planning guidance.
   </Accordion>
   <Accordion title="search">
-    The MCP tool that matches an intent to current Bily operations. It accepts `query`, optional `storeUrl`, and an optional limit from 1 to 20.
+    The MCP tool that matches your intent to current Bily operations. It accepts `query`, optional `storeUrl`, and an optional limit from 1 to 20.
   </Accordion>
   <Accordion title="execute">
     The MCP tool that runs a focused async arrow function with `bily.*` helpers. It returns a JSON-serializable `result` and captured `logs`.
   </Accordion>
   <Accordion title="Risk tier">
-    Advisory MCP planning metadata such as `read`, `draft_write`, `spend_affecting`, or `destructive`.
+    Advisory MCP planning metadata, such as `read`, `draft_write`, `spend_affecting`, or `destructive`.
   </Accordion>
   <Accordion title="Approval policy">
-    Advisory MCP planning metadata describing the recommended review before a write or spend-affecting action. The client approval prompt remains the visible approval boundary.
+    Advisory MCP planning metadata for the recommended review before a write or spend-affecting action. The client approval prompt remains the visible approval boundary.
   </Accordion>
 </AccordionGroup>
 

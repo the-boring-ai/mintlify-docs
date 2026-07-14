@@ -1,28 +1,28 @@
 ---
 title: "Choose the API or MCP"
 sidebarTitle: "API or MCP"
-description: "Choose the Bily API for deterministic software workflows and Bily MCP for compatible AI-client work."
+description: "Use the Bily API for repeatable software. Use Bily MCP for guided work in compatible AI clients."
 ---
 
-The Bily API and Bily MCP expose overlapping Bily data and supported actions for different kinds of callers. Choose based on who controls the workflow and how predictable the contract must be.
+The API and MCP can access overlapping Bily data and actions. The right choice depends on who controls the workflow and how repeatable it needs to be.
 
-## Decision table
+## Choose by workflow
 
 | Need | Use |
 | --- | --- |
 | Send website events | Bily JavaScript SDK |
-| Build a backend integration against versioned endpoints | Bily API |
+| Build a backend integration with versioned endpoints | Bily API |
 | Run a scheduled or repeatable server job | Bily API |
 | Generate a typed client from OpenAPI | Bily API |
-| Let a compatible AI client discover a current Bily operation | Bily MCP |
+| Let a compatible AI client discover a current operation | Bily MCP |
 | Perform an operator-reviewed analysis or action in an AI client | Bily MCP |
 | Combine browser collection, automation, and interactive analysis | SDK plus API and/or MCP |
 
-## Choose the Bily API
+## Use the API for repeatable software
 
-Use the API when application code owns the sequence.
+Choose the API when your application owns the sequence.
 
-The API is a good fit for:
+Use it for:
 
 - scheduled analytics exports;
 - store and account synchronization jobs;
@@ -30,37 +30,37 @@ The API is a good fit for:
 - explicit create, update, toggle, clone, or delete workflows;
 - integrations that need stable paths, request bodies, response schemas, and status codes.
 
-API requests use the versioned base URL and server-side authentication. Your application owns retries, idempotency decisions, verification, and error handling.
+API requests use the versioned base URL and server-side authentication. Your application controls retries, idempotency decisions, verification, and errors.
 
 <Card title="Bily API overview" icon="terminal" href="/rest-api/overview">
-  Review authentication, scoping, errors, and the generated endpoint reference.
+  Review authentication, scope, errors, and every generated endpoint.
 </Card>
 
-## Choose Bily MCP
+## Use MCP for guided AI workflows
 
-Use MCP when a compatible AI client should interpret a user's intent and discover the current Bily operation catalog.
+Choose MCP when a compatible AI client should interpret your intent and discover the current operation catalog.
 
-Bily MCP exposes two stable tools:
+Bily MCP gives the client two stable tools:
 
 - `search` finds supported Bily operations and their planning guidance;
 - `execute` runs a focused async function with the selected `bily.*` helper.
 
-MCP is a good fit for:
+Use it for:
 
 - interactive questions about stores and analytics;
 - exploratory work where the exact helper should be discovered at runtime;
-- operator-reviewed actions where the client shows the complete execution first;
+- operator-reviewed actions where the client shows the complete execution before it runs;
 - AI workflows that benefit from operation schemas, risk guidance, and verification hints.
 
-MCP planning metadata is advisory. Keep client approval visible and verify writes with a read.
+MCP planning metadata is advisory. Keep the client approval visible. Verify every write with a read.
 
 <Card title="Bily MCP overview" icon="robot" href="/mcp/overview">
-  Connect an AI client and review the two-tool contract.
+  Connect your AI client and review its two-tool contract.
 </Card>
 
-## Use more than one surface
+## Combine surfaces when the workflow needs them
 
-A common architecture uses each surface for the work it owns:
+A complete implementation can give each surface one clear job:
 
 ```mermaid
 flowchart LR
@@ -72,9 +72,9 @@ flowchart LR
   F --> G
 ```
 
-For example, the SDK can send product and order events, a backend job can read a daily analytics dataset through the API, and an operator can investigate a result through MCP.
+For example, the SDK sends product and order events. A backend job reads a daily analytics dataset through the API. An operator investigates the result through MCP.
 
-## Do not substitute the wrong surface
+## Keep each surface in its role
 
 - Do not place an API key in browser code.
 - Do not use MCP as the website event transport.
@@ -82,7 +82,7 @@ For example, the SDK can send product and order events, a backend job can read a
 - Do not call undocumented Bily endpoints when an OpenAPI operation exists.
 - Do not hard-code MCP helper names without first using `search` for the current contract.
 
-## Operational tradeoffs
+## Compare the contracts
 
 | Consideration | API | MCP |
 | --- | --- | --- |
@@ -94,4 +94,4 @@ For example, the SDK can send product and order events, a backend job can read a
 | Runtime responsibility | Your service | MCP execution limit and client timeout |
 | Best for | Repeatable deterministic integrations | Intent-driven operator workflows |
 
-If a workflow begins as an MCP investigation and becomes scheduled production logic, move the repeatable portion to the versioned API.
+If an MCP investigation becomes scheduled production logic, move its repeatable work to the versioned API.

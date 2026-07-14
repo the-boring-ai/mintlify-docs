@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Bily developer docs",
-  "description": "Connect website data to Bily, activate Bily Apps, and build trusted browser, server, and AI workflows.",
+  "description": "Connect your website once. Use trusted customer data across Bily Apps, analytics, APIs, and AI workflows.",
   "seo": {
     "metatags": {
       "canonical": "https://docs.bily.ai"

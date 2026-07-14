@@ -1,11 +1,11 @@
 ---
 title: "init()"
-description: "Initialize Bily with an exact script URL and configure loading behavior."
+description: "Start Bily with an exact tracking URL and control how it loads."
 ---
 
-`init()` loads Bily once in a browser document. The preferred object form accepts the exact script URL copied from Bily.
+Call `init()` once to load Bily in a browser document. Use the object form to preserve the exact tracking URL Bily provides.
 
-## Signature
+## Choose a signature
 
 ```typescript
 function init(options: BilyInitOptions): void;
@@ -16,7 +16,7 @@ function init(
 ): void;
 ```
 
-## Preferred initialization
+## Start with the exact URL
 
 ```typescript
 import { init } from "@bilyai/js";
@@ -26,27 +26,27 @@ init({
 });
 ```
 
-The SDK copies `scriptUrl` onto the browser script without removing or rebuilding its query string.
+The SDK places `scriptUrl` on the browser script without removing or rebuilding its query string.
 
 <Warning>
-  Pass the whole URL shown under **Bily > Settings > Apps > More settings > Install tracking**. Query parameters and encoded characters are required parts of the URL.
+  Copy the complete URL from **Bily > Settings > Apps > More settings > Install tracking**. Keep every query parameter and encoded character.
 </Warning>
 
-## Options
+## Control loading
 
 | Option | Type | Default | Behavior |
 | --- | --- | --- | --- |
-| `scriptUrl` | `string` | Required in the preferred form | Exact Bily script URL |
-| `debug` | `boolean` | `false` | Logs lifecycle diagnostics without logging event payloads |
-| `maxQueueSize` | `number` | `100` | Retains between 1 and 1,000 early calls and discards the oldest when full |
-| `loadTimeoutMs` | `number` | `15000` | Waits between 1,000 and 60,000 milliseconds before rejecting readiness |
-| `nonce` | `string` | — | Copies your content-security-policy nonce onto the injected script |
-| `trackingDomain` | `string` | — | Compatibility form that loads `/b.js` from the supplied origin |
+| `scriptUrl` | `string` | Required in the preferred form | Uses the exact Bily tracking URL |
+| `debug` | `boolean` | `false` | Logs lifecycle diagnostics, never event payloads |
+| `maxQueueSize` | `number` | `100` | Keeps 1 to 1,000 early calls and drops the oldest when full |
+| `loadTimeoutMs` | `number` | `15000` | Waits 1,000 to 60,000 milliseconds before rejecting readiness |
+| `nonce` | `string` | — | Adds your content-security-policy nonce to the injected script |
+| `trackingDomain` | `string` | — | Compatibility option that loads `/b.js` from the supplied origin |
 | `verbose` | `boolean` | `false` | Deprecated alias for `debug` |
 
 `scriptUrl` and `trackingDomain` are mutually exclusive in `BilyInitOptions`.
 
-## Full configuration
+## Configure every option
 
 ```typescript
 init({
@@ -60,34 +60,34 @@ init({
 });
 ```
 
-## URL requirements
+## Keep the URL valid
 
-- Production script URLs must use HTTPS.
-- Local development may use HTTP on `localhost`, `127.0.0.1`, or `[::1]`.
-- The object form preserves the exact script URL.
-- The compatibility domain form constructs a `/b.js` URL from the supplied value. Prefer `scriptUrl` so the SDK can use the exact URL Bily provided.
+- Use HTTPS for production tracking URLs.
+- Use HTTP only for local development on `localhost`, `127.0.0.1`, or `[::1]`.
+- Use the object form to preserve the exact tracking URL.
+- Prefer `scriptUrl` over the compatibility domain form, which builds a `/b.js` URL from the value you provide.
 
-## Repeated calls
+## Call it again safely
 
-Calling `init()` again with the same URL does not insert another script. If the page already contains a script with the same URL, the SDK reuses it.
+Calling `init()` again with the same URL does not add another script. If the page already has a script with that URL, the SDK reuses it.
 
-If Bily is loading or ready and a later call supplies a different URL, the SDK ignores the different URL. Keep one source of configuration for each page.
+After Bily starts loading or becomes ready, the SDK ignores a later call with a different URL. Keep one configuration source on each page.
 
-After a terminal load failure, you can call `init()` again to retry.
+After a terminal load failure, call `init()` again to retry.
 
-## Server rendering
+## Stay safe during server rendering
 
-`init()` returns without accessing browser globals when it runs during server rendering. Call it from client-mounted code so browser tracking can start.
+During server rendering, `init()` returns without accessing browser globals. Call it from client-mounted code to start browser tracking.
 
-## Compatibility form
+## Keep an older integration working
 
-Existing applications can continue to use the string overload while migrating:
+Existing applications can keep using the string overload while you migrate:
 
 ```typescript
 init("https://tracking.example.com", { verbose: false });
 ```
 
-New integrations should use `{ scriptUrl }` so the exact URL remains intact.
+For new integrations, use `{ scriptUrl }` to keep the exact URL intact.
 
 <CardGroup cols={2}>
   <Card title="ready()" icon="circle-check" href="/api-reference/ready" />

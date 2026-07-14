@@ -1,17 +1,17 @@
 ---
 title: "track()"
-description: "Send a known Bily event or a custom application event with an optional payload."
+description: "Send a Bily event or your own application event with an optional payload."
 ---
 
-`track()` accepts a known Bily event name or your own non-empty string.
+Use `track()` to record an outcome with a known Bily name or your own non-empty event name.
 
-## Signature
+## Send an event
 
 ```typescript
 function track(event: BilyEvent, payload?: BilyPayload): void;
 ```
 
-## Known event
+## Track a known outcome
 
 ```typescript
 import { track } from "@bilyai/js";
@@ -28,7 +28,7 @@ track("Product Viewed", {
 });
 ```
 
-## Custom event
+## Track an application outcome
 
 ```typescript
 track("integration_connected", {
@@ -37,35 +37,37 @@ track("integration_connected", {
 });
 ```
 
-Use stable snake_case names for application-specific events. The SDK retains autocomplete for known Bily names without restricting custom strings.
+Use stable snake_case names for application events. You still get autocomplete for known Bily names.
 
-## Automatic payload fields
+## Know what Bily adds
 
-The SDK adds these values when it prepares a browser event:
+When the SDK prepares a browser event, it adds:
 
 - A Bily browser tracking ID when one is available.
 - An ISO timestamp when `ts` is not already a string.
 - A generated event ID when `event_id` is empty or absent.
 - The browser source for the event.
 
-Provide `event_id` when you need the same logical outcome to share an identifier across systems.
+Provide `event_id` when the same outcome needs one identifier across systems.
 
-## Queue behavior
+## Track before loading finishes
 
-You can call `track()` before `init()` or while Bily loads. Calls remain in memory until loading succeeds. The default queue keeps 100 calls, and `init({ maxQueueSize })` can set a limit from 1 to 1,000.
+Call `track()` before `init()` or while Bily loads. The SDK keeps those calls in memory until loading succeeds.
 
-When the queue is full, the SDK removes the oldest call before adding the newest one.
+The queue holds 100 calls by default. Set a limit from 1 to 1,000 with `init({ maxQueueSize })`.
 
-## Error behavior
+When the queue is full, the SDK removes the oldest call before it adds the newest.
+
+## Handle errors without interrupting the app
 
 - An empty or whitespace-only event name is ignored.
 - A browser delivery failure does not throw from `track()`.
 - With `debug: true`, Bily logs a warning for delivery failures without logging the payload.
 - During server rendering, `track()` is a no-op.
 
-## Page views
+## Track only later page views
 
-The first `PageView` is automatic. Use `track("PageView", ...)` only for later client-side route changes.
+The first `PageView` is automatic. Call `track("PageView", ...)` only after a later client-side route change.
 
 ```typescript
 track("PageView", {

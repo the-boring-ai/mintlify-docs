@@ -1887,7 +1887,7 @@ const spec = {
     title: "Bily API",
     version: "1.0.0",
     description:
-      "The stable customer API for Bily identity, stores, analytics, commerce, connected data, and explicitly authorized actions.",
+      "Discover stores, read analytics and commerce data, inspect connections, and run explicitly authorized actions with the Bily API.",
     contact: {
       name: "Bily support",
       email: "support@bily.ai",

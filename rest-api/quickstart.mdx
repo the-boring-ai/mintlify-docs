@@ -1,28 +1,28 @@
 ---
-title: "API quickstart"
+title: "Make your first API request"
 sidebarTitle: "Quickstart"
-description: "Discover the authenticated user, organization, and store in one Bily API request."
+description: "Confirm your Bily API key and discover its user, organization, and store in one request."
 ---
 
-This quickstart uses a server-side API key. Create one by following the [authentication guide](/rest-api/authentication).
+This quickstart uses a server-side API key. Create and protect one with the [authentication guide](/rest-api/authentication).
 
 <Steps>
-  <Step title="Set the key in your shell">
-    Keep the value out of shell history when possible. Use your local secret manager or a temporary protected environment variable.
+  <Step title="Protect the key in your shell">
+    Keep the value out of shell history. Use a local secret manager or a temporary protected environment variable when possible.
 
     ```bash
     export BILY_API_KEY="<your-key>"
     ```
   </Step>
 
-  <Step title="Discover customer context">
+  <Step title="Confirm your access">
     ```bash
     curl --fail-with-body \
       --url https://app.bily.ai/api/customer/v1/context \
       --header "x-api-key: $BILY_API_KEY"
     ```
 
-    The response nests every visible store under its organization:
+    The response groups every visible store under its organization:
 
     ```json
     {
@@ -54,10 +54,12 @@ This quickstart uses a server-side API key. Create one by following the [authent
     }
     ```
 
-    An ordinary settings-generated key is already store-scoped, so do not add an organization parameter. Use the exact `organizations[].stores[].url` value in store-scoped endpoints.
+    A standard settings-generated key is already store-scoped. Do not add an organization parameter.
+
+    Copy the exact `organizations[].stores[].url` value into store-scoped endpoints.
   </Step>
 
-  <Step title="Read a store profile">
+  <Step title="Read the store profile">
     ```bash
     curl --fail-with-body \
       --url https://app.bily.ai/api/customer/v1/store-data/store.example.com \
@@ -67,12 +69,12 @@ This quickstart uses a server-side API key. Create one by following the [authent
 </Steps>
 
 <Warning>
-  If an older key created under **Settings > MCP** returns `403` and asks to be reissued with a store scope, select the intended store and replace it with a newly generated scoped key.
+  If an older key from **Settings > MCP** returns `403` and requires store scope, select the intended store and create a replacement scoped key.
 </Warning>
 
-## Select one organization explicitly
+## Choose an organization when required
 
-Use `organizationId` only when the authenticated identity can access multiple organizations and the workload intentionally selects one:
+Use `organizationId` only when the authenticated identity can access multiple organizations and the workload deliberately selects one:
 
 ```bash
 curl --fail-with-body --get \
@@ -81,9 +83,9 @@ curl --fail-with-body --get \
   --data-urlencode "organizationId=org_01J8W7T9G3E6ZQ4M2K5N8P1R0S"
 ```
 
-The selected organization must be inside the credential's allowed scope. Store-scoped keys should omit this parameter.
+The organization must remain inside the credential's allowed scope. Omit this parameter for store-scoped keys.
 
-## JavaScript example
+## Reuse a safe JavaScript client
 
 ```typescript bily-api.ts
 const apiKey = process.env.BILY_API_KEY;
@@ -133,5 +135,5 @@ console.log({ user: context.user, store, profile });
 ```
 
 <Card title="Browse all endpoints" icon="list" href="/rest-api/overview">
-  Continue to the generated endpoint reference, including `GET /context`, in the **Bily API** tab.
+  Open the generated endpoint reference, including `GET /context`, in the **Bily API** tab.
 </Card>

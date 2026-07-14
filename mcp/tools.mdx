@@ -1,14 +1,14 @@
 ---
-title: "MCP tools and operations"
+title: "Find and run MCP operations"
 sidebarTitle: "Tools and operations"
-description: "Use Bily MCP search and execute, inspect planning guidance, and choose current Bily operations."
+description: "Use search and execute to choose current Bily operations, review risk, and return focused results."
 ---
 
-Bily MCP exposes exactly two tools. It does not expose MCP resources or prompts.
+Bily MCP exposes exactly two tools: `search` and `execute`. It does not expose MCP resources or prompts.
 
 ## `search`
 
-Search the live Bily operation catalog before constructing an execution.
+Search the live Bily operation catalog before you construct an execution.
 
 | Input | Type | Required | Behavior |
 | --- | --- | --- | --- |
@@ -26,19 +26,19 @@ Example tool input:
 }
 ```
 
-Each result can include:
+Each result can provide:
 
-- a stable operation ID, title, description, category, method, and Bily helper;
-- whether a store is required and whether the operation can write;
-- supported connected platforms when relevant;
-- planning metadata such as risk tier, approval policy, preconditions, verification, rollback hints, and input or output schemas;
-- focused usage examples.
+- A stable operation ID, title, description, category, method, and Bily helper.
+- Whether the operation requires a store or can write.
+- Supported connected platforms when relevant.
+- Planning metadata, including risk tier, approval policy, preconditions, verification, rollback hints, and input or output schemas.
+- Focused usage examples.
 
 The current catalog contains 64 operations: 45 read-oriented operations and 19 write operations.
 
-## Start with customer context
+## Confirm identity and scope first
 
-Use the discovery helper before store-specific work:
+Run the discovery helper before store-specific work:
 
 ```javascript
 async () => {
@@ -46,9 +46,11 @@ async () => {
 }
 ```
 
-It returns the authenticated user and accessible `organizations[]`, with each organization's stores nested under `stores[]`. A store-scoped fallback key is narrowed automatically. With Bily Connect, set the optional `organizationId` input on `execute` only when the user explicitly selects one accessible organization.
+It returns the authenticated user and accessible `organizations[]`. Each organization's stores appear under `stores[]`.
 
-## Operation families
+Bily narrows a store-scoped fallback key automatically. With Bily Connect, add the optional `organizationId` input to `execute` only when the user explicitly selects one accessible organization.
+
+## Explore operation families
 
 | Family | Representative Bily helpers |
 | --- | --- |
@@ -60,11 +62,11 @@ It returns the authenticated user and accessible `organizations[]`, with each or
 | Connected-platform reads | `bily.actions.getPlatformSupport(...)`, `bily.actions.listAssets(...)`, `bily.actions.listPixels(...)` |
 | Supported actions | `bily.actions.syncAdAccounts(...)`, `bily.actions.updateAsset(...)`, and the current creation or clone helpers returned by `search` |
 
-This table is a map, not an exhaustive reference. Use `search` to get the current helper signature and planning guidance.
+Use this table as a map, not an exhaustive reference. Call `search` for the current helper signature and planning guidance.
 
 ## `execute`
 
-Run a focused async arrow function with the helper returned by `search`.
+Run one focused async arrow function with the helper returned by `search`.
 
 | Input | Type | Required | Behavior |
 | --- | --- | --- | --- |
@@ -79,9 +81,11 @@ Example tool input:
 }
 ```
 
-The function runs for at most 20 seconds. It has no direct outbound network access. Use `bily.*` helpers for Bily data and supported actions, and return JSON-serializable data.
+The function can run for up to 20 seconds. It has no direct outbound network access.
 
-Successful output contains:
+Use `bily.*` helpers for Bily data and supported actions. Return JSON-serializable data.
+
+A successful call returns:
 
 ```json
 {
@@ -95,8 +99,8 @@ Successful output contains:
 }
 ```
 
-`console.log`, `console.warn`, and `console.error` are captured in `logs`. A thrown error fails the tool call with its safe error message.
+Bily captures `console.log`, `console.warn`, and `console.error` in `logs`. A thrown error fails the tool call with its safe error message.
 
 <Warning>
-  Planning metadata is guidance for the client and user. It does not replace a client approval prompt. Review the complete `execute` function before approving any write.
+  Planning metadata guides the client and user. It does not replace a client approval prompt. Review the complete `execute` function before you approve any write.
 </Warning>

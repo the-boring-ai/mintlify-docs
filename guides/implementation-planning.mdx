@@ -1,25 +1,25 @@
 ---
 title: "Plan a Bily implementation"
 sidebarTitle: "Implementation planning"
-description: "Turn business outcomes into a scoped Bily event plan, ownership model, and release checklist before writing code."
+description: "Turn the outcomes you need into a focused event plan, clear ownership, and safe release gates."
 ---
 
-A reliable Bily implementation starts with a small, reviewed contract. Decide what you need to learn or operate, where each event should fire, and who owns the result before choosing framework code.
+Start with a small, reviewed contract. Decide what you need to learn or operate, where each event becomes true, and who owns the result before you choose framework code.
 
-## Start with decisions, not events
+## Start with the decision you need to make
 
-Write down the business decisions the implementation should support. Examples include:
+Write down the business decisions your implementation should support. For example:
 
 - which product journeys lead to checkout;
 - where customers leave a conversion flow;
 - which campaign and store results need regular review;
 - which operational actions may be performed through the API or MCP.
 
-Each decision should map to a small set of observable outcomes. Avoid tracking every render, click, or state change merely because it is available.
+Map each decision to a small set of observable outcomes. Availability alone is not a reason to track every render, click, or state change.
 
-## Create an event plan
+## Give every event an owner and proof
 
-Use one row per event. Keep this plan in the same review process as the product code.
+Use one row for each event. Review the plan with the product code.
 
 | Field | Question to answer |
 | --- | --- |
@@ -31,43 +31,43 @@ Use one row per event. Keep this plan in the same review process as the product 
 | Event ID | Can the same outcome be reported by more than one system? |
 | Verification | How will a tester prove the event fired once with the right payload? |
 
-For ecommerce activity, start with Bily's [recognized event names](/guides/ecommerce). For application-specific outcomes, use stable snake_case [custom event names](/guides/custom-events).
+For ecommerce activity, start with Bily's [recognized event names](/guides/ecommerce). For application outcomes, use stable snake_case [custom event names](/guides/custom-events).
 
-## Choose one browser installation path
+## Install Bily one way
 
 | Website architecture | Installation path |
 | --- | --- |
 | Plain HTML or a site-managed script field | The exact raw script copied from Bily |
 | Browser application with an npm build | `@bilyai/js` |
 | React single-page application | One root-level React integration |
-| Next.js App Router | One client component mounted from the root layout |
+| Next.js App Router, Pages Router, or both | One shared client component mounted once in each active route tree |
 
-Do not combine the raw script and npm SDK on the same website surface. Both install Bily and can duplicate the initial page view.
+Choose either the raw script or the npm SDK for each website surface. Using both installs Bily twice and can duplicate the initial page view.
 
-## Define page-view ownership
+## Make one integration own page views
 
-The browser script records the initial document page view. Applications that change routes without loading a new document must send one explicit `PageView` after each later committed route.
+The browser script records the initial document page view. If your application changes routes without loading a new document, send one explicit `PageView` after each later committed route.
 
-Choose one router integration as the owner of those later page views. It should:
+Choose one router integration to own those later page views. It should:
 
 1. skip the initial route callback;
 2. wait for the final committed URL;
 3. include the current URL and page title;
 4. ignore repeated notifications for the same URL.
 
-Review the [page-view guide](/guides/pageviews) before adding component-level tracking.
+Read the [page-view guide](/guides/pageviews) before you add component-level tracking.
 
-## Decide identity and privacy boundaries
+## Set identity and privacy boundaries
 
-Keep three concepts separate:
+Keep these three concepts separate:
 
 - the Bily browser tracking ID identifies a browser context;
 - `client.userId` carries your approved authenticated account ID on an event;
 - your server session authorizes protected product actions.
 
-The browser tracking ID is never authorization. Include customer fields only when they have a documented purpose and the visitor's consent state allows them.
+The browser tracking ID never authorizes a request. Include customer fields only when they have a documented purpose and the visitor's consent allows them.
 
-Create a field review for every event:
+Review every field:
 
 | Classification | Examples | Default action |
 | --- | --- | --- |
@@ -77,29 +77,29 @@ Create a field review for every event:
 
 Continue with [identity and attribution](/guides/identity-attribution) and [privacy governance](/guides/privacy-governance).
 
-## Plan read and action surfaces separately
+## Give each developer surface one job
 
-The browser SDK sends website events. It is not a server API client.
+The browser SDK sends website events. It does not replace a server API client.
 
-Use the versioned Bily API for deterministic backend integrations and scheduled workloads. Use Bily MCP for compatible AI clients that should discover current Bily operations through `search` and run focused work through `execute`.
+Use the versioned Bily API for repeatable backend integrations and scheduled work. Use Bily MCP when a compatible AI client should discover current operations through `search` and run focused work through `execute`.
 
-The [API or MCP selection guide](/guides/api-mcp-selection) explains when to use each surface and when a customer workflow needs more than one.
+The [API or MCP selection guide](/guides/api-mcp-selection) helps you choose one surface—or combine them when the workflow needs both.
 
-## Define environments and release gates
+## Prepare each environment before you build
 
-At minimum, define:
+For each environment, define:
 
-- which Bily store and script URL each environment uses;
+- which Bily store and tracking URL each environment uses;
 - where test events are allowed;
 - who can create or revoke server credentials;
 - which checks must pass before production;
 - how to disable the new tracking code without changing unrelated application behavior.
 
-Never initialize a placeholder URL and replace it later. Select the environment-specific exact script URL before the first `init()` call.
+Never initialize a placeholder URL and replace it later. Select the exact environment-specific tracking URL before the first `init()` call.
 
-## Planning exit criteria
+## Know when planning is complete
 
-Implementation can begin when:
+Start implementation when:
 
 - every event has an owner, trigger, required fields, and verification step;
 - the team selected exactly one browser installation path;
@@ -110,9 +110,9 @@ Implementation can begin when:
 
 <CardGroup cols={2}>
   <Card title="Model events and payloads" icon="diagram-project" href="/guides/event-data-model">
-    Turn the plan into a stable event contract.
+    Turn your plan into a stable event contract.
   </Card>
   <Card title="Prepare the rollout" icon="rocket" href="/guides/production-rollout">
-    Release in stages with evidence and rollback criteria.
+    Release in stages with clear evidence and rollback criteria.
   </Card>
 </CardGroup>

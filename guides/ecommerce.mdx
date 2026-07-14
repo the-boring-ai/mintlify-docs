@@ -1,11 +1,11 @@
 ---
 title: "Ecommerce events"
-description: "Track products, carts, checkouts, and orders with Bily's typed ecommerce payloads."
+description: "Track the journey from product discovery to completed order with typed ecommerce payloads."
 ---
 
-Use Bily's title-case event names for product and order activity. The SDK recognizes these events and maps typed products and orders to the Bily event contract.
+Use Bily's title-case event names for product and order activity. The SDK recognizes them and maps typed products and orders to the Bily event contract.
 
-## Product viewed
+## Record a product view
 
 ```typescript
 import { track } from "@bilyai/js";
@@ -29,7 +29,7 @@ track("Product Viewed", {
 
 `quantity` defaults to `1` when omitted.
 
-## Product added
+## Record an add to cart
 
 ```typescript
 track("Product Added", {
@@ -46,7 +46,7 @@ track("Product Added", {
 });
 ```
 
-## Checkout started
+## Record the start of checkout
 
 ```typescript
 track("Checkout Started", {
@@ -63,9 +63,9 @@ track("Checkout Started", {
 });
 ```
 
-## Order completed
+## Record a completed order
 
-Use `order` when the event represents one order. The SDK uses `order.total` when provided or calculates the total from product price and quantity.
+Use `order` when an event represents one order. If you provide `order.total`, the SDK uses it. Otherwise, it calculates the total from product price and quantity.
 
 ```typescript
 track("Order Completed", {
@@ -90,9 +90,9 @@ track("Order Completed", {
 });
 ```
 
-Zero is a valid value for totals, tax, discounts, and shipping fees.
+Totals, tax, discounts, and shipping fees can all be zero.
 
-## Recognized ecommerce names
+## Use an exact event name
 
 - `Product List Viewed`
 - `Products Searched`
@@ -120,12 +120,12 @@ Zero is a valid value for totals, tax, discounts, and shipping fees.
 - `Viewed Promotion`
 - `ViewCategory`
 
-Use the spelling and capitalization shown above. Review [event names](/api-reference/events) for accepted legacy aliases.
+Match the spelling and capitalization exactly. See [event names](/api-reference/events) for accepted legacy aliases.
 
-## Required product fields
+## Include every required product field
 
-Every product needs `id`, `name`, `price`, and `currency`. Add `quantity`, `sku`, `category`, `brand`, and `image` when available.
+Every product needs `id`, `name`, `price`, and `currency`. Include `quantity`, `sku`, `category`, `brand`, and `image` when you have them.
 
 <Card title="Payload reference" icon="brackets-curly" href="/api-reference/payload">
-  Review the complete `BilyProduct` and `BilyOrder` types.
+  See every field in `BilyProduct` and `BilyOrder`.
 </Card>

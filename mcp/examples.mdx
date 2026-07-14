@@ -1,12 +1,12 @@
 ---
-title: "MCP examples"
+title: "Run common MCP workflows"
 sidebarTitle: "Examples"
-description: "Discover Bily operations, run scoped reads, and prepare verifiable actions."
+description: "Use focused MCP requests to discover stores, compare revenue, inspect data, and verify actions."
 ---
 
-Use `search` first, then pass a focused async arrow function to `execute`.
+Start with `search`. Then pass one focused async arrow function to `execute`.
 
-## Discover identity and stores
+## Find your identity and stores
 
 Search input:
 
@@ -25,9 +25,11 @@ async () => {
 }
 ```
 
-The result contains `user` and `organizations[]`, with accessible stores nested under each organization. An ordinary store-scoped fallback key needs no organization input.
+The result contains `user` and `organizations[]`. Accessible stores appear under each organization.
 
-With Bily Connect, supply `organizationId` on the `execute` tool only when the user explicitly selects one accessible organization:
+A standard store-scoped fallback key needs no organization input.
+
+With Bily Connect, add `organizationId` to `execute` only when the user explicitly selects one accessible organization:
 
 ```json
 {
@@ -36,9 +38,9 @@ With Bily Connect, supply `organizationId` on the `execute` tool only when the u
 }
 ```
 
-## Compare revenue periods
+## Explain a revenue change
 
-Search for the operation:
+Search for the right comparison operation:
 
 ```json
 {
@@ -48,7 +50,7 @@ Search for the operation:
 }
 ```
 
-Then execute the returned revenue trend helper with real calendar dates:
+Run the returned revenue-trend helper with real calendar dates:
 
 ```javascript
 async () => {
@@ -66,9 +68,9 @@ async () => {
 }
 ```
 
-Review returned readiness, warning, and sample-size fields before making a business recommendation.
+Review the returned readiness, warning, and sample-size fields before making a business recommendation.
 
-## Inspect available analytics data
+## See which analytics data is available
 
 ```javascript
 async () => {
@@ -81,17 +83,17 @@ async () => {
 }
 ```
 
-The returned data appears in `result`; the message appears in `logs`.
+The returned data appears in `result`. The message appears in `logs`.
 
-## Perform a supported action safely
+## Complete and verify a supported action
 
-For a request such as refreshing connected advertising accounts:
+For a request such as refreshing connected advertising accounts, follow this sequence:
 
-1. Call `search` for the exact intent and store.
-2. Inspect `riskTier`, `approvalPolicy`, preconditions, and verification guidance.
+1. Call `search` with the exact intent and store.
+2. Review `riskTier`, `approvalPolicy`, preconditions, and verification guidance.
 3. Show the proposed function to the user.
-4. Obtain explicit approval in the client.
-5. Run one focused action and verify it with a read.
+4. Get explicit approval in the client.
+5. Run one focused action, then verify it with a read.
 
 ```javascript
 async () => {
@@ -107,4 +109,4 @@ async () => {
 }
 ```
 
-Do not silently add other writes to the same function. If a request expands, present the expanded function for approval again.
+Do not add other writes to the function without showing them. If the request expands, present the complete function for approval again.

@@ -1,33 +1,33 @@
 ---
 title: "Roll out Bily to production"
 sidebarTitle: "Production rollout"
-description: "Release Bily browser, API, and MCP work in stages with explicit checks and rollback criteria."
+description: "Release browser, API, and MCP changes in stages, with clear proof and a ready rollback path."
 ---
 
-Treat a tracking or automation change like any other production data change. Release a small reviewed contract, prove it with real flows, and expand only when the observed result matches the event plan.
+Release a small, reviewed contract. Prove it with real flows. Expand only when the result matches your event plan.
 
-## Before the first release
+## Make the release ready
 
-Confirm that:
+Before you begin, confirm:
 
 - one owner approves the event names and business meaning;
 - one browser installation path owns loading;
-- the exact production script URL comes from the intended Bily store;
+- the exact production tracking URL comes from the intended Bily store;
 - page-view ownership is documented for direct loads and SPA routes;
 - customer fields have consent and privacy approval;
 - API and MCP credentials are created for the intended workload and scope;
 - every write has a verification read and rollback decision.
 
-## Use staged release gates
+## Move through four release gates
 
-### Gate 1: Local or development behavior
+### Gate 1: Prove the code locally
 
 - The project builds and type-checks.
 - Bily imports remain safe during server rendering.
 - The application sends no success event on a failed operation.
 - Event payloads contain only reviewed fields.
 
-### Gate 2: Staging evidence
+### Gate 2: Prove real flows in staging
 
 - One Bily script loads with the exact URL.
 - One initial page view appears.
@@ -36,7 +36,7 @@ Confirm that:
 - Login, logout, consent-denied, and storage-restricted paths behave as expected.
 - Read-only API and MCP discovery calls use the intended organization and store.
 
-### Gate 3: Limited production exposure
+### Gate 3: Start with limited production exposure
 
 - Release to the smallest practical traffic or operator group.
 - Run a short, named verification window.
@@ -44,25 +44,25 @@ Confirm that:
 - Inspect at least one real payload for every new or changed event.
 - Exercise one safe read for each new API or MCP workload.
 
-### Gate 4: Full production
+### Gate 4: Expand to full production
 
 - Expand only after the limited window passes.
 - Remove temporary SDK diagnostics.
 - Record the release time, owner, event changes, credential changes, and verification evidence.
 - Keep the rollback path available until the next stable review window.
 
-## Roll out event changes safely
+## Evolve events without breaking the contract
 
-Prefer additive changes:
+Make additive changes when possible:
 
 - add a new property before removing an old one;
 - keep property types stable;
 - add a new event when the business meaning changes;
 - avoid renaming events and properties in place without a migration window.
 
-If the same logical outcome can be emitted by two systems during a migration, provide one stable `event_id` and test the observed result. An event ID does not itself guarantee exactly-once ingestion.
+If two systems can emit the same logical outcome during a migration, give both one stable `event_id` and test the result. An event ID does not guarantee exactly-once ingestion.
 
-## Roll out API workloads safely
+## Introduce API workloads one step at a time
 
 1. Start with `GET /context` and select an exact nested store URL.
 2. Verify one read-only store endpoint.
@@ -71,9 +71,9 @@ If the same logical outcome can be emitted by two systems during a migration, pr
 5. Before a write, read the current state and record the intended change.
 6. After a write, read the state again before reporting success.
 
-Do not automatically repeat a create, clone, update, toggle, delete, sync, or mutation request when the first result is uncertain.
+When the first result is uncertain, do not automatically repeat a create, clone, update, toggle, delete, sync, or mutation request.
 
-## Roll out MCP workflows safely
+## Keep MCP actions visible and verifiable
 
 1. Keep approval mode set to prompt.
 2. Use `search` immediately before an unfamiliar operation.
@@ -82,11 +82,11 @@ Do not automatically repeat a create, clone, update, toggle, delete, sync, or mu
 5. Introduce one approved action at a time.
 6. Verify every action with the catalog's recommended read.
 
-Planning metadata is advisory, and one `execute` call can contain several helper calls. The client review must cover the complete function.
+Planning metadata is advisory. One `execute` call can contain several helper calls, so the client review must cover the complete function.
 
-## Define rollback criteria
+## Know when to roll back
 
-Roll back or disable the new path when:
+Roll back or disable the new path if:
 
 - the script fails to become ready;
 - the initial page view duplicates;
@@ -95,11 +95,11 @@ Roll back or disable the new path when:
 - an API job crosses the intended organization or store boundary;
 - an MCP action differs from the reviewed function or verification result.
 
-Stop additional writes when verification disagrees with the requested state.
+If verification disagrees with the requested state, stop additional writes.
 
-## Post-release review
+## Confirm the result after release
 
-Within the first stable review window:
+In the first stable review window:
 
 - compare expected product outcomes with observed Bily events;
 - inspect samples across signed-out, signed-in, and consent states;

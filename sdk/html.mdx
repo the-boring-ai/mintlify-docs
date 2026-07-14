@@ -1,13 +1,13 @@
 ---
 title: "HTML"
-description: "Install the exact Bily browser script on a plain HTML website."
+description: "Add Bily to a plain HTML site with one exact browser script."
 ---
 
-Use this installation only when the website does not bundle a JavaScript application. The browser script records a page view each time the browser loads a document.
+Add Bily to a plain HTML site with one script. Each time the browser loads a document, Bily records its page view automatically.
 
-## Add the script once
+## Add Bily once
 
-Select the intended store, then open **Bily > Settings > Apps > More settings > Install tracking** and choose **HTML**. Copy the exact raw script into the global `<head>` for your site.
+Select your store. Then open **Bily > Settings > Apps > More settings > Install tracking**, choose **HTML**, and copy the provided script into your site's global `<head>`.
 
 ```html index.html
 <!doctype html>
@@ -28,22 +28,22 @@ Select the intended store, then open **Bily > Settings > Apps > More settings > 
 ```
 
 <Warning>
-  Copy the exact `src` value from Bily. Do not shorten it to an origin, append a new path, remove query parameters, or decode encoded characters.
+  Use the exact `src` value from Bily. Do not shorten it, add a path, remove query parameters, or decode encoded characters.
 </Warning>
 
-## Confirm each document includes it once
+## Load it once per document
 
-Templated sites should place the script in the shared layout. Do not paste another copy into individual pages.
+For a templated site, place the script in the shared layout. Do not add another copy to individual pages.
 
-Each full document load records its initial `PageView` automatically. Do not add another manual page-view call.
+The script records the initial `PageView` for every full document load. Do not send that page view manually.
 
-## Applications that change routes in the browser
+## Switch when your site becomes an app
 
-Plain HTML installation does not provide the `@bilyai/js` application API. If the site becomes a single-page application, remove the raw script installation and follow the [JavaScript](/sdk/javascript), [React](/sdk/react), or [Next.js](/sdk/nextjs) guide instead.
+This HTML installation does not include the `@bilyai/js` application API. If your site becomes a single-page application, remove the raw script and follow the [JavaScript](/sdk/javascript), [React](/sdk/react), or [Next.js](/sdk/nextjs) guide.
 
-## Content security policy
+## Keep your content security policy
 
-If your policy requires a script nonce, render the nonce that your server created on this script element. Keep the `src` unchanged.
+If your policy requires a script nonce, add the server-generated nonce to the script element. Keep the `src` unchanged.
 
 ```html
 <script
@@ -54,5 +54,5 @@ If your policy requires a script nonce, render the nonce that your server create
 ```
 
 <Card title="Verify the installation" icon="circle-check" href="/guides/verification">
-  Confirm one initial page view and one script request per document.
+  Confirm one initial page view and one script request for each document.
 </Card>

@@ -1,12 +1,12 @@
 ---
 title: "Identity and attribution"
 sidebarTitle: "Identity and attribution"
-description: "Use Bily browser IDs, authenticated user context, and acquisition fields without overstating identity or attribution behavior."
+description: "Keep browser identity, customer context, and attribution in their proper roles."
 ---
 
-Bily accepts browser, customer, and acquisition context, but each value has a different role. Keep those roles explicit in your event plan.
+Bily accepts browser, customer, and acquisition context. Each value serves a different purpose. Define that purpose in your event plan.
 
-## Browser identity
+## Identify the browser context
 
 `getBilyTrackingId()` returns the Bily identifier for the current browser context.
 
@@ -16,7 +16,7 @@ import { getBilyTrackingId } from "@bilyai/js";
 const trackingId = getBilyTrackingId();
 ```
 
-The SDK keeps this value stable in browser storage when storage is available. If storage is blocked, it can keep an in-memory value stable for the page session. During server rendering, the method returns `null`.
+The SDK keeps this value stable in browser storage when available. If storage is blocked, it can keep an in-memory value stable for the page session. During server rendering, the method returns `null`.
 
 The browser tracking ID:
 
@@ -25,11 +25,11 @@ The browser tracking ID:
 - does not authorize a request;
 - can change when browser storage is cleared or unavailable.
 
-Use your verified server session for authorization.
+Authorize protected work with your verified server session.
 
-## Authenticated customer context
+## Add authenticated customer context
 
-Attach your stable account identifier with `client.userId` on events that need it.
+Attach your stable account identifier as `client.userId` only to events that need it.
 
 ```typescript
 track("subscription_updated", {
@@ -41,24 +41,24 @@ track("subscription_updated", {
 });
 ```
 
-The public JavaScript SDK does not expose `identify()`, `alias()`, or `reset()` methods. Do not describe `client.userId` as an identity-merge command. It is approved customer context on the event payload.
+The public JavaScript SDK does not expose `identify()`, `alias()`, or `reset()`. `client.userId` is approved customer context on an event—not an identity-merge command.
 
-If the same person uses more than one browser or device, use the same stable internal user ID when your consent and data policy allow it. Do not use email as authorization or assume matching contact fields merge records.
+If the same person uses more than one browser or device, use the same stable internal user ID when your consent and data policy allow it. Never use email as authorization or assume that matching contact fields merge records.
 
-## Signed-out and signed-in events
+## Handle sign-in transitions explicitly
 
-Plan the transition explicitly:
+Use this sequence:
 
 1. Track signed-out behavior without authenticated customer fields.
 2. After your application verifies the login, include the stable internal user ID on later events that need it.
 3. Stop attaching the previous account's context immediately after logout.
 4. Test shared-device login and logout flows.
 
-The browser tracking ID may remain stable across that transition. It still represents the browser context, not the authenticated account.
+The browser tracking ID may stay the same through this transition. It still represents the browser context—not the authenticated account.
 
-## Page and acquisition inputs
+## Preserve page and acquisition inputs
 
-The SDK accepts fields that preserve where an event occurred and where the browser came from:
+These fields preserve where an event occurred and where the browser came from:
 
 | Field | Use |
 | --- | --- |
@@ -77,11 +77,11 @@ track("PageView", {
 });
 ```
 
-Do not place credentials, session values, or unreviewed query parameters in these fields.
+Never place credentials, session values, or unreviewed query parameters in these fields.
 
-## Attribution boundaries
+## Rely on documented attribution
 
-Bily's public API and MCP expose normalized analytics and customer-journey reads where available. Use the fields returned by those operations as the reporting contract.
+Bily's public API and MCP expose normalized analytics and customer-journey reads where available. Treat the returned fields as the reporting contract.
 
 The JavaScript SDK contract does not define:
 
@@ -90,11 +90,11 @@ The JavaScript SDK contract does not define:
 - anonymous-to-known identity merging;
 - exactly-once delivery from an `event_id`.
 
-If one of these behaviors is necessary for a business decision, document the requirement and verify the relevant Bily analytics output before relying on it in production.
+If a business decision needs one of these behaviors, document the requirement and verify the relevant Bily analytics output before you rely on it in production.
 
-## Event IDs and correlation
+## Correlate one logical outcome
 
-The SDK generates `event_id` when it is absent. Provide your own stable value when the same logical outcome can be observed by more than one system.
+The SDK generates `event_id` when it is missing. Provide a stable value when more than one system can observe the same logical outcome.
 
 ```typescript
 track("billing_checkout_completed", {
@@ -103,9 +103,9 @@ track("billing_checkout_completed", {
 });
 ```
 
-Keep one event ID for one logical outcome. An event ID supports correlation; it is not an ingestion receipt.
+Use one event ID for one logical outcome. It supports correlation, but it is not an ingestion receipt.
 
-## Identity review checklist
+## Confirm the identity model
 
 - Browser IDs and authenticated user IDs have separate names and purposes.
 - Protected actions always use your verified session or server credential.

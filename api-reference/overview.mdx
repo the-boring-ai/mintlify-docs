@@ -1,28 +1,28 @@
 ---
 title: "SDK overview"
-description: "Review the public methods and TypeScript types exported by @bilyai/js."
+description: "Find every public method and TypeScript type exported by @bilyai/js."
 ---
 
-`@bilyai/js` is the official Bily browser SDK. It provides ESM, CommonJS, and TypeScript exports with no runtime dependencies.
+`@bilyai/js` gives you one small browser SDK for loading Bily and sending events. It supports ESM, CommonJS, and TypeScript with no runtime dependencies.
 
-## Install
+## Install Bily
 
 ```bash
 npm install @bilyai/js
 ```
 
-The package supports Node.js 16 or newer for build tooling. Every public call is safe during server rendering, but browser tracking starts only in a browser document.
+Use Node.js 16 or newer for build tooling. You can call every public method during server rendering; tracking begins only when the code runs in a browser document.
 
-## Methods
+## Choose a method
 
 | Export | Return type | Purpose |
 | --- | --- | --- |
-| [`init(options)`](/api-reference/init) | `void` | Load Bily from an exact script URL |
+| [`init(options)`](/api-reference/init) | `void` | Load Bily from an exact tracking URL |
 | [`track(event, payload?)`](/api-reference/track) | `void` | Queue or send an event |
 | [`ready()`](/api-reference/ready) | `Promise<void>` | Verify that Bily finished loading |
 | [`getBilyTrackingId()`](/api-reference/get-bily-tracking-id) | `string \| null` | Read or create the Bily browser identifier |
 
-## Type exports
+## Use exported types
 
 ```typescript
 import type {
@@ -38,9 +38,9 @@ import type {
 } from "@bilyai/js";
 ```
 
-See [event names](/api-reference/events) and the [payload types](/api-reference/payload) for their complete shapes.
+See [event names](/api-reference/events) and [payload types](/api-reference/payload) for the complete definitions.
 
-## Basic lifecycle
+## Start now, verify when needed
 
 ```typescript analytics.ts
 import { init, ready, track } from "@bilyai/js";
@@ -58,8 +58,8 @@ try {
 }
 ```
 
-`track()` can run before `ready()` resolves. The SDK keeps early calls in a bounded queue and delivers them in order after loading.
+You can call `track()` before `ready()` resolves. The SDK keeps early calls in a bounded queue, then delivers them in order after Bily loads.
 
 <Warning>
-  Do not add a raw script tag when an application uses the SDK. `init()` manages the browser script for you.
+  Do not add a raw script tag alongside the SDK. `init()` loads the browser script for you.
 </Warning>
