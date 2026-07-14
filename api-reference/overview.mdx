@@ -61,5 +61,5 @@ try {
 You can call `track()` before `ready()` resolves. The SDK keeps early calls in a bounded queue, then delivers them in order after Bily loads.
 
 <Warning>
-  Do not add a raw script tag alongside the SDK. `init()` loads the browser script for you.
+  Use one Bily loader. Let `init()` create it unless your framework guide reserves one script element for the SDK to reuse. Do not add another unmanaged tag.
 </Warning>

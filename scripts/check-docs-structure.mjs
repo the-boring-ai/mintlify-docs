@@ -8,12 +8,16 @@ const config = JSON.parse(await readFile(resolve(root, "docs.json"), "utf8"));
 if (config.theme !== "mint") {
   throw new Error("The public docs must keep the original Mint layout.");
 }
-const expectedColors = ["primary", "dark"];
+const expectedColors = {
+  primary: "#000000",
+  light: "#FFFFFF",
+  dark: "#000000",
+};
 if (
-  Object.keys(config.colors ?? {}).length !== expectedColors.length ||
-  expectedColors.some((key) => config.colors?.[key] !== "#000000")
+  Object.keys(config.colors ?? {}).length !== Object.keys(expectedColors).length ||
+  Object.entries(expectedColors).some(([key, color]) => config.colors?.[key] !== color)
 ) {
-  throw new Error("The public docs must use black as the only custom color.");
+  throw new Error("The public docs must keep the neutral black-and-white palette.");
 }
 if (config.api?.playground?.display !== "interactive") {
   throw new Error("The API reference must keep the interactive playground enabled.");

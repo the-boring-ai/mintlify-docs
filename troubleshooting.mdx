@@ -29,7 +29,7 @@ Start with the [verification checklist](/guides/verification). If you need lifec
   <Accordion title="Remove a duplicate initial page view">
     Remove any `track("PageView")` call from the initial mount. The browser script records the first event automatically.
 
-    Confirm that the page does not use both a raw script tag and `@bilyai/js`. The exact script should appear only once in the document.
+    Confirm that the exact tracking script appears only once in the document. Let `init()` create it unless your framework guide reserves one element for the SDK to reuse.
   </Accordion>
 
   <Accordion title="Track missing SPA route changes">

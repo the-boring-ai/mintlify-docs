@@ -42,7 +42,7 @@ For ecommerce activity, start with Bily's [recognized event names](/guides/ecomm
 | React single-page application | One root-level React integration |
 | Next.js App Router, Pages Router, or both | One shared client component mounted once in each active route tree |
 
-Choose either the raw script or the npm SDK for each website surface. Using both installs Bily twice and can duplicate the initial page view.
+Use one Bily loader per website surface. In most npm applications, let the SDK create it. If a framework guide reserves one script element for the SDK to reuse, keep that element and do not add another unmanaged tag.
 
 ## Make one integration own page views
 
