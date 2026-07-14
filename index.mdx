@@ -88,7 +88,7 @@ All three share the same Bily data and activation layer. You can evolve Bily App
 </CardGroup>
 
 <Warning>
-  Choose either the raw script or `@bilyai/js` for each website surface. Using both loads Bily twice and can duplicate the initial page view.
+  Use one Bily loader per website surface. Let `@bilyai/js` load it unless the framework guide reserves one script element for the SDK to reuse. A second unmanaged tag can duplicate the initial page view.
 </Warning>
 
 ## Let the SDK handle the details

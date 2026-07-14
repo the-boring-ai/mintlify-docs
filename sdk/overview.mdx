@@ -62,7 +62,7 @@ The Bily JavaScript SDK works across browser applications because it owns one sm
 Every framework follows the same rules:
 
 1. Copy the complete tracking URL from **Bily > Settings > Apps > More settings > Install tracking**.
-2. Install either the raw script or `@bilyai/js` on a website surface, never both.
+2. Let `@bilyai/js` own the loader unless a framework guide reserves one script element for the SDK to reuse. Never add a second unmanaged tag.
 3. Let the browser script record the initial `PageView`.
 4. Send one explicit `PageView` after each later committed client-side route.
 5. Ignore repeated notifications when `window.location.href` has not changed.

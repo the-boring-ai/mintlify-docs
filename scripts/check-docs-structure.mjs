@@ -8,7 +8,7 @@ const config = JSON.parse(await readFile(resolve(root, "docs.json"), "utf8"));
 if (config.theme !== "mint") {
   throw new Error("The public docs must keep the original Mint layout.");
 }
-const expectedColors = ["primary", "light", "dark"];
+const expectedColors = ["primary", "dark"];
 if (
   Object.keys(config.colors ?? {}).length !== expectedColors.length ||
   expectedColors.some((key) => config.colors?.[key] !== "#000000")
