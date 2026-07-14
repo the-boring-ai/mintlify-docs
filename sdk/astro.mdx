@@ -3,7 +3,7 @@ title: "Astro"
 description: "Add Bily through one Astro layout and support both document loads and client-side transitions."
 ---
 
-Place one processed script in the shared Astro layout. Full document loads record their initial page automatically. If the site uses Astro client routing, the same script tracks later `astro:page-load` events.
+Place one processed script in the shared Astro layout. Full document loads record their initial page automatically. If the site uses Astro client routing, preserve the injected browser script during document swaps and track later `astro:page-load` events.
 
 Do not add a raw Bily script tag alongside the SDK.
 
@@ -51,8 +51,23 @@ const { title } = Astro.props;
         throw new Error("PUBLIC_BILY_SCRIPT_URL is required");
       }
 
-      init({ scriptUrl: BILY_SCRIPT_URL });
       let previousUrl = window.location.href;
+      init({ scriptUrl: BILY_SCRIPT_URL });
+
+      const trackingScript = document.querySelector("#bily-tracking-script");
+      trackingScript?.setAttribute(
+        "data-astro-transition-persist",
+        "bily-tracking-script",
+      );
+
+      document.addEventListener("astro:before-swap", (event) => {
+        const placeholder = event.newDocument.createElement("script");
+        placeholder.setAttribute(
+          "data-astro-transition-persist",
+          "bily-tracking-script",
+        );
+        event.newDocument.head.appendChild(placeholder);
+      });
 
       document.addEventListener("astro:page-load", () => {
         const currentUrl = window.location.href;
@@ -69,12 +84,14 @@ const { title } = Astro.props;
 </html>
 ```
 
-Astro bundles a processed script and runs it once per document. When `ClientRouter` is active, `astro:page-load` fires at the end of each client-side navigation. The URL guard skips its initial call and repeated notifications.
+Astro bundles a processed script and runs it once per document. When `ClientRouter` is active, it swaps the page head during navigation. The persistence marker pairs the SDK-injected script with a placeholder in the incoming head so Astro keeps the active script instead of removing it.
+
+`astro:page-load` then fires at the end of each client-side navigation. The URL guard skips its initial call and repeated notifications, including a route notification that leaves the complete URL unchanged.
 
 Without client routing, every navigation loads a new document. The Bily browser script records that document's page automatically, so the route callback has nothing extra to send.
 
 <Warning>
-  Do not add `is:inline` or `data-astro-rerun` to this module script. Re-running the integration after each transition creates extra listeners and unclear ownership.
+  Keep `data-astro-transition-persist` on the injected browser script and its incoming placeholder. Do not add `is:inline` or `data-astro-rerun` to the integration module. Re-running it after each transition creates extra listeners and unclear ownership.
 </Warning>
 
 ## Track successful actions

@@ -15,11 +15,11 @@ The Bily JavaScript SDK works across browser applications because it owns one sm
 | React Router | One component inside the existing router | `useLocation()` |
 | Next.js | One shared client component | `usePathname()` and `useSearchParams()` |
 | Vue | Browser bootstrap after the router is ready | `router.afterEach()` |
-| Nuxt | One client plugin | `page:finish` |
+| Nuxt | One client plugin | `useRouter().afterEach()` |
 | Svelte | Browser entry module | Your router's committed-navigation callback |
 | SvelteKit | Root layout component | `afterNavigate()` |
 | Angular | One root service | `NavigationEnd` |
-| Astro | Shared layout script | `astro:page-load` when client routing is active |
+| Astro | Shared layout script | Persisted script plus `astro:page-load` |
 | React Router framework mode or Remix | One component in the root route | `useLocation()` |
 
 ## Choose a guide

@@ -1,9 +1,9 @@
 ---
 title: "Nuxt"
-description: "Add Bily through one Nuxt client plugin and track each finished page once."
+description: "Add Bily through one Nuxt client plugin and track each successful route once."
 ---
 
-Use one client-only Nuxt plugin. It starts Bily when the first page finishes, then records each later `page:finish` once.
+Use one client-only Nuxt plugin. It starts Bily once, then observes every later route through Nuxt's Vue Router, including query-only navigation.
 
 Do not add a raw Bily script or another tracking plugin alongside the SDK.
 
@@ -42,7 +42,7 @@ In Nuxt 4, create `app/plugins/bily.client.ts`. In a Nuxt 3 project without the 
 ```typescript app/plugins/bily.client.ts
 import { init, track } from "@bilyai/js";
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
   const scriptUrl = config.public.bilyScriptUrl;
 
@@ -50,17 +50,11 @@ export default defineNuxtPlugin((nuxtApp) => {
     throw new Error("NUXT_PUBLIC_BILY_SCRIPT_URL is required");
   }
 
-  let previousUrl: string | null = null;
+  init({ scriptUrl });
+  let previousUrl = window.location.href;
 
-  nuxtApp.hook("page:finish", () => {
+  useRouter().afterEach(() => {
     const currentUrl = window.location.href;
-
-    if (previousUrl === null) {
-      previousUrl = currentUrl;
-      init({ scriptUrl });
-      return;
-    }
-
     if (currentUrl === previousUrl) return;
     previousUrl = currentUrl;
 
@@ -72,9 +66,9 @@ export default defineNuxtPlugin((nuxtApp) => {
 });
 ```
 
-The `.client` suffix keeps startup in the browser. Waiting for the first `page:finish` lets redirects and page metadata settle before the browser script records the automatic initial page view.
+The `.client` suffix keeps startup in the browser. The browser script records the initial page automatically.
 
-Later `page:finish` calls represent completed Nuxt pages. The URL comparison prevents repeated lifecycle notifications from creating duplicates.
+`useRouter().afterEach()` runs after Nuxt's router commits a navigation. It also observes query-only changes when Nuxt reuses the current page component. Comparing the complete URL prevents repeated lifecycle notifications from creating duplicates.
 
 ## Track successful actions
 
@@ -109,7 +103,7 @@ Never run the old and new URLs together.
 
 <CardGroup cols={2}>
   <Card title="Verify Nuxt tracking" icon="circle-check" href="/guides/verification">
-    Confirm the first page and every later finished page appear once.
+    Confirm the first page, path changes, and query-only routes appear once.
   </Card>
   <Card title="Move to first-party tracking" icon="route" href="/guides/first-party-tracking">
     Validate, replace, deploy, and verify the customer-subdomain URL.
