@@ -43,9 +43,9 @@ The string overload and `trackingDomain` remain available for compatibility. The
 Choose one installation path for each website surface.
 
 - Plain HTML keeps the exact raw script tag and does not install the package.
-- JavaScript, React, and Next.js install `@bilyai/js` and let `init()` load the script.
+- JavaScript, React, and Next.js install `@bilyai/js` and let `init()` load the script. Follow a framework guide when it reserves one script element for the SDK to reuse.
 
-In SDK-based applications, remove separate script tags, manual injection helpers, and framework script components.
+In SDK-based applications, remove unmanaged script tags, manual injection helpers, and framework script components. Keep only a framework-reserved element that the SDK explicitly reuses.
 
 ## Send one page view per route
 
