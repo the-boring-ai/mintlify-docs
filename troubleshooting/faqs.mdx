@@ -316,7 +316,7 @@ These answers reflect the public Bily SDK, API, and MCP contracts. Open the link
   <Accordion title="Why can’t I see an event even though ready() resolved?">
     `ready()` verifies loading, not ingestion.
 
-    Confirm that the successful product path reached `track()` once. Check that the event name is non-empty, the page uses the intended store URL, consent allows the call, and the observed payload matches the event plan.
+    Confirm that the successful product path reached `track()` once. Check that the event name is non-empty, the page uses the intended tracking URL, consent allows the call, and the observed payload matches the event plan.
   </Accordion>
   <Accordion title="Why do I see duplicate page views?">
     Common causes include installing both the raw script and SDK, sending a manual initial `PageView`, registering several router listeners, or failing to deduplicate the current URL.
