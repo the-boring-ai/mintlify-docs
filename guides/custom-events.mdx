@@ -1,13 +1,13 @@
 ---
 title: "Custom events"
-description: "Track stable application-specific event names and properties with @bilyai/js."
+description: "Track meaningful application outcomes with stable names and safe properties."
 ---
 
-`track()` accepts known Bily event names and your own non-empty string names. Use custom events for meaningful application outcomes that are not covered by the ecommerce catalog.
+Use custom events for meaningful application outcomes outside the ecommerce catalog. `track()` accepts known Bily event names and your own non-empty string names.
 
-## Name events consistently
+## Give every outcome one stable name
 
-Use stable snake_case names for application events:
+Use snake_case for application events:
 
 - `user_signed_in`
 - `workspace_created`
@@ -18,9 +18,9 @@ Use stable snake_case names for application events:
 - `billing_checkout_completed`
 - `product_error_encountered`
 
-Avoid names that include IDs, timestamps, or translated labels. Put changing values in the payload.
+Keep IDs, timestamps, and translated labels out of event names. Put changing values in the payload.
 
-## Track successful outcomes
+## Track the result, not the attempt
 
 ```typescript workspace.ts
 import { track } from "@bilyai/js";
@@ -34,7 +34,7 @@ track("workspace_created", {
 });
 ```
 
-Fire completion events only after the operation succeeds. Use a separate failure event if the failure is useful and safe to analyze.
+Send a completion event only after the operation succeeds. If a failure is useful and safe to analyze, give it a separate event.
 
 ```typescript campaign.ts
 import { track } from "@bilyai/js";
@@ -51,11 +51,11 @@ try {
 }
 ```
 
-Do not include raw error objects. They can contain request data, stack traces, or customer content.
+Never include raw error objects. They can expose request data, stack traces, or customer content.
 
-## Add your own event ID
+## Correlate one logical outcome
 
-The SDK creates `event_id` and `ts` values when you omit them. Provide your own stable event ID when the same business outcome can be reported by more than one system.
+The SDK creates `event_id` and `ts` when you omit them. Provide a stable event ID when more than one system can report the same business outcome.
 
 ```typescript
 track("billing_checkout_completed", {
@@ -65,11 +65,11 @@ track("billing_checkout_completed", {
 });
 ```
 
-Keep one `event_id` for one logical outcome. Do not reuse it for later outcomes.
+Use one `event_id` for one logical outcome. Never reuse it for a later outcome.
 
-## Calls before loading
+## Track while Bily loads
 
-You can call `track()` immediately after `init()`. The SDK retains calls while Bily loads and delivers them in order when ready.
+Call `track()` immediately after `init()` if needed. The SDK keeps calls while Bily loads and delivers them in order when ready.
 
 <CardGroup cols={2}>
   <Card title="track() reference" icon="function" href="/api-reference/track" />

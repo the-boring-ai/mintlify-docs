@@ -1,13 +1,13 @@
 ---
-title: "Data safety"
-description: "Protect customer data and keep secrets out of browser tracking payloads."
+title: "Keep browser event data safe"
+description: "Collect only the customer data you need and keep secrets out of every browser tracking payload."
 ---
 
 Browser events are visible to the person using the browser and to software running on the page. Treat every event field as public client data.
 
-## Never send secrets
+## Keep secrets out of events
 
-Do not send:
+Never send:
 
 - Passwords or password-reset values
 - Session cookies or authorization headers
@@ -17,11 +17,13 @@ Do not send:
 - Full keystrokes or unredacted form submissions
 - Raw error objects, request objects, or stack traces
 
-The Bily browser script URL is public installation data. It does not need a private token. Preserve the exact URL, but never add a private credential to it.
+The Bily tracking URL is public installation data. It does not need a private token.
 
-## Collect the minimum customer data
+Preserve the exact URL. Never add a private credential to it.
 
-Send a `client` field only when the event needs it and the visitor's consent state permits it.
+## Send only the customer data you need
+
+Add a `client` field only when the event needs it and the visitor's consent state permits it.
 
 ```typescript
 track("user_signed_in", {
@@ -32,11 +34,11 @@ track("user_signed_in", {
 });
 ```
 
-Prefer your stable internal user ID over extra contact fields. Add email, phone, address, date of birth, or gender only when you have a documented purpose and permission.
+Prefer a stable internal user ID over extra contact fields. Add email, phone, address, date of birth, or gender only when you have a documented purpose and permission.
 
-## Redact errors before tracking
+## Reduce errors to safe codes
 
-Map internal failures to a small safe vocabulary.
+Map internal failures to a small, reviewed vocabulary.
 
 ```typescript
 type SafeErrorCode =
@@ -51,25 +53,29 @@ track("product_error_encountered", {
 });
 ```
 
-Do not attach `error`, `error.message`, request bodies, or user-generated content.
+Do not attach `error`, `error.message`, request bodies, or user-generated content to the event.
 
-## Respect consent and deletion choices
+## Honor consent and deletion choices
 
-- Start optional customer-data tracking only after the required consent state is available.
+- Start optional customer-data tracking only after you know the required consent state.
 - Stop sending optional fields when consent changes.
 - Keep your event catalog and privacy notice consistent.
-- Apply your retention and deletion process to the identifiers you send.
+- Apply your retention and deletion process to every identifier you send.
 - Review new custom properties before releasing them.
 
-## Keep browser identity in scope
+## Use browser identity only as context
 
-`getBilyTrackingId()` returns a browser identifier, not proof of account identity. Never use it for authorization. Use a verified session on your server for protected actions.
+`getBilyTrackingId()` returns a browser identifier. It does not prove account identity.
 
-## Content security policy
+Never use it for authorization. Use a verified server session for protected actions.
 
-`init({ nonce })` can copy your server-generated nonce onto the script element. A nonce is a browser policy control, not an event property. Do not send it through `track()`.
+## Apply your content security policy
 
-## Release review
+`init({ nonce })` can copy your server-generated nonce to the script element. A nonce is a browser policy control, not an event property.
+
+Never send it through `track()`.
+
+## Review every tracking release
 
 Before shipping a tracking change:
 
@@ -81,9 +87,9 @@ Before shipping a tracking change:
 
 <CardGroup cols={2}>
   <Card title="Client data guide" icon="user-shield" href="/guides/client-data">
-    Review the supported customer fields and identity boundaries.
+    Choose supported customer fields and respect identity boundaries.
   </Card>
   <Card title="Privacy governance" icon="shield-check" href="/guides/privacy-governance">
-    Add ownership, classification, credential, and production controls.
+    Put ownership, classification, credential, and production controls in place.
   </Card>
 </CardGroup>

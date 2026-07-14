@@ -1,19 +1,19 @@
 ---
 title: "ready()"
-description: "Wait for Bily to finish loading when you need an explicit installation check."
+description: "Confirm that Bily finished loading when your application needs an explicit check."
 ---
 
-`ready()` is a load verification hook. Normal event tracking does not need to wait for it because `track()` queues early calls.
+Use `ready()` when you need to confirm that Bily loaded. Normal event tracking does not wait for it because `track()` queues early calls.
 
-## Signature
+## Check readiness
 
 ```typescript
 function ready(): Promise<void>;
 ```
 
-## Verify loading
+## Verify the installation
 
-Call `init()` before awaiting `ready()` in the browser.
+In the browser, call `init()` before awaiting `ready()`.
 
 ```typescript
 import { init, ready } from "@bilyai/js";
@@ -31,11 +31,11 @@ try {
 }
 ```
 
-## Resolution
+## Know when it resolves
 
-The promise resolves when Bily can accept the queued events. It also resolves immediately during server rendering because there is no browser script to load.
+The promise resolves when Bily can accept queued events. During server rendering, it resolves immediately because there is no browser script to load.
 
-## Rejection
+## Handle a rejection
 
 The promise rejects when:
 
@@ -43,11 +43,11 @@ The promise rejects when:
 - Bily does not become ready before `loadTimeoutMs`.
 - The script loads but does not expose a usable Bily browser API.
 
-The default timeout is 15 seconds. Configure a value from 1 to 60 seconds through `init()`.
+The default timeout is 15 seconds. Set a value from 1 to 60 seconds through `init()`.
 
-## Retry after a load failure
+## Retry one failed load
 
-Call `init()` again after a terminal load failure, then call `ready()` again for the new attempt.
+After a terminal load failure, call `init()` again. Then call `ready()` for the new attempt.
 
 ```typescript
 async function loadBily() {
@@ -66,8 +66,8 @@ async function loadBily() {
 }
 ```
 
-For repeated production failures, diagnose the URL, network policy, and duplicate installation instead of retrying indefinitely.
+If production keeps failing, check the URL, network policy, and duplicate installation. Do not retry indefinitely.
 
 <Card title="Troubleshooting" icon="screwdriver-wrench" href="/troubleshooting">
-  Resolve timeouts, script errors, and configuration conflicts.
+  Resolve timeouts, script errors, and conflicting configuration.
 </Card>

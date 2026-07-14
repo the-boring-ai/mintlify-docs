@@ -1,12 +1,12 @@
 ---
-title: "API authentication"
+title: "Authenticate API requests"
 sidebarTitle: "Authentication"
-description: "Create and use a Bily API key without exposing it in browser code, logs, or repositories."
+description: "Give trusted services scoped Bily access while keeping API keys out of public code, logs, and repositories."
 ---
 
-Use a Bily API key for server-to-server requests. Never embed an API key in browser JavaScript, mobile application code, a public repository, or a client-visible environment variable.
+Use a Bily API key to give trusted server workloads scoped access. Keep the key out of browser JavaScript, mobile application code, public repositories, and client-visible environment variables.
 
-## Create a key
+## Create a scoped key
 
 1. Sign in to [Bily](https://app.bily.ai).
 2. Select the store this workload may access.
@@ -15,19 +15,23 @@ Use a Bily API key for server-to-server requests. Never embed an API key in brow
 5. Under **Access key fallback**, enter a descriptive name and expiration.
 6. Create the key and copy its full value immediately.
 
-Bily shows the full key once. Store it in your deployment platform's secret manager. The key carries the selected store and its organization as its default API scope.
+Bily shows the full key once. Save it in your deployment platform's secret manager.
+
+The key uses the selected store and its organization as its default API scope.
 
 <Warning>
-  Replace an older settings-generated fallback key that was created without store scope. Select the intended store, create a new key, update the workload, and revoke the older key after the replacement passes a read-only `GET /context` check.
+  Replace any older settings-generated fallback key that lacks store scope. Select the intended store, create a new key, and update the workload.
+
+  Revoke the older key after the replacement passes a read-only `GET /context` check.
 </Warning>
 
 <Tip>
-  Use one key per environment and workload. Names such as `reporting-production` and `catalog-sync-staging` make rotation and audit review easier.
+  Create one key for each environment and workload. Names such as `reporting-production` and `catalog-sync-staging` simplify rotation and audit review.
 </Tip>
 
-## Send the key
+## Add the key to requests
 
-The recommended header is `x-api-key`:
+Send the key in the recommended `x-api-key` header:
 
 ```bash
 curl --request GET \
@@ -35,28 +39,32 @@ curl --request GET \
   --header "x-api-key: $BILY_API_KEY"
 ```
 
-Bearer authentication is also accepted:
+You can also use Bearer authentication:
 
 ```http
 Authorization: Bearer <BILY_API_KEY>
 ```
 
-Send one authentication method per request.
+Choose one authentication method for each request.
 
-## Protect and rotate keys
+## Keep keys protected
 
-- Keep keys only in server-side secret storage.
+- Keep each key in server-side secret storage.
 - Do not log request headers that may contain a key.
-- Set an expiration that matches the workload's lifecycle.
+- Match the expiration to the workload's lifecycle.
 - Create a replacement before revoking a production key.
 - Revoke a key immediately if it may have been exposed.
 
-## Permission failures
+## Fix authentication and permission errors
 
-Keys created in Bily include the permissions available through the stable customer API and the selected store and organization scope. Requests for another store or organization are rejected. An action can also return `403` when the caller lacks its required permission.
+Each key includes the permissions available through the stable customer API. It also carries the selected store and organization scope.
 
-Treat `401` as a missing, expired, revoked, or invalid key. Treat `403` as an authenticated request that is not allowed to access the requested operation or scope. If the error says the key must be reissued with a store scope, regenerate it after selecting the intended store.
+Bily rejects requests for another store or organization. An action can also return `403` when the caller lacks its required permission.
+
+A `401` means the key is missing, expired, revoked, or invalid. Replace or rotate it.
+
+A `403` means the request is authenticated but cannot access the requested operation or scope. If the error requires a store-scoped key, select the intended store and create a replacement.
 
 <Card title="Make your first request" icon="arrow-right" href="/rest-api/quickstart">
-  Discover the authenticated user, organization, and store in one request.
+  Confirm the authenticated user, organization, and store in one request.
 </Card>

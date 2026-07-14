@@ -1,10 +1,12 @@
 ---
-title: "MCP client configuration"
+title: "Configure your MCP client"
 sidebarTitle: "Client configuration"
-description: "Configure a Streamable HTTP MCP client for Bily Connect or a store-scoped access key."
+description: "Connect a Streamable HTTP MCP client through Bily sign-in or a store-scoped fallback key."
 ---
 
-## Connection values
+Use these values to connect a compatible client. Prefer Bily Connect so you do not place a long-lived key in client configuration.
+
+## Copy the connection values
 
 | Setting | Value |
 | --- | --- |
@@ -16,9 +18,9 @@ description: "Configure a Streamable HTTP MCP client for Bily Connect or a store
 | Recommended approval mode | Prompt before tool calls |
 | Recommended client timeout | 120 seconds |
 
-## Codex
+## Connect Codex
 
-Use the no-key configuration shown in Bily under **Settings > MCP**:
+Open **Settings > MCP** in Bily and use the no-key configuration:
 
 ```toml
 [mcp_servers.bily]
@@ -27,30 +29,32 @@ default_tools_approval_mode = "prompt"
 tool_timeout_sec = 120
 ```
 
-Codex discovers Bily Connect from the endpoint and opens the sign-in flow when needed.
+Codex discovers Bily Connect from the endpoint. It opens the sign-in flow when needed.
 
-## Other OAuth-capable clients
+## Connect another OAuth-capable client
 
-Configure a remote Streamable HTTP MCP server with this URL:
+Set up a remote Streamable HTTP MCP server with this URL:
 
 ```text
 https://api-dispatcher.bily.ai/mcp
 ```
 
-The client must support dynamic public-client registration, Authorization Code with PKCE using `S256`, the `mcp_access` scope, and refresh tokens. Bily publishes discovery metadata at:
+The client must support dynamic public-client registration. It must also support Authorization Code with PKCE using `S256`, the `mcp_access` scope, and refresh tokens.
+
+Bily publishes discovery metadata at:
 
 - `https://api-dispatcher.bily.ai/.well-known/oauth-authorization-server`
 - `https://api-dispatcher.bily.ai/.well-known/openid-configuration`
 - `https://api-dispatcher.bily.ai/.well-known/oauth-protected-resource`
 - `https://api-dispatcher.bily.ai/.well-known/oauth-protected-resource/mcp`
 
-Compatible clients should discover these values from the unauthenticated challenge instead of hard-coding the authorization and token URLs.
+Compatible clients should read these values from the unauthenticated challenge. Do not hard-code the authorization or token URLs.
 
-## Access key clients
+## Use a fallback key when sign-in is unavailable
 
-Use an access key only when the client cannot complete Bily Connect. Create the key in **Settings > MCP** while the intended store is selected, then copy the one-time JSON configuration shown by Bily.
+Use an access key only when the client cannot complete Bily Connect. Select the intended store, then create the key in **Settings > MCP**. Copy the one-time JSON configuration Bily shows you.
 
-A typical client shape is:
+A typical client configuration looks like this:
 
 ```json
 {
@@ -65,9 +69,9 @@ A typical client shape is:
 }
 ```
 
-Store the full key only in the client's secret-aware configuration. Do not commit it, place it in browser code, or include it in prompts.
+Keep the full key only in the client's secret-aware configuration. Never commit it, add it to browser code, or include it in a prompt.
 
-## What not to configure
+## Avoid common configuration mistakes
 
 - Do not use `https://app.bily.ai/mcp`; it is not the MCP endpoint.
 - Do not send both Bily Connect credentials and an access key.

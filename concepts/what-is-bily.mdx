@@ -1,32 +1,32 @@
 ---
 title: "What is Bily?"
-description: "Understand Bily's programmable customer data and activation layer across browser, server, and AI workflows."
+description: "Connect customer data and activation across your browser, server, and AI workflows."
 ---
 
-Bily is the programmable customer data and activation layer for websites.
+Bily is the programmable customer data and activation layer for your website.
 
-Connect a site once to collect and normalize events, route trusted data, and run governed work across browser, server, and AI surfaces. Bily keeps these surfaces aligned around the same website, organization, and customer data context.
+Connect a site once to collect consistent events, route trusted data, and run governed browser, server, and AI workflows. Every surface stays aligned to the same website, organization, and customer data context.
 
-[Bily Apps](/concepts/bily-apps) is the installable capability layer of Bily. It gives teams a governed way to add reusable capabilities without turning Bily itself into a collection of one-off scripts.
+[Bily Apps](/concepts/bily-apps) adds reusable capabilities through that connection. You can expand what Bily does without managing a new script for every capability.
 
-## The Bily model
+## What one connection gives you
 
 <CardGroup cols={2}>
   <Card title="Connected customer data" icon="database">
-    Collect and normalize website events once so browser, server, and AI workflows share a dependable context.
+    Collect consistent website events once, then share dependable context across browser, server, and AI workflows.
   </Card>
   <Card title="Trusted routing" icon="route">
-    Route data through explicit website, organization, and store boundaries.
+    Keep data within explicit website, organization, and store boundaries.
   </Card>
   <Card title="Governed activation" icon="shield-check">
-    Run supported reads and actions through authenticated developer surfaces with clear scope.
+    Run supported reads and actions through authenticated surfaces with clear scope.
   </Card>
   <Card title="Bily Apps" icon="puzzle-piece">
-    Install and evolve reusable capabilities through the Bily connection a site already maintains.
+    Install and evolve reusable capabilities through the Bily connection you already maintain.
   </Card>
 </CardGroup>
 
-## How the developer surfaces fit
+## Use the right surface for each job
 
 ```mermaid
 flowchart LR
@@ -41,19 +41,19 @@ flowchart LR
   I --> F
 ```
 
-The [JavaScript SDK](/api-reference/overview) is the browser contract. It installs Bily once and sends page, product, checkout, and custom events.
+Use the [JavaScript SDK](/api-reference/overview) in the browser. It installs Bily once and sends page, product, checkout, and custom events.
 
-The [Bily API](/rest-api/overview) is the server contract. It lets your own tools read scoped analytics and store state, and perform supported actions with explicit authentication.
+Use the [Bily API](/rest-api/overview) on the server. Your tools can read scoped analytics and store state, then perform supported actions with explicit authentication.
 
-The [Bily MCP](/mcp/overview) is the AI-client contract. It lets compatible clients discover the current operation catalog and run scoped work with Bily authentication.
+Use [Bily MCP](/mcp/overview) in compatible AI clients. They can discover the current operation catalog and run scoped work with Bily authentication.
 
-All three surfaces connect to the same Bily layer. The API and MCP enforce Bily identity, organization, and store access for authenticated server and AI work.
+All three connect to the same Bily layer. The API and MCP enforce identity, organization, and store access for authenticated server and AI work.
 
-## Designed to evolve
+## Grow without rebuilding
 
-Bily gives your team one stable foundation for customer data, activation, safety, and observability. You can adopt Bily Apps without repeatedly rebuilding your website integration.
+Bily gives your team one stable foundation for customer data, activation, safety, and observability. Add Bily Apps as your needs change, without rebuilding the website integration.
 
-Your team keeps control of:
+You control:
 
 - which sites and stores are connected;
 - which Bily Apps are installed and enabled;
@@ -63,13 +63,13 @@ Your team keeps control of:
 
 <CardGroup cols={2}>
   <Card title="Install the SDK" icon="code" href="/quickstart">
-    Connect a website and send your first event.
+    Connect your website and send your first event.
   </Card>
   <Card title="Explore Bily Apps" icon="puzzle-piece" href="/concepts/bily-apps">
-    Review the installable capability layer built for the Bily connection.
+    See what you can install through your Bily connection.
   </Card>
   <Card title="Call the Bily API" icon="terminal" href="/rest-api/quickstart">
-    Authenticate a server request and discover your stores.
+    Authenticate your server and discover its stores.
   </Card>
   <Card title="Connect an AI client" icon="robot" href="/mcp/quickstart">
     Connect through Bily MCP and discover supported operations.

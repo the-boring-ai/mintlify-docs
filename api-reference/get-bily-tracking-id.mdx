@@ -1,18 +1,18 @@
 ---
 title: "getBilyTrackingId()"
 sidebarTitle: "getBilyTrackingId()"
-description: "Read or create the stable Bily browser identifier."
+description: "Get or create the stable Bily identifier for the current browser."
 ---
 
-`getBilyTrackingId()` returns the identifier Bily uses for the current browser.
+Use `getBilyTrackingId()` to read the identifier Bily uses for the current browser. The SDK creates one when needed.
 
-## Signature
+## Get the identifier
 
 ```typescript
 function getBilyTrackingId(): string | null;
 ```
 
-## Example
+## Correlate it safely
 
 ```typescript
 import { getBilyTrackingId } from "@bilyai/js";
@@ -24,24 +24,28 @@ if (trackingId) {
 }
 ```
 
-## Browser behavior
+## Keep it stable in the browser
 
-The SDK keeps the identifier stable in browser storage when storage is available. If storage is blocked, it keeps an in-memory identifier stable for the page session and can use an existing Bily identifier when available.
+When browser storage is available, the SDK stores a stable identifier there.
 
-You can call this method before or after `init()`.
+If storage is blocked, the SDK keeps an in-memory identifier for the page session. It can also use an existing Bily identifier when one is available.
 
-## Server behavior
+Call this method before or after `init()`.
 
-The method returns `null` during server rendering. Always handle the nullable return type.
+## Handle `null` on the server
+
+During server rendering, the method returns `null`. Always handle the nullable return type.
 
 ```typescript
 const trackingId: string | null = getBilyTrackingId();
 ```
 
-## Security boundary
+## Keep authorization separate
 
-The browser tracking ID is not a password, session token, or authenticated account ID. Never use it to authorize a request. Use your own verified session for authorization and `client.userId` for approved account context.
+The browser tracking ID is not a password, session token, or authenticated account ID. Never use it to authorize a request.
+
+Authorize requests with your own verified session. Use `client.userId` only for approved account context.
 
 <Card title="Client data" icon="user-shield" href="/guides/client-data">
-  Keep browser identity, authenticated users, and consent responsibilities separate.
+  Separate browser identity, authenticated users, and consent responsibilities.
 </Card>

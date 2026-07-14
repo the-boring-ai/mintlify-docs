@@ -1,29 +1,31 @@
 ---
 title: "Migrate to 2.0"
-description: "Prepare an existing @bilyai/js integration for the 2.0 initialization, readiness, payload, and event contract."
+description: "Upgrade an existing @bilyai/js integration to the stable 2.0 contract."
 ---
 
-Version 2.0 modernizes the SDK while retaining compatibility overloads for older initialization code. The current stable release is `2.0.1`.
+Version 2.0 gives you exact-URL initialization, bounded event queuing, explicit readiness, and complete public types. Older initialization code remains compatible.
+
+The current stable release is `2.0.1`.
 
 ```bash
 npm view @bilyai/js version
 ```
 
-Install the current compatible 2.x release:
+Install the current compatible 2.x release.
 
 ```bash
 npm install @bilyai/js@^2.0.1
 ```
 
-## Move to the exact script URL
+## Preserve the exact tracking URL
 
-Earlier integrations commonly passed only a tracking origin:
+Earlier integrations often passed only a tracking origin:
 
 ```typescript
 init("https://tracking.example.com", { verbose: false });
 ```
 
-In 2.0, prefer the exact URL copied from **Bily > Settings > Apps > More settings > Install tracking**:
+In 2.0, copy the exact URL from **Bily > Settings > Apps > More settings > Install tracking**:
 
 ```typescript
 init({
@@ -32,24 +34,24 @@ init({
 });
 ```
 
-Keep every query parameter and encoded character. Do not derive an origin or rebuild the URL.
+Keep every query parameter and encoded character. Do not reduce the URL to an origin or rebuild it in code.
 
-The string overload and `trackingDomain` remain available for compatibility. `verbose` remains available as a deprecated alias for `debug`.
+The string overload and `trackingDomain` remain available for compatibility. The deprecated `verbose` option remains an alias for `debug`.
 
-## Remove duplicate loaders
+## Load Bily one way
 
-Choose one installation path for each website surface:
+Choose one installation path for each website surface.
 
 - Plain HTML keeps the exact raw script tag and does not install the package.
 - JavaScript, React, and Next.js install `@bilyai/js` and let `init()` load the script.
 
-Remove separate script tags, manual script-injection helpers, and framework script components from SDK-based applications.
+In SDK-based applications, remove separate script tags, manual injection helpers, and framework script components.
 
-## Correct page-view tracking
+## Send one page view per route
 
-The installed browser script records the initial `PageView`. Remove any initial manual page-view call.
+The browser script records the initial `PageView` automatically. Remove any manual call for that first view.
 
-For later SPA routes, send the exact event name after navigation commits:
+For every later SPA route, send the exact event name after navigation commits:
 
 ```typescript
 track("PageView", {
@@ -58,13 +60,13 @@ track("PageView", {
 });
 ```
 
-Add a same-URL guard so rerenders do not create new page views.
+Add a same-URL guard so rerenders do not create duplicate page views.
 
-## Use readiness only for verification
+## Let early events queue
 
-`track()` calls made before loading finishes are queued. Application event code does not need to await `ready()`.
+The SDK queues `track()` calls made before loading finishes. Your event code does not need to await `ready()`.
 
-Use `ready()` for installation checks and diagnostics:
+Use `ready()` only for installation checks and diagnostics:
 
 ```typescript
 try {
@@ -74,11 +76,11 @@ try {
 }
 ```
 
-Version 2.0 adds bounded queuing, a configurable load timeout, script load errors, and retry support after a terminal load failure.
+Version 2.0 bounds the queue, lets you configure the load timeout, reports script load errors, and supports retry after a terminal load failure.
 
-## Review payload changes
+## Confirm payload behavior
 
-Version 2.0:
+Version 2.0 now:
 
 - Supports top-level `products` payloads.
 - Defaults an omitted product quantity to `1`.
@@ -88,9 +90,9 @@ Version 2.0:
 - Adds `event_id` and `ts` when you omit them.
 - Accepts custom event strings while retaining known-event autocomplete.
 
-Run representative product, cart, checkout, and order payloads through staging after updating.
+After upgrading, run representative product, cart, checkout, and order payloads through staging.
 
-## Handle nullable tracking IDs
+## Handle a nullable tracking ID
 
 `getBilyTrackingId()` returns `string | null`. Update code that assumed a string:
 
@@ -101,9 +103,9 @@ if (trackingId) {
 }
 ```
 
-`null` is expected during server rendering.
+Expect `null` during server rendering.
 
-## Import public types from the package root
+## Import types from the package root
 
 Version 2.0 exports the complete public payload types:
 
@@ -121,11 +123,11 @@ import type {
 } from "@bilyai/js";
 ```
 
-Do not import internal package files.
+Do not import types from internal package files.
 
-## Move to current event names
+## Adopt current event names
 
-Compatibility aliases continue to work, but new code should use current names:
+Compatibility aliases still work. Use current names for new code:
 
 | Replace | With |
 | --- | --- |
@@ -135,11 +137,11 @@ Compatibility aliases continue to work, but new code should use current names:
 | `Remove from Cart` | `Product Removed From Cart` |
 | `Search` | `Products Searched` |
 
-Review the complete [event name reference](/api-reference/events) for the other normalized aliases.
+See the complete [event name reference](/api-reference/events) for every normalized alias.
 
-## Validate before release
+## Verify the upgrade
 
-1. Confirm the exact script URL remains unchanged in the browser.
+1. Confirm the exact tracking URL remains unchanged in the browser.
 2. Confirm one automatic initial `PageView`.
 3. Confirm one explicit event for each later SPA route.
 4. Trigger events before loading finishes and verify their delivery order.
@@ -149,5 +151,5 @@ Review the complete [event name reference](/api-reference/events) for the other 
 8. Search the browser bundle for credentials and private tokens.
 
 <Card title="Verification checklist" icon="circle-check" href="/guides/verification">
-  Validate the installation and event behavior before updating production.
+  Confirm installation and event behavior before you update production.
 </Card>

@@ -1,13 +1,13 @@
 ---
 title: "Client data"
-description: "Attach approved customer and account context to individual Bily events."
+description: "Add only the approved customer context each Bily event needs."
 ---
 
-Add a `client` object when an event needs customer context. The client data applies to that event payload.
+Add `client` only when an event needs customer context. Its data applies to that event alone.
 
-## Identify an authenticated customer
+## Add verified customer context
 
-Send only fields your privacy policy and consent state allow.
+Send only the fields your privacy policy and the customer's consent allow.
 
 ```typescript
 import { track } from "@bilyai/js";
@@ -24,7 +24,7 @@ track("user_signed_in", {
 });
 ```
 
-## Supported client fields
+## Choose the minimum fields
 
 | Field | Type | Purpose |
 | --- | --- | --- |
@@ -33,20 +33,20 @@ track("user_signed_in", {
 | `phone` | `string` | Customer phone when permitted |
 | `firstname` | `string` | First name |
 | `lastname` | `string` | Last name |
-| `dateOfBirth` | `string` | Date of birth when strictly necessary and permitted |
-| `gender` | `string` | Gender when strictly necessary and permitted |
+| `dateOfBirth` | `string` | Date of birth only when strictly necessary and permitted |
+| `gender` | `string` | Gender only when strictly necessary and permitted |
 | `userGroup` | `string` | Plan, segment, or account group |
 | `address` | `BilyAddress` | Approved city, state, postal code, and country fields |
 
 `BilyAddress` accepts `city`, `state`, `zip`, and `country`.
 
 <Warning>
-  Do not send customer data by default. Collect the minimum required fields and honor the visitor's consent and deletion choices.
+  Do not send customer data by default. Collect only what you need, and honor the visitor's consent and deletion choices.
 </Warning>
 
-## Browser tracking ID
+## Read the browser identifier
 
-Use `getBilyTrackingId()` when you need Bily's stable browser identifier.
+Use `getBilyTrackingId()` when you need Bily's stable identifier for the current browser context.
 
 ```typescript
 import { getBilyTrackingId } from "@bilyai/js";
@@ -57,9 +57,9 @@ if (trackingId) {
 }
 ```
 
-The return type is `string | null`. It returns `null` during server rendering. It is not an authenticated user ID, credential, or authorization value.
+The return type is `string | null`. During server rendering, it returns `null`. It is not an authenticated user ID, credential, or authorization value.
 
-## Keep identity roles separate
+## Keep each identity in its role
 
 - Use `client.userId` for your authenticated account identifier.
 - Use `getBilyTrackingId()` for the Bily browser identifier.

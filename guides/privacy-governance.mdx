@@ -1,25 +1,25 @@
 ---
 title: "Privacy and governance"
 sidebarTitle: "Privacy and governance"
-description: "Govern Bily event fields, browser identity, credentials, approvals, and production changes."
+description: "Keep event data minimal, identities distinct, credentials private, and production changes reviewable."
 ---
 
-Treat a Bily implementation as a maintained data contract. Product, engineering, privacy, and operations owners should agree on what is collected, why it is needed, who can access it, and how changes reach production.
+Treat your Bily implementation as a living data contract. Product, engineering, privacy, and operations should agree on what you collect, why you need it, who can access it, and how changes reach production.
 
-## Assign owners
+## Give every event clear ownership
 
-Every tracked event should have:
+For each event, name:
 
 - a product owner for the business meaning;
 - an engineering owner for the trigger and payload;
 - a privacy owner for customer-data classification and consent requirements;
 - a verification owner for staging and production checks.
 
-Ownership prevents an event name from remaining in production after its meaning or source has changed.
+Clear ownership keeps an event from outliving its meaning or source.
 
-## Classify every field
+## Know what every field contains
 
-Use a small classification model in the event catalog.
+Use a simple classification in your event catalog.
 
 | Class | Examples | Handling |
 | --- | --- | --- |
@@ -28,11 +28,11 @@ Use a small classification model in the event catalog.
 | Customer data | user ID, email, phone, address | Purpose, permission, and retention review required |
 | Secret or restricted content | passwords, tokens, payment details, private messages | Never send in browser events |
 
-Browser events are visible to the person using the browser and to software running on the page. Do not treat an event payload as secret storage.
+The person using the browser—and software running on the page—can see browser events. An event payload is never secret storage.
 
-## Minimize customer data
+## Send the least customer data you need
 
-Prefer the smallest stable identifier needed for the analysis.
+Choose the smallest stable identifier that supports the analysis.
 
 ```typescript
 track("user_signed_in", {
@@ -43,13 +43,13 @@ track("user_signed_in", {
 });
 ```
 
-Add email, phone, address, date of birth, or gender only when a documented purpose and consent state require it. Do not copy an entire application user object into `client` or custom properties.
+Add email, phone, address, date of birth, or gender only for a documented purpose and permitted consent state. Never copy an entire application user object into `client` or custom properties.
 
-## Make consent an application decision
+## Let your application enforce consent
 
-The SDK accepts the events your application sends. Your application must decide whether a particular event or customer field is permitted before calling `track()`.
+The SDK accepts the events your application sends. Before calling `track()`, your application must decide whether the event and each customer field are permitted.
 
-Test at least:
+Test these states:
 
 - consent not yet selected;
 - optional tracking accepted;
@@ -57,19 +57,19 @@ Test at least:
 - consent changed after page load;
 - signed-out and signed-in states.
 
-When consent changes, stop sending fields that are no longer permitted. Keep the event catalog and customer-facing privacy notice aligned.
+When consent changes, stop sending fields that are no longer permitted. Keep your event catalog and customer-facing privacy notice aligned.
 
-## Keep identity within its role
+## Keep identity separate from authorization
 
-The Bily browser tracking ID is not an authenticated account ID and must never authorize a request. `client.userId` is customer context on an event, not proof of a live session.
+The Bily browser tracking ID is not an authenticated account ID and must never authorize a request. `client.userId` adds customer context to an event. It does not prove a live session.
 
-Protected actions must use:
+Authorize protected actions with:
 
 - your verified application session;
 - a Bily API key kept in server-side secret storage; or
 - Bily Connect or a fallback key in a compatible MCP client.
 
-## Govern API and MCP access
+## Limit API and MCP access
 
 - Use one server credential per workload and environment.
 - Give credentials descriptive names and an expiration.
@@ -79,13 +79,13 @@ Protected actions must use:
 - Verify writes with a read and preserve request IDs.
 - Revoke a credential immediately if exposure is possible.
 
-MCP risk and approval metadata helps a client plan, but it is advisory. It does not prove that a human reviewed an action.
+MCP risk and approval metadata helps a client plan. It is advisory and does not prove that a human reviewed an action.
 
-## Review custom properties
+## Review every custom property
 
-Custom properties are flexible and therefore require stronger governance.
+Custom properties are flexible. Review them carefully.
 
-Reject properties that can contain:
+Reject any property that can contain:
 
 - raw error objects or stack traces;
 - request or response bodies;
@@ -94,11 +94,11 @@ Reject properties that can contain:
 - authorization values;
 - complete URLs with sensitive query parameters.
 
-Convert internal errors to a small safe vocabulary before tracking them.
+Map internal errors to a small, safe vocabulary before you track them.
 
-## Control production changes
+## Review every production change
 
-Require a review when a change:
+Require review when a change:
 
 - adds an event or field;
 - changes a field's type or meaning;
@@ -107,9 +107,9 @@ Require a review when a change:
 - creates a new API or MCP write path;
 - changes a credential's scope.
 
-The review should update the event catalog, privacy classification, test evidence, and rollback plan together.
+Update the event catalog, privacy classification, test evidence, and rollback plan in the same review.
 
-## Governance checklist
+## Confirm your safeguards
 
 - Every event and API/MCP workload has a named owner.
 - Customer fields have a purpose, permission, and retention decision.

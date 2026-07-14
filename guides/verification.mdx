@@ -1,11 +1,11 @@
 ---
 title: "Verify your installation"
-description: "Confirm Bily loads once, records the initial page view, and tracks later events without duplicates."
+description: "Prove Bily loads once and records each page and action without duplicates."
 ---
 
-Verify the installation in a development or staging environment before releasing it to customers.
+Verify your installation in development or staging before you release it to customers.
 
-## Expected result
+## Know what success looks like
 
 | Check | Expected behavior |
 | --- | --- |
@@ -16,9 +16,9 @@ Verify the installation in a development or staging environment before releasing
 | Console | No Bily load errors |
 | Built assets | No credentials or private tokens |
 
-## Verify an SDK installation
+## Confirm the SDK is ready
 
-Temporarily enable lifecycle diagnostics and wait for the explicit readiness signal.
+Temporarily enable lifecycle diagnostics, then wait for the explicit readiness signal.
 
 ```typescript verify-bily.ts
 import { init, ready, track } from "@bilyai/js";
@@ -36,27 +36,27 @@ try {
 }
 ```
 
-`debug` logs lifecycle diagnostics. It does not log event payloads. Remove it or set it to `false` after verification.
+`debug` logs lifecycle diagnostics, not event payloads. Remove it or set it to `false` when verification is complete.
 
 <Note>
-  Normal `track()` calls do not need to await `ready()`. Calls made while the script loads stay in the bounded SDK queue.
+  Normal `track()` calls do not need to await `ready()`. The bounded SDK queue holds calls while the script loads.
 </Note>
 
-## Verify a plain HTML installation
+## Confirm a plain HTML installation
 
-Open browser developer tools, then:
+In browser developer tools:
 
-1. Open the **Elements** panel and search for the exact script URL.
+1. Open the **Elements** panel and search for the exact tracking URL.
 2. Confirm the document contains one matching script element.
 3. Open the **Network** panel and reload the document.
 4. Confirm the browser requests the exact URL once, including its query string.
 5. Confirm Bily shows one initial `PageView` for that document.
 
-Do not call SDK methods on this installation path. Plain HTML uses only the raw script.
+Do not call SDK methods on this path. Plain HTML uses only the raw script.
 
-## Test page-view behavior
+## Confirm every page appears once
 
-Run these checks in order:
+Run these checks:
 
 1. Load a page directly. Expect one automatic `PageView`.
 2. Reload it. Expect one new `PageView` for the new document load.
@@ -64,13 +64,13 @@ Run these checks in order:
 4. Trigger a component rerender without changing the URL. Expect no new page view.
 5. Navigate back and forward. Expect one event for each committed URL change.
 
-If the initial load produces two events, remove the manual page-view call from the initial mount and check for a second installation.
+If the initial load produces two events, remove the manual page-view call from the initial mount. Then check for a second installation.
 
-## Inspect the exact URL
+## Match the complete tracking URL
 
-Do not compare only the hostname. Compare the full URL character for character with the value shown in Bily. Query parameters and encoded characters are part of the installation contract.
+Do not compare only the hostname. Match the complete URL character for character with the value in Bily. Query parameters and encoded characters are part of the installation contract.
 
-## Production checklist
+## Clear the production gates
 
 - Disable temporary diagnostics.
 - Confirm your consent controls run before optional customer data is sent.
@@ -79,5 +79,5 @@ Do not compare only the hostname. Compare the full URL character for character w
 - Verify the same action does not fire from both a container and a nested component.
 
 <Card title="Troubleshoot a failed check" icon="screwdriver-wrench" href="/troubleshooting">
-  Diagnose timeouts, duplicate page views, missing routes, and changed script URLs.
+  Diagnose timeouts, duplicate page views, missing routes, and incorrect tracking URLs.
 </Card>

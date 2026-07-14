@@ -1,10 +1,10 @@
 ---
-title: "Errors and request IDs"
+title: "Handle API errors"
 sidebarTitle: "Errors"
-description: "Handle Bily API status codes, structured error bodies, retries, and request IDs safely."
+description: "Use status codes and request IDs to recover safely from Bily API failures."
 ---
 
-The Bily API uses standard HTTP status codes and JSON error bodies.
+Bily returns standard HTTP status codes with JSON error bodies, so your application can choose the right recovery step.
 
 ```json
 {
@@ -12,7 +12,7 @@ The Bily API uses standard HTTP status codes and JSON error bodies.
 }
 ```
 
-Unexpected server errors can also include the request ID:
+An unexpected server error can also include its request ID:
 
 ```json
 {
@@ -21,7 +21,7 @@ Unexpected server errors can also include the request ID:
 }
 ```
 
-## Status codes
+## Act on each status
 
 | Status | Meaning | Recommended handling |
 | --- | --- | --- |
@@ -35,9 +35,11 @@ Unexpected server errors can also include the request ID:
 | `502` | A dependent Bily operation was temporarily unavailable | Retry safe reads after a short delay. |
 | `504` | The request did not complete before its timeout | Retry safe reads after a short delay or reduce the requested range. |
 
-## Preserve the request ID
+## Keep the request ID
 
-Every response includes `x-request-id`. You may send your own safe correlation value in `x-request-id` or `x-correlation-id`; Bily returns the selected value as `x-request-id`.
+Every response includes `x-request-id`. Record it with the operation and timestamp.
+
+You can send a safe correlation value in `x-request-id` or `x-correlation-id`. Bily returns the selected value as `x-request-id`.
 
 ```typescript
 const requestId = crypto.randomUUID();
@@ -60,10 +62,10 @@ if (!response.ok) {
 }
 ```
 
-Do not place customer data, credentials, or secrets in a request ID.
+Keep customer data, credentials, and secrets out of request IDs.
 
-## Retry safely
+## Retry only when safe
 
-Retry idempotent `GET` requests after transient `429`, `500`, `502`, or `504` responses. Use capped exponential backoff with jitter.
+Retry idempotent `GET` requests after transient `429`, `500`, `502`, or `504` responses. Add jitter to capped exponential backoff.
 
-Do not automatically retry create, clone, update, toggle, delete, sync, or mutation requests unless your application can prove the first attempt did not succeed. Read the affected resource before deciding whether to repeat a write.
+Do not automatically retry create, clone, update, toggle, delete, sync, or other mutation requests. First read the affected resource and confirm that the original write did not succeed.

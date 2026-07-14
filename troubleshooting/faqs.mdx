@@ -1,242 +1,344 @@
 ---
 title: "Frequently asked questions"
 sidebarTitle: "Customer FAQ"
-description: "Answers to common Bily implementation, event, identity, API, MCP, privacy, and production questions."
+description: "Find direct answers about Bily setup, events, identity, analytics, API, MCP, privacy, and production use."
 ---
 
-These answers describe the public Bily SDK, API, and MCP contracts. Follow the linked guide when a question needs implementation steps or a complete reference.
+These answers reflect the public Bily SDK, API, and MCP contracts. Open the linked guide when you need implementation steps or a complete reference.
 
-## Bily basics
+## Understand Bily
 
 <AccordionGroup>
   <Accordion title="What does Bily do?">
-    Bily is the programmable customer data and activation layer for websites. It connects browser events, trusted server workflows, and compatible AI clients around the same website, organization, and store context.
+    Bily gives websites a programmable customer data and activation layer. It brings browser events, trusted server workflows, and compatible AI clients into the same website, organization, and store context.
 
-    Start with [What is Bily?](/concepts/what-is-bily).
+    Start with [What is Bily?](/concepts/what-is-bily) for the full product model.
   </Accordion>
   <Accordion title="What are Bily Apps?">
-    Bily Apps are installable capabilities activated through a governed Bily website connection. They are distinct from the SDK, API, and MCP developer surfaces.
+    Bily Apps add installable capabilities through a governed website connection. They remain separate from the SDK, API, and MCP developer surfaces.
 
-    Review [Bily Apps](/concepts/bily-apps) for the product lifecycle and boundaries.
+    See [Bily Apps](/concepts/bily-apps) for their lifecycle and boundaries.
   </Accordion>
   <Accordion title="What is the difference between the SDK, API, and MCP?">
-    The SDK sends browser events. The API gives trusted server code versioned endpoints for Bily data and actions. MCP lets a compatible AI client discover current Bily operations through `search` and run focused work through `execute`.
+    Use the SDK to send browser events. Use the API when trusted server code needs versioned Bily data or actions.
 
-    Use the [API or MCP selection guide](/guides/api-mcp-selection) when a workflow crosses more than one surface.
+    Use MCP when a compatible AI client needs to discover current operations through `search` and run focused work through `execute`.
+
+    The [API or MCP selection guide](/guides/api-mcp-selection) helps when a workflow crosses more than one surface.
   </Accordion>
   <Accordion title="Where should I start?">
-    Start with an event and ownership plan, then choose one browser installation path. Verify a small set of high-value events in staging before adding production automation.
+    Define your events and owners first. Then choose one browser installation path.
 
-    Follow [implementation planning](/guides/implementation-planning) and the [quickstart](/quickstart).
+    Verify a small set of high-value events in staging before you add production automation.
+
+    Use [implementation planning](/guides/implementation-planning), then follow the [quickstart](/quickstart).
   </Accordion>
   <Accordion title="Do I need all three developer surfaces?">
-    No. Use only the surfaces your workflow needs. A website may need only the SDK. A scheduled backend integration may use the API. An operator may connect an AI client through MCP. They can also be combined without making one a substitute for another.
+    No. Choose only what the workflow needs.
+
+    A website may use only the SDK. A scheduled backend integration may use the API. An operator may connect an AI client through MCP. You can combine them without treating one as a substitute for another.
   </Accordion>
 </AccordionGroup>
 
-## Installing and sending browser events
+## Install browser tracking
 
 <AccordionGroup>
   <Accordion title="Should I use the raw script or the npm package?">
-    Use the exact raw script on plain HTML or a site-managed script field. Use `@bilyai/js` in applications with an npm build, including React and Next.js. Do not install both on the same website surface.
+    Use the exact raw script for plain HTML or a site-managed script field. Use `@bilyai/js` for applications with an npm build, including React and Next.js.
+
+    Install only one method on each website surface.
   </Accordion>
-  <Accordion title="Where do I find the browser script URL?">
-    Select the intended store, then open **Bily > Settings > Apps > More settings > Install tracking**. Choose the site's technology and copy the complete script or SDK snippet. Preserve every query parameter and do not reconstruct the URL from only the hostname.
+  <Accordion title="Where do I find the tracking URL?">
+    Select the intended store. Open **Bily > Settings > Apps > More settings > Install tracking**, choose the site's technology, and copy the complete script or SDK snippet.
+
+    Keep every query parameter. Do not rebuild the URL from only its hostname.
   </Accordion>
-  <Accordion title="Why must the exact script URL stay unchanged?">
-    The full URL is the installation contract. Query parameters and encoded characters can select the intended store or configuration. Passing only the origin or rebuilding the path can change the installation.
+  <Accordion title="Why must the exact tracking URL stay unchanged?">
+    The full URL is the installation contract. Its query parameters and encoded characters can select the intended store or configuration.
+
+    Passing only the origin or rebuilding the path can change the installation.
   </Accordion>
   <Accordion title="Does Bily track the first page automatically?">
-    Yes. The browser script records the initial document `PageView`. Do not send another manual page view from the initial mount.
+    Yes. The browser script records the initial document `PageView` automatically. Do not send another page view from the initial mount.
   </Accordion>
   <Accordion title="How do I track routes in a single-page application?">
-    Send one explicit `PageView` after each later committed route. Include the final `window.location.href` and `document.title`, skip the initial route callback, and ignore repeated notifications for the same URL.
+    Send one explicit `PageView` after each later committed route. Include the final `window.location.href` and `document.title`.
+
+    Skip the initial route callback and ignore repeated notifications for the same URL.
 
     See [Page views](/guides/pageviews).
   </Accordion>
   <Accordion title="Can I call track() before Bily finishes loading?">
-    Yes. The SDK keeps early calls in a bounded in-memory queue and sends them in order after the browser runtime becomes ready. The default queue holds 100 calls and can be configured from 1 to 1,000.
+    Yes. The SDK keeps early calls in a bounded in-memory queue and sends them in order when the browser runtime becomes ready.
+
+    The default queue holds 100 calls. You can set it from 1 to 1,000.
   </Accordion>
   <Accordion title="What does ready() prove?">
-    `ready()` proves the Bily browser runtime can accept queued calls. It rejects when loading fails or times out. It does not acknowledge a particular event or prove that the event was ingested.
+    `ready()` confirms that the Bily browser runtime can accept queued calls. It rejects when loading fails or times out.
+
+    It does not acknowledge a specific event or prove ingestion.
   </Accordion>
   <Accordion title="Can I enable debug logging in production?">
-    Use `debug: true` temporarily while validating a release. It logs SDK lifecycle diagnostics without logging event payloads. Disable it after verification to keep the console quiet.
+    Use `debug: true` temporarily while you validate a release. It logs SDK lifecycle details without logging event payloads.
+
+    Turn it off after verification to keep the console quiet.
   </Accordion>
   <Accordion title="What happens if init() runs twice?">
-    Repeating `init()` with the same URL does not load another script. A different URL is ignored after Bily starts loading or becomes ready. Keep one configuration owner and select the correct environment URL before the first call.
+    Repeating `init()` with the same URL does not load another script. Bily ignores a different URL after loading starts or completes.
+
+    Keep one configuration owner. Select the correct environment URL before the first call.
   </Accordion>
   <Accordion title="Is the SDK safe during server rendering?">
-    Yes. Public SDK methods avoid browser work during server rendering. `track()` is a no-op, `ready()` resolves, and `getBilyTrackingId()` returns `null`. Initialize Bily from client-mounted browser code.
+    Yes. Public SDK methods avoid browser work during server rendering. `track()` becomes a no-op, `ready()` resolves, and `getBilyTrackingId()` returns `null`.
+
+    Initialize Bily from client-mounted browser code.
   </Accordion>
 </AccordionGroup>
 
-## Event names and payloads
+## Design reliable events
 
 <AccordionGroup>
   <Accordion title="Can I send custom events?">
-    Yes. `track()` accepts Bily's known event names and any custom non-empty string. Use stable snake_case names for application outcomes and keep changing IDs or values in the payload.
+    Yes. `track()` accepts Bily's known event names and any custom non-empty string.
+
+    Use stable snake_case names for application outcomes. Keep changing IDs or values in the payload.
   </Accordion>
   <Accordion title="Are event names case-sensitive?">
-    Yes. Use the exact capitalization in the [event reference](/api-reference/events). The SDK accepts documented compatibility aliases, but new code should use current names.
+    Yes. Copy the exact capitalization from the [event reference](/api-reference/events).
+
+    The SDK accepts documented compatibility aliases, but new code should use current names.
   </Accordion>
   <Accordion title="When should an event fire?">
-    Fire it only after the outcome in its name is true. For example, send `workspace_created` after creation succeeds, not when the user first clicks the submit button.
+    Send an event only after its named outcome becomes true. For example, send `workspace_created` after creation succeeds, not when the user clicks submit.
   </Accordion>
   <Accordion title="Which fields does the SDK add automatically?">
-    The SDK adds the browser source, a Bily browser tracking ID when available, an ISO timestamp when `ts` is absent, and a generated `event_id` when one is not provided.
+    The SDK adds the browser source and a Bily browser tracking ID when available. It also adds an ISO timestamp when `ts` is absent and generates `event_id` when you do not provide one.
   </Accordion>
   <Accordion title="Does event_id prevent duplicates?">
-    The public SDK contract treats `event_id` as the identifier for one logical outcome and useful correlation context. It is not an ingestion receipt or a promise of exactly-once delivery. Your application must still prevent duplicate triggers.
+    Use `event_id` to identify one logical outcome and correlate related work. It is not an ingestion receipt or a promise of exactly-once delivery.
+
+    Your application must still prevent duplicate triggers.
   </Accordion>
   <Accordion title="How is an order total calculated?">
-    The SDK uses `order.total` when it is a finite number. Otherwise, it calculates the total from each `order.products` price and quantity. Zero is a valid total, tax, discount, or shipping value.
+    The SDK uses `order.total` when it is a finite number. Otherwise, it calculates the total from each price and quantity in `order.products`.
+
+    Zero is a valid total, tax, discount, or shipping value.
   </Accordion>
   <Accordion title="Why are top-level products missing from an order event?">
-    When the payload contains `order`, place that order's items in `order.products`. Top-level `products` do not replace missing `order.products` for the same event.
+    When a payload contains `order`, put its items in `order.products`. Top-level `products` do not replace missing `order.products` for that event.
   </Accordion>
   <Accordion title="Can custom properties contain any value?">
-    The type accepts additional top-level properties, but production fields should use stable, JSON-serializable values with reviewed meaning and data classification. Do not pass raw errors, request objects, secrets, or unredacted user content.
+    The type accepts additional top-level properties. In production, use stable, JSON-serializable values with reviewed meaning and data classification.
+
+    Never pass raw errors, request objects, secrets, or unredacted user content.
   </Accordion>
   <Accordion title="How should I change an event contract after release?">
-    Prefer additive changes. Add a new property before removing an old one, keep property types stable, and create a new event name when the business meaning changes. Validate the migration in staging and update the event catalog.
+    Prefer additive changes. Add a new property before you remove an old one, and keep property types stable.
+
+    Create a new event name when the business meaning changes. Validate the migration in staging and update the event catalog.
   </Accordion>
 </AccordionGroup>
 
-## Identity and attribution
+## Keep identity and attribution in scope
 
 <AccordionGroup>
   <Accordion title="What is the Bily browser tracking ID?">
-    It is the identifier returned by `getBilyTrackingId()` for the current browser context. The SDK keeps it stable in browser storage when possible. It is not a password, authenticated user ID, or authorization value.
+    `getBilyTrackingId()` returns an identifier for the current browser context. The SDK keeps it stable in browser storage when possible.
+
+    It is not a password, authenticated user ID, or authorization value.
   </Accordion>
   <Accordion title="What happens when browser storage is cleared or blocked?">
-    Clearing browser storage can cause a later browser context to receive a new ID. If storage is blocked, the SDK can keep an in-memory identifier stable for the current page session.
+    Clearing browser storage can give a later browser context a new ID. If storage is blocked, the SDK can keep an in-memory identifier stable for the current page session.
   </Accordion>
   <Accordion title="How do I attach an authenticated user ID?">
-    Add your stable internal account ID as `client.userId` on events that need authenticated customer context and that your consent policy allows.
+    Add your stable internal account ID as `client.userId` only to events that need authenticated customer context and that your consent policy allows.
   </Accordion>
   <Accordion title="Does client.userId merge anonymous and known identities?">
-    The public SDK does not expose an identity-merge command and does not promise a merge from `client.userId`. Treat it as customer context on that event. Do not describe matching email or user fields as an automatic merge.
+    No. The public SDK does not expose an identity-merge command or promise a merge from `client.userId`.
+
+    Treat the value as context for that event. Do not describe matching email or user fields as an automatic merge.
   </Accordion>
   <Accordion title="Does Bily share a browser ID across domains?">
-    The public SDK does not define cross-domain browser-ID sharing. Treat each browser origin as its own storage boundary unless a separate verified Bily contract says otherwise.
+    No. The public SDK does not define cross-domain browser-ID sharing.
+
+    Treat each browser origin as its own storage boundary unless a separate verified Bily contract says otherwise.
   </Accordion>
   <Accordion title="Does the SDK automatically define first-touch or last-touch attribution?">
-    The public SDK contract accepts page, referrer, and custom campaign context but does not define a first-touch or last-touch rule. Use the fields returned by Bily analytics operations as the reporting contract and verify the output needed for your business decision.
+    No. The public SDK accepts page, referrer, and custom campaign context, but it does not define a first-touch or last-touch rule.
+
+    Use the fields returned by Bily analytics operations as the reporting contract. Verify the output required for your business decision.
   </Accordion>
   <Accordion title="Which acquisition fields can I send?">
-    Use `sourceUrl`, `pageTitle`, and `referrer` for page context, plus reviewed custom properties for campaign or channel IDs. Remove sensitive query values and never include credentials or session data.
+    Use `sourceUrl`, `pageTitle`, and `referrer` for page context. Add reviewed custom properties for campaign or channel IDs.
+
+    Remove sensitive query values. Never include credentials or session data.
   </Accordion>
 </AccordionGroup>
 
-## Analytics definitions
+## Read analytics consistently
 
 <AccordionGroup>
   <Accordion title="What do conversions, people, sessions, and pageviews mean?">
-    In Bily advertising analytics, `conversions` means orders, `people` means unique browser visitors, `sessions` means total 30-minute visits, and `pageviews` means tracked page-view events. Do not use these labels interchangeably.
+    In Bily advertising analytics, `conversions` means orders. `people` means unique browser visitors. `sessions` means total 30-minute visits. `pageviews` means tracked page-view events.
+
+    Keep these labels distinct.
   </Accordion>
   <Accordion title="How should I calculate conversion rate?">
-    Choose and name a complete traffic denominator. Visitor CVR is `sum(conversions) / sum(people)`. Session CVR is `sum(conversions) / sum(sessions)`. Multiply the ratio by 100 only when presenting it as a percentage.
+    Choose and name a complete traffic denominator. Visitor CVR is `sum(conversions) / sum(people)`. Session CVR is `sum(conversions) / sum(sessions)`.
 
-    Do not divide by orders, revenue, customers, purchase-only sessions, or rows already filtered to conversions. Those denominators exclude the traffic that did not purchase.
+    Multiply the ratio by 100 only when you present it as a percentage.
+
+    Do not divide by orders, revenue, customers, purchase-only sessions, or rows already filtered to conversions. Those values exclude traffic that did not purchase.
   </Accordion>
   <Accordion title="Why can’t I add platform spend across currencies?">
-    Raw platform money such as `p_spend` remains in each ad account's native `p_currency`. Group raw aggregates by currency. Use Bily's normalized channel or asset reports when you need store-currency spend and efficiency metrics across accounts.
+    Raw platform money such as `p_spend` remains in each ad account's native `p_currency`. Group raw aggregates by currency.
+
+    Use Bily's normalized channel or asset reports for store-currency spend and cross-account efficiency metrics.
   </Accordion>
   <Accordion title="What is the difference between product orders and units?">
-    Product orders count product-order occurrences; units count product quantity. In `product_metrics`, use `sum(orders)` for product orders and `sum(units)` for units. Do not use the number of rows for either metric.
+    Product orders count product-order occurrences. Units count product quantity.
+
+    In `product_metrics`, use `sum(orders)` for product orders and `sum(units)` for units. Do not use the row count for either metric.
   </Accordion>
   <Accordion title="How does Bily define ROAS, CPA, and CAC?">
-    In normalized Bily reports, ROAS is revenue divided by spend, CPA is spend divided by orders, and CAC is spend divided by customers. The metric is unavailable when its denominator is zero. CPA and CAC differ when a customer can place more than one order.
+    In normalized Bily reports, ROAS is revenue divided by spend. CPA is spend divided by orders. CAC is spend divided by customers.
+
+    A metric is unavailable when its denominator is zero. CPA and CAC differ when one customer can place several orders.
   </Accordion>
   <Accordion title="How does Bily define LTV?">
-    The `customer_ltv` dataset treats LTV as a customer's total lifetime revenue. Average LTV averages customer `total_revenue`; net LTV subtracts refunds where available. Do not label this lifetime dataset as period new-versus-returning revenue.
+    The `customer_ltv` dataset defines LTV as a customer's total lifetime revenue. Average LTV averages customer `total_revenue`. Net LTV subtracts refunds where available.
+
+    Do not label this lifetime dataset as period new-versus-returning revenue.
   </Accordion>
   <Accordion title="What is data readiness?">
-    Data readiness is the per-platform connector and account-selection status for a store. Use it to determine whether a source must be connected, accounts must be selected, or data needs more time before analysis.
+    Data readiness shows the connector and account-selection status for each platform in a store. Use it to see whether you need to connect a source, select accounts, or wait for more data.
   </Accordion>
   <Accordion title="What does a quality warning mean?">
-    A quality warning explains why an analytics result needs review. It can include a code, severity, message, evidence, and recommended next step. Resolve blocking warnings and `review_required` results before making channel, budget, creative, or attribution decisions.
+    A quality warning explains why an analytics result needs review. It can include a code, severity, message, evidence, and recommended next step.
+
+    Resolve blocking warnings and `review_required` results before making channel, budget, creative, or attribution decisions.
   </Accordion>
   <Accordion title="What are connections, pixels, ad accounts, and assets?">
-    A connection links a store to a supported data or activation surface. A pixel is the public API resource for a store-scoped tracking connection. An ad account is an advertising account mapped to the store. An asset is a normalized campaign, ad set, or ad inside an enabled account.
+    A connection links a store to a supported data or activation surface. A pixel is the public API resource for a store-scoped tracking connection.
 
-    The [glossary](/concepts/glossary) defines the fields and boundaries for each term.
+    An ad account is an advertising account mapped to the store. An asset is a normalized campaign, ad set, or ad inside an enabled account.
+
+    The [glossary](/concepts/glossary) defines each term's fields and boundaries.
   </Accordion>
 </AccordionGroup>
 
-## API and MCP
+## Choose and operate the API or MCP
 
 <AccordionGroup>
   <Accordion title="When should I use the Bily API?">
-    Use the API when trusted server code owns a deterministic, repeatable workflow. It is appropriate for scheduled jobs, internal services, typed OpenAPI clients, scoped analytics reads, and explicit supported actions.
+    Use the API when trusted server code owns a deterministic, repeatable workflow. Good fits include scheduled jobs, internal services, typed OpenAPI clients, scoped analytics reads, and explicit supported actions.
   </Accordion>
   <Accordion title="Can I call the Bily API from browser JavaScript?">
-    Do not put a Bily API key in browser code or a client-visible environment variable. Call the API from a trusted server and apply your own application authorization before returning data to a browser.
+    No. Keep Bily API keys out of browser code and client-visible environment variables.
+
+    Call the API from a trusted server. Apply your own application authorization before returning data to a browser.
   </Accordion>
   <Accordion title="How do I discover my organization and store?">
-    Call `GET /context`. It returns the authenticated user and accessible organizations with stores nested under each organization. An ordinary store-scoped key needs no parameter. Use the exact returned `organizations[].stores[].url` in store-scoped paths.
+    Call `GET /context`. It returns the authenticated user and accessible organizations, with stores nested under each organization.
+
+    A standard store-scoped key needs no parameter. Copy the exact returned `organizations[].stores[].url` into store-scoped paths.
   </Accordion>
   <Accordion title="Is a Bily API key store-scoped?">
-    A key created while a store is selected carries that store and its organization as its API scope. Select the intended store before creating the key under **Settings > MCP > Access key fallback**. Requests for another store or organization are then rejected.
+    Yes. A key created while a store is selected carries that store and its organization as its API scope.
+
+    Select the intended store before creating the key under **Settings > MCP > Access key fallback**. Bily then rejects requests for another store or organization.
   </Accordion>
   <Accordion title="Why does my older fallback key require store scope?">
-    Older settings-generated keys may not include the selected store and organization required by the current customer API and MCP boundaries. Select the intended store, create a replacement key under **Settings > MCP > Access key fallback**, update the workload, verify `GET /context` or `bily.context()`, and then revoke the older key.
+    Older settings-generated keys may lack the store and organization required by current API and MCP boundaries.
+
+    Select the intended store and create a replacement under **Settings > MCP > Access key fallback**. Update the workload, verify `GET /context` or `bily.context()`, then revoke the older key.
   </Accordion>
   <Accordion title="What is the difference between 401 and 403?">
-    `401` means the credential is missing, invalid, expired, or revoked. `403` means the caller is authenticated but lacks the required permission, organization access, store scope, or action access.
+    A `401` means the credential is missing, invalid, expired, or revoked. Reconnect or replace it.
+
+    A `403` means the caller is authenticated but lacks the required permission, organization access, store scope, or action access. Confirm the requested scope.
   </Accordion>
   <Accordion title="Should I retry a failed API request?">
-    Retry safe reads after transient `429`, `500`, `502`, or `504` responses with capped exponential backoff and jitter. Do not automatically retry a write until a read proves whether the first attempt took effect.
+    Retry safe reads after transient `429`, `500`, `502`, or `504` responses. Use capped exponential backoff with jitter.
+
+    Do not automatically retry a write until a read shows whether the first attempt took effect.
   </Accordion>
   <Accordion title="Why does Bily MCP expose only two tools?">
-    `search` provides runtime discovery of the current operation catalog, while `execute` runs the selected `bily.*` helpers. This keeps the top-level client contract stable as Bily operations evolve.
+    `search` discovers the current operation catalog at runtime. `execute` runs the selected `bily.*` helpers.
+
+    This two-tool model keeps the top-level client contract stable as Bily operations evolve.
   </Accordion>
   <Accordion title="Does MCP enforce a human approval step?">
-    Bily returns advisory risk, approval, precondition, verification, and rollback guidance. The AI client must keep its approval prompt visible and show the complete `execute` function. Planning metadata alone is not proof that a human approved the action.
+    No. Bily returns advisory risk, approval, precondition, verification, and rollback guidance.
+
+    The AI client must keep its approval prompt visible and show the complete `execute` function. Planning metadata alone does not prove human approval.
   </Accordion>
   <Accordion title="What can execute() run?">
-    It runs a focused async arrow function of at most 20,000 characters for at most 20 seconds. The function uses `bily.*` helpers, has no direct outbound network access, and returns JSON-serializable `result` data plus captured `logs`.
+    It runs a focused async arrow function of at most 20,000 characters for up to 20 seconds. The function uses `bily.*` helpers and has no direct outbound network access.
+
+    It returns JSON-serializable `result` data with captured `logs`.
   </Accordion>
   <Accordion title="What is the difference between Bily Connect and a fallback key?">
-    Bily Connect uses the signed-in user's current Bily organization and store memberships. A fallback key is for clients that cannot complete that sign-in flow and carries the selected default store and organization scope in MCP.
+    Bily Connect uses the signed-in user's current Bily organization and store memberships.
+
+    A fallback key is for clients that cannot complete sign-in. It carries the selected default store and organization scope in MCP.
   </Accordion>
   <Accordion title="Why did Bily Connect ask me to sign in again?">
-    Reconnect through Bily Connect. For security, refresh credentials are rotated, so reusing an older refresh credential or losing the latest refresh response can invalidate the connection. Do not keep retrying an older credential.
+    Reconnect through Bily Connect. Bily rotates refresh credentials for security.
+
+    Reusing an older refresh credential or losing the latest refresh response can invalidate the connection. Do not keep retrying an older credential.
   </Accordion>
   <Accordion title="Are llms.txt and llms-full.txt MCP endpoints?">
-    No. They are agent-readable documentation resources at `docs.bily.ai`. The MCP endpoint is `https://api-dispatcher.bily.ai/mcp`.
+    No. They are agent-readable documentation resources at `docs.bily.ai`.
+
+    Use `https://api-dispatcher.bily.ai/mcp` as the MCP endpoint.
   </Accordion>
 </AccordionGroup>
 
-## Privacy, validation, and production
+## Protect data and release with confidence
 
 <AccordionGroup>
   <Accordion title="Can I send email, phone, or address data?">
-    The typed `client` object accepts those optional fields, but support in the type is not permission to collect them. Send only fields with a documented purpose, consent basis, and retention decision.
+    The typed `client` object accepts these optional fields. Type support does not grant permission to collect them.
+
+    Send only fields with a documented purpose, consent basis, and retention decision.
   </Accordion>
   <Accordion title="What data must never be sent in a browser event?">
-    Never send passwords, session values, authorization headers, access or refresh tokens, private API keys, payment-card or bank details, private message bodies, raw form submissions, raw errors, request bodies, or stack traces.
+    Never send passwords, session values, authorization headers, access or refresh tokens, or private API keys.
+
+    Also keep payment-card or bank details, private message bodies, raw form submissions, raw errors, request bodies, and stack traces out of browser events.
   </Accordion>
   <Accordion title="Does the SDK manage consent for my application?">
-    Your application decides whether an event or customer field is permitted before calling `track()`. Test consent-not-selected, accepted, denied, changed, signed-out, and signed-in states.
+    No. Your application must decide whether an event or customer field is allowed before it calls `track()`.
+
+    Test consent-not-selected, accepted, denied, changed, signed-out, and signed-in states.
   </Accordion>
   <Accordion title="Why can’t I see an event even though ready() resolved?">
-    `ready()` verifies loading, not ingestion. Confirm the product success path reached `track()` once, the event name is non-empty, the page uses the intended store URL, consent allows the call, and the observed payload matches the event plan.
+    `ready()` verifies loading, not ingestion.
+
+    Confirm that the successful product path reached `track()` once. Check that the event name is non-empty, the page uses the intended tracking URL, consent allows the call, and the observed payload matches the event plan.
   </Accordion>
   <Accordion title="Why do I see duplicate page views?">
-    The usual causes are both raw-script and SDK installations, a manual initial `PageView`, more than one router listener, or a listener that does not deduplicate the current URL. Confirm one script and one page-view owner.
+    Common causes include installing both the raw script and SDK, sending a manual initial `PageView`, registering several router listeners, or failing to deduplicate the current URL.
+
+    Keep one script and one page-view owner.
   </Accordion>
   <Accordion title="Why are early events missing?">
-    The application must eventually call `init()`. Also check whether high-volume startup calls filled the bounded queue; when the queue reaches `maxQueueSize`, the oldest call is discarded.
+    Make sure the application eventually calls `init()`. Then check whether high-volume startup calls filled the bounded queue.
+
+    When the queue reaches `maxQueueSize`, the SDK discards the oldest call.
   </Accordion>
   <Accordion title="How should I validate a production release?">
-    Begin with a limited exposure, verify one script and representative events, inspect signed-out, signed-in, and consent states, exercise safe API and MCP reads, and expand only when the observed result matches the reviewed contract.
+    Begin with limited exposure. Verify one script and representative events across signed-out, signed-in, and consent states.
 
-    Follow [Production rollout](/guides/production-rollout).
+    Exercise safe API and MCP reads. Expand only after the observed result matches the reviewed contract.
+
+    Follow [Production rollout](/guides/production-rollout) for the complete sequence.
   </Accordion>
   <Accordion title="What should I send to Bily support?">
-    Send the environment, selected store, SDK or client version, safe event or operation name, expected and observed result, reproduction steps, timestamp, and Bily request ID when available. Remove credentials, customer payloads, session data, and full request headers.
+    Send the environment, selected store, SDK or client version, safe event or operation name, expected and observed result, reproduction steps, timestamp, and Bily request ID when available.
+
+    Remove credentials, customer payloads, session data, and full request headers.
   </Accordion>
 </AccordionGroup>
 

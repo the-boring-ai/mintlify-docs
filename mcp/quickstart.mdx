@@ -1,17 +1,19 @@
 ---
-title: "MCP quickstart"
+title: "Connect Codex to Bily"
 sidebarTitle: "Quickstart"
-description: "Connect Codex to Bily MCP, sign in through Bily Connect, and discover your first operation."
+description: "Add Bily to Codex, sign in securely, and discover your first scoped operation."
 ---
 
-This quickstart uses Bily Connect, the recommended sign-in path. It keeps credentials out of the client configuration and applies the signed-in user's Bily organization and store memberships.
+This quickstart uses Bily Connect, the recommended sign-in path. It keeps credentials out of client configuration and uses the signed-in user's current organization and store memberships.
 
 <Steps>
-  <Step title="Open Bily MCP settings">
-    Sign in to [Bily](https://app.bily.ai), then open **Settings > MCP**. The selected store matters only if you later create a fallback key; Bily Connect uses the signed-in user's current memberships.
+  <Step title="Open MCP settings">
+    Sign in to [Bily](https://app.bily.ai), then open **Settings > MCP**.
+
+    The selected store matters only if you later create a fallback key. Bily Connect uses the signed-in user's current memberships.
   </Step>
 
-  <Step title="Add the Codex configuration">
+  <Step title="Add Bily to Codex">
     Add this block to `~/.codex/config.toml`:
 
     ```toml
@@ -21,16 +23,16 @@ This quickstart uses Bily Connect, the recommended sign-in path. It keeps creden
     tool_timeout_sec = 120
     ```
 
-    No access key belongs in this configuration.
+    Do not add an access key to this configuration.
   </Step>
 
-  <Step title="Complete Bily Connect">
-    Restart or reload the client. When it asks to connect Bily, sign in and approve MCP access.
+  <Step title="Sign in to Bily">
+    Restart or reload Codex. When it asks to connect Bily, sign in and approve MCP access.
 
-    Bily Connect uses the `mcp_access` scope. Bily still checks the signed-in user's organization and store memberships for every requested operation.
+    Bily Connect uses the `mcp_access` scope. Bily checks the signed-in user's organization and store memberships for every operation.
   </Step>
 
-  <Step title="Verify discovery">
+  <Step title="Confirm your identity and stores">
     Ask the client:
 
     ```text
@@ -38,10 +40,10 @@ This quickstart uses Bily Connect, the recommended sign-in path. It keeps creden
     Search for the right operations first. Do not make changes.
     ```
 
-    The client should use `search`, then `execute` with `bily.context()` for one-call discovery.
+    Codex should call `search`, then use `execute` with `bily.context()` for one-call discovery.
   </Step>
 
-  <Step title="Inspect a store operation">
+  <Step title="Preview a store operation">
     Continue with a read-only request:
 
     ```text
@@ -52,7 +54,7 @@ This quickstart uses Bily Connect, the recommended sign-in path. It keeps creden
 </Steps>
 
 <Warning>
-  Keep approval mode set to `prompt`. An `execute` call can contain more than one helper call, so review the complete function before approving it.
+  Keep approval mode set to `prompt`. One `execute` call can contain several helper calls. Review the complete function before you approve it.
 </Warning>
 
 If your client cannot complete Bily Connect, use the [store-scoped access key fallback](/mcp/authentication#access-key-fallback).

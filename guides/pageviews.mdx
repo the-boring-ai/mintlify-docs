@@ -1,23 +1,23 @@
 ---
 title: "Page views"
-description: "Capture one automatic initial page view and explicit page views for later SPA routes."
+description: "Record every page once: automatically on the first load, explicitly on later SPA routes."
 ---
 
-Bily uses the exact event name `PageView`.
+Use the exact event name `PageView`.
 
-## Initial page view
+## Let Bily record the first page
 
-The Bily browser script records the initial page view when a document loads. This applies whether you installed the raw script or initialized it through `@bilyai/js`.
+The Bily browser script records the first page view when the document loads. This works the same whether you use the raw script or initialize Bily through `@bilyai/js`.
 
 <Warning>
-  Do not call `track("PageView")` during the initial page or component mount. That would duplicate the automatic event.
+  Do not call `track("PageView")` during the initial page or component mount. It would duplicate the automatic event.
 </Warning>
 
-Traditional multi-page sites need no manual page-view code. Each full navigation loads a new document and records its own initial event.
+Traditional multi-page sites need no manual page-view code. Each full navigation loads a new document and records one initial event.
 
-## SPA route transitions
+## Record each later SPA route
 
-Single-page applications do not load a new document for every route. After the router commits a later URL, send:
+Single-page applications do not load a new document for each route. After the router commits a later URL, send:
 
 ```typescript
 import { track } from "@bilyai/js";
@@ -28,11 +28,11 @@ track("PageView", {
 });
 ```
 
-Use the full current URL in `sourceUrl`. Run the call after the page title and route state are current.
+Set `sourceUrl` to the complete current URL. Send the event after the page title and route state are current.
 
-## Skip the initial route and duplicates
+## Skip the first route and repeated URLs
 
-Store the current URL before listening for later navigation.
+Save the current URL before you listen for later navigation.
 
 ```typescript route-tracking.ts
 import { track } from "@bilyai/js";
@@ -51,20 +51,20 @@ export function onRouteCommitted() {
 }
 ```
 
-Connect `onRouteCommitted()` to the router's after-navigation callback. Do not call it once just to initialize the listener.
+Connect `onRouteCommitted()` to your router's after-navigation callback. Do not call it to initialize the listener.
 
-## Framework patterns
+## Use your framework's router
 
 <CardGroup cols={2}>
   <Card title="React Router" icon="atom" href="/sdk/react">
-    Track pathname, search, and hash changes from one mounted component.
+    Track pathname, search, and hash changes from one component.
   </Card>
-  <Card title="Next.js App Router" icon="layers" href="/sdk/nextjs">
-    Track pathname and search changes from one client component.
+  <Card title="Next.js" icon="layers" href="/sdk/nextjs">
+    Track App Router and Pages Router navigation from one shared component.
   </Card>
 </CardGroup>
 
-## Page-view checklist
+## Confirm every page appears once
 
 - The event name is exactly `PageView`.
 - The initial document relies on the automatic event.

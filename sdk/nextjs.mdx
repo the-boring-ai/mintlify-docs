@@ -1,43 +1,46 @@
 ---
 title: "Next.js"
-description: "Install Bily in a Next.js App Router application with one client component."
+description: "Add Bily to Next.js App Router, Pages Router, or a hybrid application."
 ---
 
-Initialize the SDK from one client component. Do not use `next/script` or add a raw script tag alongside the SDK.
+Add Bily through one client component in each route tree. The same setup supports App Router, Pages Router, and hybrid applications.
 
-## Install the package
+Do not use `next/script` or add a raw script tag alongside the SDK. `init()` loads the script for you.
+
+## Install Bily
 
 ```bash
 npm install @bilyai/js
 ```
 
-## Configure the store URL
+## Keep the tracking URL exact
 
-Copy the exact, complete SDK URL from **Bily > Settings > Apps > More settings > Install tracking** into the app's public
-build-time settings. The URL is public installation data; it does not contain a private token.
+Copy the complete tracking URL from **Bily > Settings > Apps > More settings > Install tracking** into your app's public
+build-time settings. The URL is public installation data, not a private token.
 
-Use `.env.local` only for local development; it is normally not committed.
+For local development, add it to `.env.local`. This file is normally not committed.
 
 ```dotenv .env.local
 NEXT_PUBLIC_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
 ```
 
-In dotenv files, keep the double quotes so `#` cannot start a comment. If the exact Bily-provided URL contains a literal
-dollar sign, escape only that character as `\$` in the dotenv file so Next.js preserves it.
+In dotenv files, keep the double quotes so `#` cannot begin a comment. If the exact URL contains a literal dollar sign,
+escape only that character as `\$` so Next.js preserves it.
 
-For every preview and production deployment, set the same variable in the deployment build environment before running
-`next build`. In a deployment settings field, enter the exact raw URL without dotenv quotes or escapes. Next.js inlines
-`NEXT_PUBLIC_` values into the browser bundle at build time, so rebuild and redeploy after changing the value.
+Set the same variable in every preview and production build environment before running `next build`. In a deployment
+settings field, enter the raw URL without dotenv quotes or escapes.
 
-If the production build reads `.env.production`, `.env.production.local`, or another `.env*` file, use the quoted dotenv
-form above instead.
+Next.js inlines `NEXT_PUBLIC_` values into the browser bundle at build time. Rebuild and redeploy whenever the value changes.
 
-Aside from that escape, keep the URL unchanged, including its query string. Restart the local development server after
-changing `.env.local`.
+If your production build reads `.env.production`, `.env.production.local`, or another `.env*` file, use the quoted dotenv
+form shown above.
 
-## Create a client tracking component
+Keep the rest of the URL unchanged, including its query string. After changing `.env.local`, restart the local development
+server.
 
-The browser script records the initial page view. This component saves the initial URL and tracks only later App Router transitions.
+## Track Next.js navigation
+
+The browser script records the initial page view automatically. This component remembers that URL and tracks only later client-side Next.js transitions.
 
 ```tsx app/bily-tracking.tsx
 "use client";
@@ -82,12 +85,12 @@ export function BilyTracking() {
 }
 ```
 
-The null-safe search value also supports applications that still contain a `pages/` directory while migrating to the
-App Router. URL comparison prevents that compatibility transition from creating a duplicate initial page view.
+The null-safe search value supports App Router, Pages Router, and applications that use both.
+Comparing URLs prevents route notifications from duplicating the initial page view.
 
-## Mount it in the root layout
+## Mount it once in App Router
 
-Wrap the component in `Suspense` because it reads the current search parameters.
+Add the component to the root layout. Wrap it in `Suspense` because it reads the current search parameters.
 
 ```tsx app/layout.tsx
 import { Suspense } from "react";
@@ -109,13 +112,13 @@ export default function RootLayout({
 }
 ```
 
-## Optional: cover remaining Pages Router routes
+## Cover Pages Router routes
 
-The App Router root layout does not wrap routes that still live in `pages/`. During a hybrid migration, mount the same
-component once in the Pages Router root too.
+The App Router root layout does not wrap routes in `pages/`. If your application uses Pages Router alone or alongside App
+Router, mount the same component once in the Pages Router root.
 
-If `pages/_app.tsx` already exists, add only the Bily mount and preserve all existing imports, providers, layouts, global
-CSS, data hooks, and error boundaries. Use the minimal example below only when the app does not already have a Custom App.
+If `pages/_app.tsx` already exists, add only the Bily mount. Keep its existing imports, providers, layouts, global CSS,
+data hooks, and error boundaries. Use this minimal example only when your application does not already have a Custom App.
 
 ```tsx pages/_app.tsx
 import type { AppProps } from "next/app";
@@ -134,14 +137,14 @@ export default function App({ Component, pageProps }: AppProps) {
 }
 ```
 
-Mount `BilyTracking` only once within each route tree. The root layout covers App Router routes; `_app.tsx` covers Pages
-Router routes.
+Mount `BilyTracking` once in each route tree. The root layout covers App Router routes. `_app.tsx` covers Pages Router
+routes.
 
-Use a separate complete URL for each environment. Do not construct it from a hostname or add query parameters in code.
+Give each environment its own complete URL. Do not build the URL from a hostname or add query parameters in code.
 
-## Track client actions
+## Track successful actions
 
-Call `track()` from client code after the operation succeeds.
+Call `track()` from client code only after the operation succeeds.
 
 ```tsx app/workspaces/create-workspace-button.tsx
 "use client";

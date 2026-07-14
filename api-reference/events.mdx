@@ -1,17 +1,17 @@
 ---
 title: "Event names"
-description: "Review known Bily event names, custom event support, and normalized compatibility aliases."
+description: "Choose consistent names for Bily events and your own application events."
 ---
 
-`BilyEvent` provides autocomplete for known events while accepting any custom string.
+`BilyEvent` autocompletes known events and still accepts your own event names.
 
 ```typescript
 type BilyEvent = KnownBilyEvent | (string & Record<never, never>);
 ```
 
-Event names are case-sensitive. Prefer the exact capitalization below for Bily events and stable snake_case for application events.
+Event names are case-sensitive. Use the capitalization shown for Bily events. Use stable snake_case names for application events.
 
-## Known event type
+## Use known Bily events
 
 ```typescript
 type KnownBilyEvent =
@@ -67,9 +67,9 @@ type KnownBilyEvent =
   | "Subscription Renewed";
 ```
 
-## Preferred ecommerce names
+## Use current ecommerce names
 
-For new ecommerce tracking, use the current names in the [ecommerce guide](/guides/ecommerce). The SDK accepts these compatibility names and normalizes them before delivery:
+For new ecommerce tracking, use the current names in the [ecommerce guide](/guides/ecommerce). The SDK still accepts these compatibility names and converts them before delivery:
 
 | Compatibility name | Current name |
 | --- | --- |
@@ -86,7 +86,7 @@ For new ecommerce tracking, use the current names in the [ecommerce guide](/guid
 | `Remove from Wishlist` | `Product Removed From Wishlist` |
 | `Search` | `Products Searched` |
 
-## Custom application events
+## Add application events
 
 ```typescript
 track("workspace_created", {
@@ -94,8 +94,8 @@ track("workspace_created", {
 });
 ```
 
-Custom event names must contain at least one non-whitespace character. Keep a small internal event catalog so spelling does not drift across components.
+Every custom name must contain at least one non-whitespace character. Keep a short internal event catalog so every component uses the same spelling.
 
 <Card title="Track custom events" icon="wave-pulse" href="/guides/custom-events">
-  Design stable event names and safe properties.
+  Create stable names and safe properties for your application.
 </Card>

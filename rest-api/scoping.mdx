@@ -1,28 +1,28 @@
 ---
-title: "Organizations and store scoping"
+title: "Keep API work in the right store"
 sidebarTitle: "Scoping"
-description: "Keep every Bily API request inside the intended organization and store boundary."
+description: "Use Bily organization and store boundaries to keep every request within its intended customer scope."
 ---
 
-Bily uses two customer-facing boundaries: organizations and stores.
+Bily protects customer access with two boundaries: organizations and stores.
 
-An organization represents the team that owns access. A store represents one connected commerce or web property inside that organization.
+An organization is the team that owns access. A store is one connected commerce or web property inside that organization.
 
-## Store-scoped API keys
+## Give each key one store
 
-An API key created under **Settings > MCP > Access key fallback** carries the store selected at creation and that store's organization. Discovery responses are limited to that scope, and the key cannot request another store or organization.
+An API key created under **Settings > MCP > Access key fallback** carries the selected store and its organization. Bily limits discovery responses to that scope and rejects requests for another store or organization.
 
-Create a separate key when another workload needs a different store. Do not reuse one customer key as a multi-store credential.
+Create a separate key when a workload needs another store. Never reuse one customer key as a multi-store credential.
 
-An older settings-generated fallback key without both organization and store scope is rejected. Select the intended store and regenerate the key before using the customer API or MCP.
+Bily rejects an older settings-generated fallback key that lacks organization and store scope. Select the intended store and regenerate the key before using the customer API or MCP.
 
-## Discover the allowed context
+## Confirm the available scope
 
-Call `GET /context` without an organization parameter for an ordinary store-scoped key. Bily returns the authenticated user and a scoped `organizations` array with each visible store nested under its organization.
+Call `GET /context` without an organization parameter when you use a standard store-scoped key. Bily returns the authenticated user and a scoped `organizations` array. Each visible store appears under its organization.
 
-Use the optional `organizationId` query only when an identity can access multiple organizations and the request explicitly selects one. The supplied organization must remain inside the credential's allowed scope.
+Use the optional `organizationId` query only when an identity can access multiple organizations and the request deliberately selects one. The organization must remain inside the credential's allowed scope.
 
-## Organization-scoped requests
+## Make an organization-scoped request
 
 `GET /stores` requires the organization header:
 
@@ -30,23 +30,23 @@ Use the optional `organizationId` query only when an identity can access multipl
 x-bily-organization-id: org_01J8W7T9G3E6ZQ4M2K5N8P1R0S
 ```
 
-Get valid organization IDs from `GET /context` or `GET /organizations`. Bily verifies that the authenticated identity belongs to the supplied organization.
+Get valid organization IDs from `GET /context` or `GET /organizations`. Bily confirms that the authenticated identity belongs to the supplied organization.
 
-## Store-scoped requests
+## Make a store-scoped request
 
-Store-scoped paths include `{storeUrl}`. Use the exact `url` returned by `GET /context` or `GET /stores`, encoded as a URL path segment when necessary.
+Store-scoped paths include `{storeUrl}`. Copy the exact `url` from `GET /context` or `GET /stores`. Encode it as a URL path segment when necessary.
 
 ```text
 GET /ad-metrics/store.example.com?startDate=2026-07-01&endDate=2026-07-07
 ```
 
-Bily derives the organization from the store and verifies access. You may also send `x-bily-organization-id` explicitly. If you do, it must match the store's organization.
+Bily derives the organization from the store and verifies access. You can also send `x-bily-organization-id`. Its value must match the store's organization.
 
 <Warning>
-  Never accept a store URL from an untrusted client and forward it without checking that your own application intended to access that store.
+  Never forward a store URL from an untrusted client until your application confirms that it intended to access that store.
 </Warning>
 
-## Expected access errors
+## Resolve scope errors
 
 | Status | Meaning |
 | --- | --- |
@@ -54,9 +54,9 @@ Bily derives the organization from the store and verifies access. You may also s
 | `403` | The identity cannot access the supplied organization or an explicitly scoped store. |
 | `404` | The store does not exist in the caller's accessible scope. |
 
-For privacy, Bily may return `404` instead of revealing that a store exists under another organization.
+To protect privacy, Bily may return `404` instead of revealing that a store exists under another organization.
 
-## Scope every job explicitly
+## Store scope with every job
 
 For scheduled and multi-tenant jobs, store these values together:
 
@@ -67,4 +67,4 @@ For scheduled and multi-tenant jobs, store these values together:
 }
 ```
 
-Re-run `GET /context` after membership or connection changes. Do not copy identifiers between customer accounts.
+Run `GET /context` again after a membership or connection changes. Never copy identifiers between customer accounts.

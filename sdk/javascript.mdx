@@ -1,19 +1,19 @@
 ---
 title: "JavaScript"
-description: "Install @bilyai/js in a browser application and track later client-side routes."
+description: "Add Bily to a browser application and track each client-side route once."
 ---
 
-Use the SDK in browser applications built with npm. The SDK loads the exact Bily script URL, queues early calls, and stays safe when imported during server rendering.
+Use the SDK in browser applications built with npm. It loads your exact Bily tracking URL, keeps early calls in order, and can be imported safely during server rendering.
 
-## Install the package
+## Install Bily
 
 ```bash
 npm install @bilyai/js
 ```
 
-## Initialize once
+## Start tracking once
 
-Select the intended store, then open **Bily > Settings > Apps > More settings > Install tracking**. Choose your framework and use the exact `scriptUrl` from the SDK snippet.
+Select your store. Then open **Bily > Settings > Apps > More settings > Install tracking**, choose your framework, and copy the exact `scriptUrl` from the SDK snippet.
 
 ```typescript analytics.ts
 import { init, track } from "@bilyai/js";
@@ -26,7 +26,7 @@ init({ scriptUrl: BILY_SCRIPT_URL });
 export { track };
 ```
 
-Import this module once from your browser entry point.
+Import this module once from your browser entry point. This gives the SDK one clear place to start.
 
 ```typescript main.ts
 import "./analytics";
@@ -35,11 +35,11 @@ import { startApplication } from "./application";
 startApplication();
 ```
 
-Do not add a separate script tag. `init()` owns script loading for this installation path.
+Do not add a separate script tag. For this installation path, `init()` loads the script.
 
-## Track client-side route changes
+## Track every later route once
 
-The browser script records the initial page view. Save that initial URL, then call this function only after your router completes a later navigation.
+The browser script records the initial page view automatically. Save that URL, then run this function only after the router completes a later navigation.
 
 ```typescript analytics.ts
 import { init, track } from "@bilyai/js";
@@ -62,9 +62,9 @@ export function trackCommittedRoute(): void {
 }
 ```
 
-Call `trackCommittedRoute()` from your router's after-navigation callback. Do not call it during the initial application mount.
+Call `trackCommittedRoute()` from your router's after-navigation callback. Do not call it during the initial mount, or you will duplicate the automatic page view.
 
-## Track an action
+## Track successful actions
 
 ```typescript create-workspace.ts
 import { track } from "./analytics";
@@ -81,7 +81,7 @@ export async function createWorkspace(name: string) {
 }
 ```
 
-Track successful outcomes after they happen. Avoid firing completion events when an operation starts.
+Send completion events only after the operation succeeds. This keeps attempted actions from looking like completed ones.
 
 <CardGroup cols={2}>
   <Card title="Track custom events" icon="wave-pulse" href="/guides/custom-events" />

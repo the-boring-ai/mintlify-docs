@@ -1,25 +1,25 @@
 ---
 title: "Validate and debug an implementation"
 sidebarTitle: "Validation and debugging"
-description: "Prove Bily loading, event behavior, payloads, API requests, and MCP operations with focused evidence."
+description: "Find the failing boundary quickly, then prove loading, events, payloads, API scope, and MCP work."
 ---
 
-Debug one boundary at a time. First prove that Bily loaded, then that the application called the intended event, then that the payload and selected Bily scope are correct.
+Debug one boundary at a time. First prove Bily loaded. Then prove your application called the intended event. Finally, confirm the payload and Bily scope.
 
-## Define the expected observation
+## Write the expected result first
 
-Before opening developer tools, write one sentence describing what should happen.
+Before you open developer tools, describe the expected result in one sentence.
 
 ```text
 After a successful checkout, one Order Completed event should contain order_789,
 two products, USD 73 total, and no private payment fields.
 ```
 
-This makes duplicates, missing fields, and premature events easier to identify than a broad “tracking is broken” report.
+A precise expectation makes duplicates, missing fields, and premature events easier to spot than a broad “tracking is broken” report.
 
-## Validate the browser installation
+## Prove the browser installation
 
-For `@bilyai/js`, enable lifecycle diagnostics temporarily:
+For `@bilyai/js`, turn on lifecycle diagnostics temporarily:
 
 ```typescript
 import { init, ready } from "@bilyai/js";
@@ -32,7 +32,7 @@ init({
 await ready();
 ```
 
-Check these boundaries in order:
+Check each boundary in order:
 
 1. The page contains exactly one Bily script.
 2. Its full URL matches **Bily > Settings > Apps > More settings > Install tracking**, including query parameters.
@@ -41,11 +41,11 @@ Check these boundaries in order:
 5. The application reaches the intended `track()` call once.
 6. The event appears with the expected name and safe payload in the selected Bily store.
 
-`ready()` proves the browser runtime can accept queued calls. It does not acknowledge a particular event or prove ingestion.
+`ready()` proves the browser runtime can accept queued calls. It does not acknowledge an event or prove ingestion.
 
-## Validate page views separately
+## Prove each page view once
 
-Run this sequence:
+Test this sequence:
 
 | Action | Expected result |
 | --- | --- |
@@ -55,11 +55,11 @@ Run this sequence:
 | Component rerender without URL change | No new page view |
 | Back or forward navigation | One event per committed URL change |
 
-If the direct load produces two events, search for both installation paths and remove the manual page-view call from the initial mount.
+If a direct load produces two events, check for both installation paths and remove the manual page-view call from the initial mount.
 
-## Validate event payloads
+## Compare the payload with the plan
 
-Compare the observed payload with the event plan, not just the TypeScript type.
+Compare the observed payload with your event plan—not only the TypeScript type.
 
 - Is the event name spelled and capitalized exactly?
 - Did it fire only after the outcome succeeded?
@@ -69,9 +69,9 @@ Compare the observed payload with the event plan, not just the TypeScript type.
 - Is the customer context permitted for this event?
 - Are secrets, raw errors, and unreviewed form values absent?
 
-For order events, use `order.total` when it is authoritative. Otherwise, the SDK calculates the total from `order.products`.
+For order events, provide `order.total` when it is authoritative. Otherwise, the SDK calculates the total from `order.products`.
 
-## Interpret SDK diagnostics correctly
+## Read each SDK signal correctly
 
 | Observation | Meaning |
 | --- | --- |
@@ -83,9 +83,9 @@ For order events, use `order.total` when it is authoritative. Otherwise, the SDK
 
 The default queue holds 100 calls and can be configured from 1 to 1,000. The default load timeout is 15 seconds and can be configured from 1,000 to 60,000 milliseconds.
 
-## Validate API requests
+## Start API validation with discovery
 
-Start with discovery before a store-specific endpoint:
+Discover your scope before you call a store-specific endpoint:
 
 1. `GET /context` without `organizationId` for an ordinary store-scoped key
 2. An exact `organizations[].stores[].url` from the response
@@ -93,7 +93,7 @@ Start with discovery before a store-specific endpoint:
 
 Use the optional `organizationId` query only when the authenticated identity can access multiple organizations and the workload intentionally selects one.
 
-Preserve `x-request-id` from every response.
+Save `x-request-id` from every response.
 
 | Status | First check |
 | --- | --- |
@@ -104,11 +104,11 @@ Preserve `x-request-id` from every response.
 | `429` | Request rate and retry backoff |
 | `500`, `502`, `504` | Request ID, safe retry policy, and requested range |
 
-Do not automatically retry a write until a read proves whether the first request took effect.
+Before you retry a write, use a read to prove whether the first request took effect.
 
-## Validate MCP requests
+## Separate MCP discovery from execution
 
-For MCP, separate discovery from execution:
+Follow this sequence:
 
 1. Confirm the endpoint is exactly `https://api-dispatcher.bily.ai/mcp`.
 2. Confirm the client completed Bily Connect or uses one valid fallback key.
@@ -117,11 +117,11 @@ For MCP, separate discovery from execution:
 5. Review the complete async function before approving `execute`.
 6. Verify any write with the recommended read.
 
-An `execute` function can contain several helper calls, has no direct outbound network access, and can run for at most 20 seconds.
+An `execute` function can contain several helper calls. It has no direct outbound network access and can run for at most 20 seconds.
 
-## Build a useful support report
+## Make a support report actionable
 
-Include:
+Provide:
 
 - environment and selected Bily store;
 - SDK or client version;
@@ -131,7 +131,7 @@ Include:
 - timestamp and Bily request ID when available;
 - browser or client error text with customer data removed.
 
-Never attach credentials, raw customer payloads, session data, or full request headers.
+Never include credentials, raw customer payloads, session data, or full request headers.
 
 <CardGroup cols={2}>
   <Card title="SDK troubleshooting" icon="screwdriver-wrench" href="/troubleshooting" />

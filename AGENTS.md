@@ -1,45 +1,87 @@
-> **First-time setup**: This is a default AGENTS.md file. Customize it for your project's specific needs, including your preferred code languages, terminology, style guidelines, and content requirements.
+# Bily documentation instructions
 
-# Documentation agent instructions
+These instructions apply to every public page in this repository.
 
-IMPORTANT! When you start a session, remind the user that they have the default AGENTS.md file and they might want to customize it for their project.
+## Purpose
 
-## Mintlify basics
+Bily gives teams one programmable layer for website data, customer context, analytics, and activation. Write for the person trying to install, understand, verify, or operate Bily—not for the team that built it.
 
-- Configuration lives in `docs.json` - check it before making structural changes
-- Use MDX format for documentation pages
-- Run `mint dev` locally to preview changes before committing
-- Run `mint broken-links` to check for broken links
+Bily Apps is a product within Bily. Keep the two concepts distinct. Only the Bily Apps product page may use its approved app-store positioning.
 
-## Mintlify components
+## Voice
 
-Use Mintlify's built-in components for consistent formatting. See https://www.mintlify.com/docs/components for all available components.
+Bily sounds calm, capable, direct, and human.
 
-## Style and formatting
+- Lead with the outcome the reader can achieve.
+- Put the most important information first.
+- Use active voice, second person, and concrete verbs.
+- Prefer familiar words over internal or abstract terms.
+- Keep one idea in each sentence and one purpose in each paragraph.
+- Remove any word that does not improve meaning, safety, or confidence.
+- Be concise without hiding prerequisites, consequences, or failure modes.
+- Be warm through usefulness, not jokes, hype, or forced enthusiasm.
 
-- Use active voice and second person ("you")
-- Keep sentences concise - one idea per sentence
-- Use sentence case for headings
-- When referencing UI elements, use bold: Click **Settings**
-- Use code formatting for: file names, commands, paths, and code references
+## Page structure
+
+- Give each page one clear job.
+- Write a specific title and a one-sentence description that states the outcome.
+- Open with what the reader will accomplish or understand.
+- Organize instructions in the order the reader performs them.
+- Use outcome-led, sentence-case headings.
+- Place prerequisites before the action that depends on them.
+- Put warnings immediately before the risky step.
+- End with the next useful action when one exists.
+
+## Product language
+
+- Use **Bily** for the product and platform.
+- Use **Bily Apps** for installable capabilities managed through Bily.
+- Use **Bily API**, **Bily MCP**, and **Bily JavaScript SDK** for developer surfaces.
+- Use **browser script** for the installed website runtime.
+- Use **tracking URL** for the exact customer-specific browser-script URL.
+- Use **store** for an ecommerce property and **website** for the browser surface.
+- Use **event** for a named customer or website action and **payload** for its attached data.
+- Keep private implementation providers and infrastructure out of public content.
+
+Avoid vague product language such as “powerful,” “seamless,” “robust,” “next-generation,” “all-in-one,” and “leverage.” Do not call a task easy or simple. Make it easy through the instructions.
+
+## Instructions and interface paths
+
+- Start steps with a verb.
+- Bold interface labels: Select **Settings**.
+- Format commands, files, paths, fields, methods, and values as code.
+- Name the expected result after a consequential action.
+- Write errors as a path forward: state what happened, why it matters, and what to do next.
+- Never use “click here” or a vague link label such as “learn more.”
+
+## Technical invariants
+
+- Keep every example aligned with the exported `@bilyai/js` contract.
+- Copy the exact Bily tracking URL. Never remove, reorder, decode, or rebuild its query string.
+- Use one installation path per website surface: the raw script for plain HTML or the SDK for application frameworks.
+- Treat the initial `PageView` as automatic. Track only later client-side route changes manually.
+- Never include credentials, private tokens, or customer data in examples.
+- Preserve API authentication, organization scope, store scope, safety, and retry semantics.
+- Keep `openapi.json` generated from `scripts/build-openapi.mjs`; update the generator first.
 
 ## Code examples
 
-- Include language identifiers in fenced code blocks
-- Add titles to code blocks when relevant: ```javascript filename.js
-- Show realistic parameter values, not placeholders like `foo` or `bar`
-- Include error handling for API examples
+- Include a language identifier and a useful filename when appropriate.
+- Use realistic, obviously fictional values.
+- Show the shortest production-safe path, including relevant error handling.
+- Explain what the example proves; do not narrate every line.
+- Preserve exact casing for methods, events, fields, headers, and environment variables.
 
-## Content structure
+## Before publishing
 
-- Add frontmatter (title, description) to every page
-- Use `sidebarTitle` in frontmatter if the nav title should differ from the page title
-- Include introductory context before diving into steps or details
-- Add "Next steps" or related links where helpful
+Use Node.js 22 LTS and run:
 
-## What to avoid
+```bash
+node scripts/build-openapi.mjs --check
+node scripts/check-public-language.mjs
+node scripts/check-docs-structure.mjs
+mint validate
+mint broken-links --check-redirects
+```
 
-- Don't edit `docs.json` without understanding the navigation structure
-- Don't remove existing pages without checking for inbound links
-- Don't use HTML when an MDX component exists for the same purpose
-- Don't add pages to navigation that don't exist yet
+Preview the changed pages at desktop and mobile widths. Confirm headings, code blocks, callouts, tables, and next-step links remain easy to scan.
