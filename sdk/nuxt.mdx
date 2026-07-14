@@ -41,6 +41,7 @@ In Nuxt 4, create `app/plugins/bily.client.ts`. In a Nuxt 3 project without the 
 
 ```typescript app/plugins/bily.client.ts
 import { init, track } from "@bilyai/js";
+import { nextTick } from "vue";
 
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
@@ -53,7 +54,10 @@ export default defineNuxtPlugin(() => {
   init({ scriptUrl });
   let previousUrl = window.location.href;
 
-  useRouter().afterEach(() => {
+  useRouter().afterEach(async (_to, _from, failure) => {
+    if (failure) return;
+    await nextTick();
+
     const currentUrl = window.location.href;
     if (currentUrl === previousUrl) return;
     previousUrl = currentUrl;
@@ -68,7 +72,7 @@ export default defineNuxtPlugin(() => {
 
 The `.client` suffix keeps startup in the browser. The browser script records the initial page automatically.
 
-`useRouter().afterEach()` runs after Nuxt's router commits a navigation. It also observes query-only changes when Nuxt reuses the current page component. Comparing the complete URL prevents repeated lifecycle notifications from creating duplicates.
+`useRouter().afterEach()` runs after Nuxt's router commits a navigation. Waiting for Vue's next update captures the new page title as well as the new URL. The hook also observes query-only changes when Nuxt reuses the current page component. Comparing the complete URL prevents repeated lifecycle notifications from creating duplicates.
 
 ## Track successful actions
 
