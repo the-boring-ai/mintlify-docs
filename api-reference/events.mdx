@@ -9,7 +9,7 @@ description: "Choose consistent names for Bily events and your own application e
 type BilyEvent = KnownBilyEvent | (string & Record<never, never>);
 ```
 
-Event names are case-sensitive. Use the capitalization shown for Bily events. Use stable snake_case names for application events.
+Event names are case-sensitive. Use the capitalization shown for Bily events. Create a stable snake_case application event only when no standard event describes the outcome.
 
 ## Use known Bily events
 
@@ -19,6 +19,9 @@ type KnownBilyEvent =
   | "AddShippingInfo"
   | "Checkout Address Info Submitted"
   | "Contact"
+  | "Contact Submitted"
+  | "Demo Requested"
+  | "Download"
   | "New Customer Purchase"
   | "PageView"
   | "Pageview"
@@ -57,15 +60,35 @@ type KnownBilyEvent =
   | "Login"
   | "Logout"
   | "Search"
+  | "Sign Up"
   | "Add to Wishlist"
   | "Remove from Wishlist"
   | "View Wishlist"
   | "Newsletter"
   | "Contact Form Submitted"
   | "Subscription Cancelled"
+  | "Subscription Started"
   | "Subscription Updated"
-  | "Subscription Renewed";
+  | "Subscription Renewed"
+  | "Trial Started";
 ```
+
+## Prefer standard application outcomes
+
+Use the same standard name whether Bily found the action on a public page or you install it in application code.
+
+| Verified outcome | Event |
+| --- | --- |
+| Authentication succeeded | `Login` |
+| Registration succeeded | `Sign Up` |
+| Contact request submitted | `Contact Submitted` |
+| Demo or sales meeting scheduled | `Demo Requested` |
+| Trial started | `Trial Started` |
+| Subscription started | `Subscription Started` |
+| High-intent step that is not yet a completion | `Lead` |
+| Download completed | `Download` |
+
+Do not emit a completion event from the button that merely begins the flow. Track it at the successful callback or committed state.
 
 ## Use current ecommerce names
 
@@ -86,7 +109,7 @@ For new ecommerce tracking, use the current names in the [ecommerce guide](/guid
 | `Remove from Wishlist` | `Product Removed From Wishlist` |
 | `Search` | `Products Searched` |
 
-## Add application events
+## Add product-specific application events
 
 ```typescript
 track("workspace_created", {
