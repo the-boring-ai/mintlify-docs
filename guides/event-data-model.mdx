@@ -29,7 +29,7 @@ When `event_id` or `ts` is missing, the SDK creates it. A generated event ID hel
 
 ## Name outcomes consistently
 
-Use Bily's current title-case names for ecommerce events. Use stable snake_case names for application events.
+Use Bily's current names for standard commerce and application outcomes. Use stable snake_case names only for product-specific outcomes that have no standard event.
 
 Good application event names:
 
@@ -103,7 +103,7 @@ When `order.total` is missing, the SDK calculates it from product price and quan
 The optional `client` object applies only to the event you send.
 
 ```typescript
-track("user_signed_in", {
+track("Login", {
   client: {
     userId: "user_123",
     userGroup: "growth",

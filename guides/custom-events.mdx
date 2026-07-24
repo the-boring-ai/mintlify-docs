@@ -3,19 +3,20 @@ title: "Custom events"
 description: "Track meaningful application outcomes with stable names and safe properties."
 ---
 
-Use custom events for meaningful application outcomes outside the ecommerce catalog. `track()` accepts known Bily event names and your own non-empty string names.
+Use custom events for meaningful product-specific outcomes outside the standard Bily catalog. `track()` accepts known Bily event names and your own non-empty string names.
+
+<Warning>
+  Check the [event reference](/api-reference/events) first. Authentication, registration, contact, demo, trial, subscription, lead, download, and commerce outcomes already have standard names that Bily can connect consistently across destinations.
+</Warning>
 
 ## Give every outcome one stable name
 
 Use snake_case for application events:
 
-- `user_signed_in`
 - `workspace_created`
 - `integration_connected`
 - `contacts_imported`
 - `campaign_launched`
-- `billing_checkout_started`
-- `billing_checkout_completed`
 - `product_error_encountered`
 
 Keep IDs, timestamps, and translated labels out of event names. Put changing values in the payload.
