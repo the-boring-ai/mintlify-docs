@@ -11,8 +11,8 @@ Use these values to connect a compatible client. Prefer Bily Connect so you do n
 | Setting | Value |
 | --- | --- |
 | Server name | `bily` |
-| URL | `https://api-dispatcher.bily.ai/mcp` |
-| OAuth resource | `https://api-dispatcher.bily.ai/mcp` |
+| URL | `https://api.bily.ai/mcp` |
+| OAuth resource | `https://api.bily.ai/mcp` |
 | Transport | Streamable HTTP with JSON responses |
 | OAuth scope | `mcp_access` |
 | Recommended approval mode | Prompt before tool calls |
@@ -24,7 +24,7 @@ Open **Settings > MCP** in Bily and use the no-key configuration:
 
 ```toml
 [mcp_servers.bily]
-url = "https://api-dispatcher.bily.ai/mcp"
+url = "https://api.bily.ai/mcp"
 default_tools_approval_mode = "prompt"
 tool_timeout_sec = 120
 ```
@@ -36,19 +36,23 @@ Codex discovers Bily Connect from the endpoint. It opens the sign-in flow when n
 Set up a remote Streamable HTTP MCP server with this URL:
 
 ```text
-https://api-dispatcher.bily.ai/mcp
+https://api.bily.ai/mcp
 ```
 
 The client must support dynamic public-client registration. It must also support Authorization Code with PKCE using `S256`, the `mcp_access` scope, and refresh tokens.
 
 Bily publishes discovery metadata at:
 
-- `https://api-dispatcher.bily.ai/.well-known/oauth-authorization-server`
-- `https://api-dispatcher.bily.ai/.well-known/openid-configuration`
-- `https://api-dispatcher.bily.ai/.well-known/oauth-protected-resource`
-- `https://api-dispatcher.bily.ai/.well-known/oauth-protected-resource/mcp`
+- `https://api.bily.ai/.well-known/oauth-authorization-server`
+- `https://api.bily.ai/.well-known/openid-configuration`
+- `https://api.bily.ai/.well-known/oauth-protected-resource`
+- `https://api.bily.ai/.well-known/oauth-protected-resource/mcp`
 
 Compatible clients should read these values from the unauthenticated challenge. Do not hard-code the authorization or token URLs.
+
+<Note>
+  Existing connections on the legacy hostname remain supported during the migration. After changing an OAuth connection to `https://api.bily.ai/mcp`, reconnect once so the client obtains credentials for the new OAuth resource.
+</Note>
 
 ## Use a fallback key when sign-in is unavailable
 
@@ -60,7 +64,7 @@ A typical client configuration looks like this:
 {
   "mcpServers": {
     "bily": {
-      "url": "https://api-dispatcher.bily.ai/mcp",
+      "url": "https://api.bily.ai/mcp",
       "headers": {
         "x-api-key": "<key shown once by Bily>"
       }
