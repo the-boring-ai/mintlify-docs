@@ -29,6 +29,15 @@ mint dev
 
 The preview is available at `http://localhost:3000` by default.
 
+## Deployment
+
+Publish reviewed changes with Bily's existing direct Mintlify deployment. The
+Mintlify GitHub App is not part of this repository's deployment architecture
+and must not be installed or authorized.
+
+Follow [DEPLOYMENT.md](./DEPLOYMENT.md) for the release and live-verification
+checklist.
+
 ## Documentation rules
 
 - Keep every example aligned with the exported `@bilyai/js` contract.
