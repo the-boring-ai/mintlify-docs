@@ -12,3 +12,8 @@ Keep changes concise, testable, and consistent with the current public SDK types
 6. Preview the changed pages with `mint dev`.
 
 Do not publish or deploy documentation from a feature branch.
+
+After the change merges into `main`, use the existing direct Mintlify
+deployment described in [DEPLOYMENT.md](./DEPLOYMENT.md). Do not install or
+authorize the Mintlify GitHub App for this repository, including when the
+dashboard presents an **Installation Needed** prompt.
