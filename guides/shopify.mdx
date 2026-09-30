@@ -1,0 +1,59 @@
+---
+title: "Install Bily on Shopify"
+description: "Connect your Shopify store, activate Bily in your published theme, and verify your first events."
+---
+
+Use the Bily Shopify app for a Shopify-hosted storefront. Bily provisions its Web Pixel during setup for analytics and conversion events. The **Bily Storefront** app embed adds the browser integration used by storefront features.
+
+You need permission to install apps and edit the store's published theme. Complete any permission or plan prompts in Shopify and Bily before verifying tracking.
+
+<Steps>
+  <Step title="Install and connect the Shopify app">
+    Open [Bily in the Shopify App Store](https://apps.shopify.com/bily), install it on the intended store, and approve the requested access. Return to Bily and select the company workspace that owns this store.
+
+    Complete the Shopify connection in Bily. The Web Pixel does not require pasting a custom pixel or script into your theme.
+  </Step>
+
+  <Step title="Enable Bily in your published theme">
+    In Shopify, open **Online Store > Themes** and open the editor for your published theme. Select **App embeds**, turn on **Bily Storefront**, and select **Save**.
+
+    If Bily provides an activation link for your store, it opens this editor with the embed selected. You still need to save the change.
+
+    <Note>
+      Installing the app makes the embed available. Opening the editor or seeing a preview does not activate it on the live store; saving the published theme does.
+    </Note>
+  </Step>
+
+  <Step title="Verify activity on the live storefront">
+    Open the public storefront outside the theme editor. Follow your store's consent choices, visit a product, and add an item to the cart. Remove the test item afterward.
+
+    Return to Bily's **Watch events arrive** setup step and confirm fresh activity for the selected store. If events are absent, follow [tracking troubleshooting](/troubleshooting) before completing setup.
+
+    Confirm both the saved embed setting and the expected events. Web Pixel events alone do not prove that the theme embed is active, and a saved embed alone does not prove that events arrive.
+  </Step>
+
+  <Step title="Connect your destinations">
+    Continue Bily's guided setup to connect the ad and analytics services you use. Verify the intended events and destinations with the [verification checklist](/guides/verification).
+  </Step>
+</Steps>
+
+## Migrate an existing installation
+
+Existing customers use the same **App embeds > Bily Storefront > Save** step on their published theme.
+
+<Warning>
+  Keep working Bily scripts until the replacement is verified. Ask Bily support to review duplicate or older installations before removing them.
+</Warning>
+
+Shopify stops accepting new or updated ScriptTags on **October 1, 2026**. It stops loading existing ScriptTags on **March 1, 2027**. Complete the theme-embed migration before that second date. These dates apply to Shopify's ScriptTag API; Web Pixels and theme app embeds are the replacement paths. See [Shopify's deprecation notice](https://shopify.dev/changelog/posts/online-store-script-tags-deprecation).
+
+## Resolve an incomplete connection
+
+- **Bily Storefront is missing:** confirm that Bily is installed on the same store whose published theme you are editing. Refresh the editor after completing installation.
+- **Shopify requests permissions or reconnection:** finish that flow, return to Bily, and repeat verification. An older connection can require reconnection before a missing Web Pixel can be restored.
+- **The store is paused or unavailable:** restore store access in Shopify before retrying setup.
+- **You publish a different theme:** check the Bily embed in that theme and verify the live storefront again.
+
+For a headless or custom storefront rendered outside Shopify themes, use the [browser-script or SDK installation guide](/quickstart) for that website. Enabling an embed in a Shopify theme does not install it on a separate frontend.
+
+Continue with [event verification](/guides/verification).
