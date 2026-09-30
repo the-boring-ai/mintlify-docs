@@ -47,6 +47,7 @@
           {
             "group": "Install Bily",
             "pages": [
+              "guides/shopify",
               "sdk/overview",
               "sdk/html",
               "sdk/javascript",
