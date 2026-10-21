@@ -15,29 +15,21 @@ node scripts/check-docs-structure.mjs
 node scripts/check-sdk-guidance.mjs
 ```
 
-Install the Mintlify CLI, then validate links and redirects:
-
-```bash
-npm install --global mint
-mint broken-links --check-redirects
-```
-
-Start a local preview from the repository root:
-
-```bash
-mint dev
-```
-
-The preview is available at `http://localhost:3000` by default.
+Run build, link, and rendering checks through the actual custom frontend after
+verifying its source and configuration. Preview changed pages at desktop and
+mobile widths. The presence of Mintlify-compatible content or configuration
+does not identify the production frontend or establish a Mintlify login requirement.
 
 ## Deployment
 
-Publish reviewed changes with Bily's existing direct Mintlify deployment. The
-Mintlify GitHub App is not part of this repository's deployment architecture
-and must not be installed or authorized.
+The Bily owner identifies a custom frontend for `docs.bily.ai`; its exact
+serving source and release workflow need verification. Publish reviewed changes
+through that verified existing workflow. Do not
+install or authorize the Mintlify GitHub App or a replacement integration.
 
-Follow [DEPLOYMENT.md](./DEPLOYMENT.md) for the release and live-verification
-checklist.
+Follow [DEPLOYMENT.md](./DEPLOYMENT.md) for source verification, required checks,
+release, and live-verification steps. The exact frontend deployment command
+must be verified from current configuration before it is used.
 
 ## Documentation rules
 
@@ -48,3 +40,4 @@ checklist.
 - Treat the initial page view as automatic. Let the browser script track supported client-side navigation automatically; do not duplicate it with manual page-view calls.
 - Keep implementation providers and private infrastructure out of public content.
 - Never include credentials, private tokens, or customer data in examples.
+

@@ -33,4 +33,5 @@ Avoid vague product language such as “powerful,” “seamless,” “robust,�
 
 ## Publishing
 
-Before publishing public pages, follow [publishing checks and deployment](.agents/references/publishing.md). Keep the existing direct Mintlify path and verify changed live pages; a merge alone is not publication. Do not install a replacement integration. For instruction-only changes, validate the changed instructions and links without running a public-page publishing workflow.
+Before publishing public pages, follow [publishing checks and deployment](.agents/references/publishing.md). The Bily owner identifies a custom frontend; verify the current serving architecture rather than inferring a publisher from this repository's name or content format. Verify the actual frontend source, build configuration, and existing release workflow before publishing; a merge alone is not publication. Do not request Mintlify login merely because this repository contains Mintlify-compatible files. Do not install a replacement integration. For instruction-only changes, validate the changed instructions and links without running a public-page publishing workflow.
+
