@@ -6,7 +6,7 @@ description: "Track meaningful application outcomes with stable names and safe p
 Use custom events for meaningful product-specific outcomes outside the standard conversion catalog. The SDK accepts non-empty names, but Bily ingestion requires a recognized built-in lifecycle name or a custom name already configured in the website or store's Moment catalog. Unknown, unconfigured names are rejected as `UNSUPPORTED_EVENT`; a successful `track()` call does not confirm acceptance.
 
 <Warning>
-  Check the [event reference](/api-reference/events) first. Authentication, registration, contact, demo, trial, subscription, lead, download, and commerce outcomes already have standard names that Bily can connect consistently across destinations.
+  Check the [event reference](/api-reference/events) for recognized conversion names, collector admission and destination support. Prefer a standard event only when it matches the real outcome; SDK name acceptance does not guarantee ingestion or advertising delivery.
 </Warning>
 
 ## Confirm admission and destination support
@@ -83,4 +83,3 @@ Call `track()` immediately after `init()` if needed. The SDK keeps calls in memo
   <Card title="track() reference" icon="function" href="/api-reference/track" />
   <Card title="Data safety" icon="shield" href="/privacy/data-safety" />
 </CardGroup>
-

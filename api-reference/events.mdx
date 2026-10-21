@@ -11,7 +11,9 @@ type BilyEvent = KnownBilyEvent | (string & Record<never, never>);
 
 Event names are case-sensitive. Use the capitalization shown for Bily events. Create a stable snake_case application event only when no standard event describes the outcome.
 
-## Use known Bily events
+## SDK-known event names
+
+This type lists SDK autocomplete and compatibility names, not an ingestion or destination allowlist. Some names still require a configured Moment or supported destination mapping. Use the preferred conversion names and verify receipts as described below.
 
 ```typescript
 type KnownBilyEvent =
@@ -139,4 +141,3 @@ The SDK accepts non-empty custom strings, but ingestion is separately validated.
 <Card title="Track custom events" icon="wave-pulse" href="/guides/custom-events">
   Create stable names and safe properties for your application.
 </Card>
-
