@@ -14,9 +14,11 @@ Keep changes concise, testable, and consistent with the current public SDK types
 
 Do not publish or deploy documentation from a feature branch.
 
-After the approved change merges into `main`, observe the existing source
-integration described in [DEPLOYMENT.md](./DEPLOYMENT.md). Public deployment
-metadata identifies this repository and branch as the live source. Do not
+After the approved change merges into `main`, reverify and use the current
+publishing mode described in [DEPLOYMENT.md](./DEPLOYMENT.md). The existing
+Manual update action was verified on 2026-10-21 while automatic updates were
+not connected; this is an observation, not a permanent manual-only rule. Public
+deployment metadata identifies this repository and branch as the live source. Do not
 invent a separate frontend, infer a manual login requirement, install the
 Mintlify GitHub App, or create a replacement integration. Verify changed live
 content separately from the source merge.

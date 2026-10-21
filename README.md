@@ -22,9 +22,11 @@ validation is separate from signing into a publishing dashboard.
 ## Deployment
 
 The live site's public deployment metadata identifies this repository's `main`
-branch, with root content, as the source for `docs.bily.ai`. Use that existing
-integration. Do not infer a separate custom frontend repository or a mandatory
-manual Mintlify login/publish step.
+branch, with root content, as the source for `docs.bily.ai`. On 2026-10-21,
+automatic updates were not connected; the existing Manual update action
+published the reviewed main revision successfully without a new grant. Reverify
+that mode for each release rather than assuming either automatic or manual
+publishing is permanently required. Do not invent a separate frontend.
 
 Follow [DEPLOYMENT.md](./DEPLOYMENT.md) for evidence, required checks, source
 release, and live verification. Do not install a replacement integration.
