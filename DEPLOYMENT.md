@@ -20,7 +20,7 @@ source repository. Do not invent one or infer a manual publishing requirement.
 
 1. Prepare and review the documentation change in this repository.
 2. Run content, build, link, and rendering checks from
-   [publishing checks](.agents/references/publishing.md).
+   repository publishing checks in `.agents/references/publishing.md`.
 3. Merge the approved change into `main`, the verified deployment source.
 4. Observe the existing source integration's publication result. Do not start
    a separate manual release or request login unless a concrete failure shows
