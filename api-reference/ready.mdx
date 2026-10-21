@@ -1,9 +1,9 @@
 ---
 title: "ready()"
-description: "Confirm that Bily finished loading when your application needs an explicit check."
+description: "Confirm that the Bily browser runtime initialized when your application needs an explicit check."
 ---
 
-Use `ready()` when you need to confirm that Bily loaded. Normal event tracking does not wait for it because `track()` queues early calls.
+Use `ready()` when you need to confirm that the Bily browser runtime initialized. Normal event tracking does not wait for it because `track()` queues early calls.
 
 ## Check readiness
 
@@ -33,14 +33,14 @@ try {
 
 ## Know when it resolves
 
-The promise resolves when Bily can accept queued events. During server rendering, it resolves immediately because there is no browser script to load.
+In 2.0.8, the promise resolves after the browser runtime finishes initialization and can accept queued events, not merely when its bootstrap script loads or exposes a queue. Queued events wait for that runtime handoff. Readiness is not a delivery receipt from an analytics destination. During server rendering, it resolves immediately because there is no browser script to load.
 
 ## Handle a rejection
 
 The promise rejects when:
 
 - The browser reports a script load error.
-- Bily does not become ready before `loadTimeoutMs`.
+- Bily does not finish runtime initialization before `loadTimeoutMs`, even if the bootstrap script loaded.
 - The script loads but does not expose a usable Bily browser API.
 
 The default timeout is 15 seconds. Set a value from 1 to 60 seconds through `init()`.

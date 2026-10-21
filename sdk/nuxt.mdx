@@ -3,7 +3,7 @@ title: "Nuxt"
 description: "Add Bily through one Nuxt client plugin and track each successful route once."
 ---
 
-Use one client-only Nuxt plugin. It starts Bily once, then observes every later route through Nuxt's Vue Router, including query-only navigation.
+Use one client-only Nuxt plugin. It starts Bily once; the browser script records navigation automatically.
 
 Do not add a raw Bily script or another tracking plugin alongside the SDK.
 
@@ -40,8 +40,7 @@ The URL is visible in the browser by design. It is not a private token. Keep cre
 In Nuxt 4, create `app/plugins/bily.client.ts`. In a Nuxt 3 project without the `app/` directory structure, create `plugins/bily.client.ts`.
 
 ```typescript app/plugins/bily.client.ts
-import { init, track } from "@bilyai/js";
-import { nextTick } from "vue";
+import { init } from "@bilyai/js";
 
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
@@ -52,27 +51,12 @@ export default defineNuxtPlugin(() => {
   }
 
   init({ scriptUrl });
-  let previousUrl = window.location.href;
-
-  useRouter().afterEach(async (_to, _from, failure) => {
-    if (failure) return;
-    await nextTick();
-
-    const currentUrl = window.location.href;
-    if (currentUrl === previousUrl) return;
-    previousUrl = currentUrl;
-
-    track("PageView", {
-      sourceUrl: currentUrl,
-      pageTitle: document.title,
-    });
-  });
 });
 ```
 
 The `.client` suffix keeps startup in the browser. The browser script records the initial page automatically.
 
-`useRouter().afterEach()` runs after Nuxt's router commits a navigation. Waiting for Vue's next update captures the new page title as well as the new URL. The hook also observes query-only changes when Nuxt reuses the current page component. Comparing the complete URL prevents repeated lifecycle notifications from creating duplicates.
+The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
 ## Track successful actions
 

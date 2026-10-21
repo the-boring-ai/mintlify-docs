@@ -65,16 +65,9 @@ When the queue is full, the SDK removes the oldest call before it adds the newes
 - With `debug: true`, Bily logs a warning for delivery failures without logging the payload.
 - During server rendering, `track()` is a no-op.
 
-## Track only later page views
+## Let the browser script track page views
 
-The first `PageView` is automatic. Call `track("PageView", ...)` only after a later client-side route change.
-
-```typescript
-track("PageView", {
-  sourceUrl: window.location.href,
-  pageTitle: document.title,
-});
-```
+The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
 <CardGroup cols={2}>
   <Card title="Event names" icon="list" href="/api-reference/events" />

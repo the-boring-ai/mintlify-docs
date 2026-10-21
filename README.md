@@ -12,6 +12,7 @@ Run the public-language guard before previewing or submitting changes:
 node scripts/build-openapi.mjs
 node scripts/check-public-language.mjs
 node scripts/check-docs-structure.mjs
+node scripts/check-sdk-guidance.mjs
 ```
 
 Install the Mintlify CLI, then validate links and redirects:
@@ -44,6 +45,6 @@ checklist.
 - Keep `openapi.json` generated from `scripts/build-openapi.mjs`. Update the route definition and regenerate the file together.
 - Copy the exact Bily script URL. Never remove, reorder, decode, or rebuild its query string.
 - Use one installation path per website surface: a raw script tag for plain HTML or the SDK for application frameworks.
-- Treat the initial page view as automatic. Track only later client-side route changes manually.
+- Treat the initial page view as automatic. Let the browser script track supported client-side navigation automatically; do not duplicate it with manual page-view calls.
 - Keep implementation providers and private infrastructure out of public content.
 - Never include credentials, private tokens, or customer data in examples.

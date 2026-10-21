@@ -19,7 +19,7 @@ Use Node.js 16 or newer for build tooling. You can call every public method duri
 | --- | --- | --- |
 | [`init(options)`](/api-reference/init) | `void` | Load Bily from an exact tracking URL |
 | [`track(event, payload?)`](/api-reference/track) | `void` | Queue or send an event |
-| [`ready()`](/api-reference/ready) | `Promise<void>` | Verify that Bily finished loading |
+| [`ready()`](/api-reference/ready) | `Promise<void>` | Verify that the browser runtime initialized |
 | [`getBilyTrackingId()`](/api-reference/get-bily-tracking-id) | `string \| null` | Read or create the Bily browser identifier |
 
 ## Use exported types
@@ -58,7 +58,7 @@ try {
 }
 ```
 
-You can call `track()` before `ready()` resolves. The SDK keeps early calls in a bounded queue, then delivers them in order after Bily loads.
+You can call `track()` before `ready()` resolves. The SDK keeps early calls in a bounded queue, then hands them off in order after the browser runtime initializes. Readiness is not a destination delivery receipt.
 
 <Warning>
   Use one Bily loader. Let `init()` create it unless your framework guide reserves one script element for the SDK to reuse. Do not add another unmanaged tag.

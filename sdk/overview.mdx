@@ -4,23 +4,23 @@ sidebarTitle: "Frameworks"
 description: "Install Bily once in your framework and track every committed route without duplicates."
 ---
 
-The Bily JavaScript SDK works across browser applications because it owns one small contract: load one exact tracking URL, record the initial page automatically, and track only later client-side routes yourself.
+The Bily JavaScript SDK works across browser applications because it owns one small contract: load one exact tracking URL, let the browser script record initial pages and supported client-side navigation automatically.
 
 ## Find your installation path
 
-| Website | Start Bily in | Observe later routes with |
+| Website | Start Bily in | Page-view owner |
 | --- | --- | --- |
-| Plain HTML | Shared `<head>` | A new document loads the script again |
-| Vanilla JavaScript | Browser entry module | Your router's committed-navigation callback |
-| React Router | One component inside the existing router | `useLocation()` |
-| Next.js | One shared client component | `usePathname()` and `useSearchParams()` |
-| Vue | Browser bootstrap after the router is ready | `router.afterEach()` |
-| Nuxt | One client plugin | `useRouter().afterEach()` |
-| Svelte | Browser entry module | Your router's committed-navigation callback |
-| SvelteKit | Root layout component | `afterNavigate()` |
-| Angular | One root service | `NavigationEnd` |
-| Astro | Shared layout script | Persisted script plus `astro:page-load` |
-| React Router framework mode or Remix | One component in the root route | `useLocation()` |
+| Plain HTML | Shared `<head>` | Browser script |
+| Vanilla JavaScript | Browser entry module | Browser script |
+| React Router | One component inside the existing router | Browser script |
+| Next.js | One shared client component | Browser script |
+| Vue | Browser bootstrap after the router is ready | Browser script |
+| Nuxt | One client plugin | Browser script |
+| Svelte | Browser entry module | Browser script |
+| SvelteKit | Root layout component | Browser script |
+| Angular | One root service | Browser script |
+| Astro | Shared layout script | Browser script |
+| React Router framework mode or Remix | One component in the root route | Browser script |
 
 ## Choose a guide
 
@@ -64,8 +64,8 @@ Every framework follows the same rules:
 1. Copy the complete tracking URL from **Bily > Settings > Apps > More settings > Install tracking**.
 2. Let `@bilyai/js` own the loader unless a framework guide reserves one script element for the SDK to reuse. Never add a second unmanaged tag.
 3. Let the browser script record the initial `PageView`.
-4. Send one explicit `PageView` after each later committed client-side route.
-5. Ignore repeated notifications when `window.location.href` has not changed.
+4. Let the browser script record later supported client-side navigation automatically.
+5. Do not attach another page-view listener to your router.
 
 The package ships ESM, CommonJS, and TypeScript definitions with no runtime dependencies. Its public methods can be imported during server rendering; browser work starts only from client-mounted code.
 

@@ -118,7 +118,7 @@ Prefer a stable internal `userId` to extra contact fields. Add email, phone, add
 Use typed page fields when an explicit event needs that context:
 
 ```typescript
-track("PageView", {
+track("content_engaged", {
   sourceUrl: window.location.href,
   pageTitle: document.title,
   referrer: document.referrer,

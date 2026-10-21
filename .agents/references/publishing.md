@@ -10,6 +10,7 @@ Use Node.js 22 LTS and run:
 node scripts/build-openapi.mjs --check
 node scripts/check-public-language.mjs
 node scripts/check-docs-structure.mjs
+node scripts/check-sdk-guidance.mjs
 mint validate
 mint broken-links --check-redirects
 ```

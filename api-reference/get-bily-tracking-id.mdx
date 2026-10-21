@@ -26,7 +26,7 @@ if (trackingId) {
 
 ## Keep it stable in the browser
 
-When browser storage is available, the SDK stores a stable identifier there.
+The SDK shares the browser identifier with the tracking initializer before the first page view and reuses an existing tracked visitor when one is available. When browser storage is available, it preserves the identifier there.
 
 If storage is blocked, the SDK keeps an in-memory identifier for the page session. It can also use an existing Bily identifier when one is available.
 

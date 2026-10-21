@@ -33,7 +33,7 @@ Start with the [verification checklist](/guides/verification). If you need lifec
   </Accordion>
 
   <Accordion title="Track missing SPA route changes">
-    The automatic page view covers only the initial document. Connect `track("PageView", ...)` to the router's committed-navigation callback.
+    The browser script tracks the initial document and supported client-side navigation automatically. Verify the current browser runtime is loaded and inspect navigation in the event stream before adding any manual tracking.
 
     Send the current `window.location.href` and final `document.title`. Skip the initial callback. Ignore repeated notifications for the same URL.
   </Accordion>

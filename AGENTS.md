@@ -26,7 +26,7 @@ Avoid vague product language such as “powerful,” “seamless,” “robust,�
 - Keep every example aligned with the exported `@bilyai/js` contract.
 - Copy the exact Bily tracking URL. Never remove, reorder, decode, or rebuild its query string.
 - Use one installation path per website surface: the raw script for plain HTML or the SDK for application frameworks.
-- Treat the initial `PageView` as automatic. Track only later client-side route changes manually.
+- Treat the initial `PageView` as automatic. Let the browser script track supported client-side navigation automatically; do not duplicate it with manual page-view calls.
 - Never include credentials, private tokens, or customer data in examples.
 - Preserve API authentication, organization scope, store scope, safety, and retry semantics.
 - Keep `openapi.json` generated from `scripts/build-openapi.mjs`; update the generator first.

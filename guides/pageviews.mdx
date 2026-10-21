@@ -1,77 +1,40 @@
 ---
 title: "Page views"
-description: "Record every page once: automatically on the first load, explicitly on later SPA routes."
+description: "Let the browser script record initial loads and client-side navigation without duplicate page views."
 ---
 
-Use the exact event name `PageView`.
+## Let Bily record navigation
 
-## Let Bily record the first page
+The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
-The Bily browser script records the first page view when the document loads. This works the same whether you use the raw script or initialize Bily through `@bilyai/js`.
+This works whether you use the exact raw browser script or initialize it through `@bilyai/js`. Traditional multi-page sites record an initial page view on each full document load. Single-page applications use the browser runtime's supported navigation tracking. Verify custom router behavior in staging; not every application state change is a navigation.
 
 <Warning>
-  Do not call `track("PageView")` during the initial page or component mount. It would duplicate the automatic event.
+  Do not call `track("PageView")` on initial mount or from router navigation hooks alongside automatic tracking. Remove older manual route listeners when upgrading.
 </Warning>
 
-Traditional multi-page sites need no manual page-view code. Each full navigation loads a new document and records one initial event.
+## Keep one installation
 
-## Record each later SPA route
-
-Single-page applications do not load a new document for each route. After the router commits a later URL, send:
-
-```typescript
-import { track } from "@bilyai/js";
-
-track("PageView", {
-  sourceUrl: window.location.href,
-  pageTitle: document.title,
-});
-```
-
-Set `sourceUrl` to the complete current URL. Send the event after the page title and route state are current.
-
-## Skip the first route and repeated URLs
-
-Save the current URL before you listen for later navigation.
-
-```typescript route-tracking.ts
-import { track } from "@bilyai/js";
-
-let previousUrl = window.location.href;
-
-export function onRouteCommitted() {
-  const currentUrl = window.location.href;
-  if (currentUrl === previousUrl) return;
-
-  previousUrl = currentUrl;
-  track("PageView", {
-    sourceUrl: currentUrl,
-    pageTitle: document.title,
-  });
-}
-```
-
-Connect `onRouteCommitted()` to your router's after-navigation callback. Do not call it to initialize the listener.
-
-## Use your framework's router
+Mount one SDK initialization for the website surface. Do not add a second unmanaged browser-script tag. For Astro client transitions, preserve the reserved script as described in the framework guide.
 
 <CardGroup cols={2}>
   <Card title="React Router" icon="atom" href="/sdk/react">
-    Track pathname, search, and hash changes from one component.
+    Initialize once from a browser effect.
   </Card>
   <Card title="Next.js" icon="layers" href="/sdk/nextjs">
-    Track App Router and Pages Router navigation from one shared component.
+    Initialize from one client component in each route tree.
   </Card>
 </CardGroup>
 
 ## Confirm every page appears once
 
-- The event name is exactly `PageView`.
-- The initial document relies on the automatic event.
-- Later browser routes call `track()` after the route commits.
-- `sourceUrl` contains `window.location.href`.
-- `pageTitle` contains the final `document.title`.
-- A rerender at the same URL does not emit another event.
+- Direct loads and reloads produce one automatic initial `PageView`.
+- Supported client-side URL changes produce one automatic page view.
+- Browser Back and Forward record the resulting page once.
+- Rerenders at the same URL do not produce another event.
+- Custom business events remain separate from navigation.
+
+If navigation is missing, inspect the loaded runtime and the browser network requests before adding another page-view sender. `ready()` confirms runtime initialization, not destination delivery.
 
 <Card title="Verify page views" icon="circle-check" href="/guides/verification">
   Test direct loads, reloads, route transitions, and browser history.

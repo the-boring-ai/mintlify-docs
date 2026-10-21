@@ -31,39 +31,18 @@ Choose the import that matches the framework. Both versions follow the same rout
 <Tabs>
   <Tab title="React Router framework mode">
     ```tsx app/bily-tracking.tsx
-    import { useEffect, useRef } from "react";
-    import { useLocation } from "react-router";
-    import { init, track } from "@bilyai/js";
+    import { useEffect } from "react";
+    import { init } from "@bilyai/js";
 
     const BILY_SCRIPT_URL = import.meta.env.VITE_BILY_SCRIPT_URL;
 
     export function BilyTracking() {
-      const location = useLocation();
-      const previousUrl = useRef<string | null>(null);
-
       useEffect(() => {
         if (!BILY_SCRIPT_URL) {
           throw new Error("VITE_BILY_SCRIPT_URL is required");
         }
         init({ scriptUrl: BILY_SCRIPT_URL });
       }, []);
-
-      useEffect(() => {
-        const currentUrl = window.location.href;
-
-        if (previousUrl.current === null) {
-          previousUrl.current = currentUrl;
-          return;
-        }
-
-        if (currentUrl === previousUrl.current) return;
-        previousUrl.current = currentUrl;
-
-        track("PageView", {
-          sourceUrl: currentUrl,
-          pageTitle: document.title,
-        });
-      }, [location.pathname, location.search, location.hash]);
 
       return null;
     }
@@ -71,16 +50,12 @@ Choose the import that matches the framework. Both versions follow the same rout
   </Tab>
   <Tab title="Remix">
     ```tsx app/bily-tracking.tsx
-    import { useEffect, useRef } from "react";
-    import { useLocation } from "@remix-run/react";
-    import { init, track } from "@bilyai/js";
+    import { useEffect } from "react";
+    import { init } from "@bilyai/js";
 
     const BILY_SCRIPT_URL = import.meta.env.VITE_BILY_SCRIPT_URL;
 
     export function BilyTracking() {
-      const location = useLocation();
-      const previousUrl = useRef<string | null>(null);
-
       useEffect(() => {
         if (!BILY_SCRIPT_URL) {
           throw new Error("VITE_BILY_SCRIPT_URL is required");
@@ -88,36 +63,19 @@ Choose the import that matches the framework. Both versions follow the same rout
         init({ scriptUrl: BILY_SCRIPT_URL });
       }, []);
 
-      useEffect(() => {
-        const currentUrl = window.location.href;
-
-        if (previousUrl.current === null) {
-          previousUrl.current = currentUrl;
-          return;
-        }
-
-        if (currentUrl === previousUrl.current) return;
-        previousUrl.current = currentUrl;
-
-        track("PageView", {
-          sourceUrl: currentUrl,
-          pageTitle: document.title,
-        });
-      }, [location.pathname, location.search, location.hash]);
-
       return null;
     }
     ```
   </Tab>
 </Tabs>
 
-The initial effect starts the SDK. The browser script records the initial page automatically. The second effect remembers that URL and sends only later location changes.
+The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
-Repeated `init()` calls with the same URL are safe, and the URL guard keeps development checks from duplicating route events.
+Repeated `init()` calls with the same URL are safe.
 
 ## Mount it in the existing root route
 
-Add `<BilyTracking />` inside the default root component, where `useLocation()` already has router context.
+Add `<BilyTracking />` inside the default root component, without replacing your existing router.
 
 <Tabs>
   <Tab title="React Router framework mode">

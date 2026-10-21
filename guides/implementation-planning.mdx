@@ -46,7 +46,7 @@ Use one Bily loader per website surface. In most npm applications, let the SDK c
 
 ## Make one integration own page views
 
-The browser script records the initial document page view. If your application changes routes without loading a new document, send one explicit `PageView` after each later committed route.
+The browser script records the initial document page view. The browser script also records supported client-side navigation automatically. Do not duplicate it with manual router page-view calls.
 
 Choose one router integration to own those later page views. It should:
 

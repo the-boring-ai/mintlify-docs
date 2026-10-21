@@ -3,7 +3,7 @@ title: "Svelte and SvelteKit"
 description: "Add Bily to a Svelte browser entry or track SvelteKit navigation from the root layout."
 ---
 
-Use the browser entry for a Svelte application. In SvelteKit, mount one component from the root layout so `afterNavigate()` can observe every completed route.
+Use the browser entry for a Svelte application. In SvelteKit, mount one component from the root layout to initialize Bily in the browser.
 
 Do not add a raw Bily script tag alongside the SDK.
 
@@ -43,7 +43,7 @@ import "./bily";
 // Keep your existing Svelte application mount below this import.
 ```
 
-The browser script records the initial document automatically. If your Svelte application uses a client router, call one route function from that router's committed-navigation callback. Follow the [Vanilla JavaScript route guard](/sdk/javascript) and compare the complete `window.location.href` before sending a later `PageView`.
+The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
 ## Add Bily to SvelteKit
 
@@ -53,36 +53,19 @@ Use a public static environment value when the URL belongs in the browser bundle
 PUBLIC_BILY_SCRIPT_URL="https://tracking.example.com/b.js?shop=store.example.com"
 ```
 
-Create one component. `afterNavigate()` runs when the component first mounts and after later SvelteKit navigations.
+Create one component. `onMount()` starts Bily only in the browser.
 
 ```svelte src/lib/BilyTracking.svelte
 <script lang="ts">
-  import { afterNavigate } from "$app/navigation";
+  import { onMount } from "svelte";
   import { PUBLIC_BILY_SCRIPT_URL } from "$env/static/public";
-  import { init, track } from "@bilyai/js";
+  import { init } from "@bilyai/js";
 
-  let previousUrl: string | null = null;
-
-  afterNavigate(() => {
-    const currentUrl = window.location.href;
-
-    if (previousUrl === null) {
-      if (!PUBLIC_BILY_SCRIPT_URL) {
-        throw new Error("PUBLIC_BILY_SCRIPT_URL is required");
-      }
-
-      previousUrl = currentUrl;
-      init({ scriptUrl: PUBLIC_BILY_SCRIPT_URL });
-      return;
+  onMount(() => {
+    if (!PUBLIC_BILY_SCRIPT_URL) {
+      throw new Error("PUBLIC_BILY_SCRIPT_URL is required");
     }
-
-    if (currentUrl === previousUrl) return;
-    previousUrl = currentUrl;
-
-    track("PageView", {
-      sourceUrl: currentUrl,
-      pageTitle: document.title,
-    });
+    init({ scriptUrl: PUBLIC_BILY_SCRIPT_URL });
   });
 </script>
 ```
@@ -102,7 +85,7 @@ Mount it once from the root layout. Keep the layout's existing data, snippets, p
 
 If your project uses legacy slot syntax, keep its existing `<slot />` and add only `<BilyTracking />` beside it.
 
-The first `afterNavigate()` call starts the SDK, so the browser script owns the initial page. Every later callback sends at most one event for the final URL.
+The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
 ## Track successful actions
 

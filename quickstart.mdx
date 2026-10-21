@@ -45,16 +45,8 @@ For other websites and custom frontends, select the intended store, then open **
   <Step title="Record each page once">
     The browser script records the first `PageView` automatically. Do not call `track("PageView")` during the initial mount.
 
-    If your application changes routes without loading a new document, track each later route after the router commits the change.
+    The browser script also records supported client-side navigation automatically. Do not add manual router page-view calls.
 
-    ```typescript analytics.ts
-    import { track } from "@bilyai/js";
-
-    track("PageView", {
-      sourceUrl: window.location.href,
-      pageTitle: document.title,
-    });
-    ```
   </Step>
 
   <Step title="Send your first event">
@@ -71,7 +63,7 @@ For other websites and custom frontends, select the intended store, then open **
   </Step>
 
   <Step title="Confirm Bily is ready">
-    The SDK queues calls while Bily loads, so normal tracking does not need to wait. Use `ready()` only for an explicit load check.
+    The SDK queues calls while Bily loads, so normal tracking does not need to wait. Use `ready()` for an explicit runtime-initialization check, not as a destination delivery receipt.
 
     ```typescript verify-bily.ts
     import { ready } from "@bilyai/js";

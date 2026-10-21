@@ -3,7 +3,7 @@ title: "Angular"
 description: "Add Bily through one browser-only Angular service and track each successful Router navigation once."
 ---
 
-Create one root service. It starts Bily in the browser and observes successful `NavigationEnd` events from the Angular Router.
+Create one root service. It starts Bily only in the browser.
 
 Do not add the raw Bily script to `index.html`. The SDK owns script loading for this installation path.
 
@@ -26,21 +26,17 @@ export const environment = {
 
 The URL is public installation data. It is not a private token. If your build replaces environment files, set the complete value for every preview and production target.
 
-## Observe successful navigation
+## Initialize in the browser
 
 ```typescript src/app/bily-tracking.service.ts
 import { isPlatformBrowser } from "@angular/common";
 import { inject, Injectable, PLATFORM_ID } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NavigationEnd, Router } from "@angular/router";
-import { filter } from "rxjs";
-import { init, track } from "@bilyai/js";
+import { init } from "@bilyai/js";
 import { environment } from "../environments/environment";
 
 @Injectable({ providedIn: "root" })
 export class BilyTrackingService {
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly router = inject(Router);
 
   constructor() {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -49,30 +45,11 @@ export class BilyTrackingService {
     }
 
     init({ scriptUrl: environment.bilyScriptUrl });
-    let previousUrl = window.location.href;
-
-    this.router.events
-      .pipe(
-        filter(
-          (event): event is NavigationEnd => event instanceof NavigationEnd,
-        ),
-        takeUntilDestroyed(),
-      )
-      .subscribe(() => {
-        const currentUrl = window.location.href;
-        if (currentUrl === previousUrl) return;
-
-        previousUrl = currentUrl;
-        track("PageView", {
-          sourceUrl: currentUrl,
-          pageTitle: document.title,
-        });
-      });
   }
 }
 ```
 
-`isPlatformBrowser()` keeps initialization out of server rendering. `NavigationEnd` fires after a successful navigation updates the URL. `takeUntilDestroyed()` closes the subscription with its injection context.
+`isPlatformBrowser()` keeps initialization out of server rendering.
 
 ## Start the service once
 
@@ -96,7 +73,7 @@ export class AppComponent {
 
 If your root component already exists, add only the import and constructor parameter. Do not replace its metadata or template with this minimal example.
 
-The browser script records the initial page automatically. The URL guard skips the initial router event when it describes the same page and ignores repeated notifications.
+The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
 ## Track successful actions
 
