@@ -73,22 +73,39 @@ type KnownBilyEvent =
   | "Trial Started";
 ```
 
-## Prefer standard application outcomes
+## Prefer standard conversion outcomes
 
-Use the same standard name whether Bily found the action on a public page or you install it in application code.
+Choose the standard event that matches the verified outcome, not a button label. Keep a product-specific label in `bily_business_event` instead of changing the conversion name.
 
-| Verified outcome | Event |
+| Verified outcome | Preferred event |
 | --- | --- |
 | Authentication succeeded | `Login` |
-| Registration succeeded | `Sign Up` |
-| Contact request submitted | `Contact Submitted` |
-| Demo or sales meeting scheduled | `Demo Requested` |
-| Trial started | `Trial Started` |
-| Subscription started | `Subscription Started` |
-| High-intent step that is not yet a completion | `Lead` |
-| Download completed | `Download` |
+| Registration succeeded | `CompleteRegistration` |
+| Sales, demo, contact or signup-request form successfully submitted | `Lead` |
+| Appointment actually booked | `Schedule` |
+| Trial actually started | `StartTrial` |
+| Subscription started | `Subscribe` |
+| Checkout actually started | `InitiateCheckout` |
+| Payment completed | `Purchase` |
 
-Do not emit a completion event from the button that merely begins the flow. Track it at the successful callback or committed state.
+Do not emit these conversions from a CTA click or a bare thank-you-page visit. Compatibility aliases such as `Sign Up`, `Trial Started` and `Subscription Started` remain accepted, but new integrations should use the preferred names above. `Demo Requested` has different legacy destination mappings; distinguish a submitted request (`Lead`) from an actual booking (`Schedule`).
+
+For purchases, use the real stable order/action ID, numeric value and currency, and the verified product details required by the connected destination. Never invent identity, value or order data to make an event pass validation. Observe consent and check each destination's required fields and configuration.
+
+### Destination mapping is not identical
+
+The current destination adapters translate the same standard outcome differently:
+
+| Bily event | Meta | TikTok | Google Ads action | Snapchat |
+| --- | --- | --- | --- | --- |
+| `Lead` | `Lead` | `Lead` | `Bily Submit lead form` | `SIGN_UP` |
+| `CompleteRegistration` | `CompleteRegistration` | `CompleteRegistration` | `Bily Submit lead form` | `SIGN_UP` |
+| `Schedule` | `Schedule` | `Schedule` | `Bily Submit lead form` | `RESERVE` |
+| `StartTrial` | `StartTrial` | `StartTrial` | `Bily Submit lead form` | `START_TRIAL` |
+| `Subscribe` | `Subscribe` | `Subscribe` | `Bily Subscription` | `SUBSCRIBE` |
+| `Purchase` | `Purchase` | `Purchase` | `Bily Purchase` | `PURCHASE` |
+
+This table describes mapping, not a delivery guarantee. Connected destinations still apply consent, configuration, required-field and delivery rules. Verify a Bily receipt and the destination result for the same event ID.
 
 ## Use current ecommerce names
 
@@ -117,8 +134,9 @@ track("workspace_created", {
 });
 ```
 
-Every custom name must contain at least one non-whitespace character. Keep a short internal event catalog so every component uses the same spelling.
+The SDK accepts non-empty custom strings, but ingestion is separately validated. Built-in lifecycle names such as `workspace_created` are recognized; other names must be configured in the website or store's Bily Moment catalog before they can be admitted. An unknown, unconfigured name is rejected as `UNSUPPORTED_EVENT`. A payload cannot add itself to that catalog. Keep a short event catalog and verify the actual Bily receipt. Custom ingestion also does not imply support by every ads destination; see the [custom event guide](/guides/custom-events).
 
 <Card title="Track custom events" icon="wave-pulse" href="/guides/custom-events">
   Create stable names and safe properties for your application.
 </Card>
+

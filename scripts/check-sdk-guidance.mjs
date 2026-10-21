@@ -28,3 +28,16 @@ async function check(directory) {
 }
 await check(root);
 console.log('SDK guidance passed: 2.0.8 readiness and no duplicate page-view examples.');
+
+const eventReference = await readFile(new URL('api-reference/events.mdx', root), 'utf8');
+const customEvents = await readFile(new URL('guides/custom-events.mdx', root), 'utf8');
+for (const page of [eventReference, customEvents]) {
+  assert.match(page, /UNSUPPORTED_EVENT/);
+  assert.match(page, /Moment catalog/);
+}
+assert.match(eventReference, /Registration succeeded \| `CompleteRegistration`/);
+assert.match(eventReference, /Appointment actually booked \| `Schedule`/);
+assert.match(eventReference, /This table describes mapping, not a delivery guarantee/);
+assert.match(customEvents, /TikTok, Google Ads and Snapchat use finite standard-event mappings/);
+assert.doesNotMatch(customEvents, /track\("billing_checkout_completed"/);
+console.log('Event guidance passed: standard outcomes, custom admission and destination boundaries.');
