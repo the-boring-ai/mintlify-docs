@@ -15,21 +15,19 @@ node scripts/check-docs-structure.mjs
 node scripts/check-sdk-guidance.mjs
 ```
 
-Run build, link, and rendering checks through the actual custom frontend after
-verifying its source and configuration. Preview changed pages at desktop and
-mobile widths. The presence of Mintlify-compatible content or configuration
-does not identify the production frontend or establish a Mintlify login requirement.
+Run the compatible renderer's build/link checks and preview changed pages at
+desktop and mobile widths as described in the publishing reference. Local
+validation is separate from signing into a publishing dashboard.
 
 ## Deployment
 
-The Bily owner identifies a custom frontend for `docs.bily.ai`; its exact
-serving source and release workflow need verification. Publish reviewed changes
-through that verified existing workflow. Do not
-install or authorize the Mintlify GitHub App or a replacement integration.
+The live site's public deployment metadata identifies this repository's `main`
+branch, with root content, as the source for `docs.bily.ai`. Use that existing
+integration. Do not infer a separate custom frontend repository or a mandatory
+manual Mintlify login/publish step.
 
-Follow [DEPLOYMENT.md](./DEPLOYMENT.md) for source verification, required checks,
-release, and live-verification steps. The exact frontend deployment command
-must be verified from current configuration before it is used.
+Follow [DEPLOYMENT.md](./DEPLOYMENT.md) for evidence, required checks, source
+release, and live verification. Do not install a replacement integration.
 
 ## Documentation rules
 

@@ -11,16 +11,18 @@ node scripts/build-openapi.mjs --check
 node scripts/check-public-language.mjs
 node scripts/check-docs-structure.mjs
 node scripts/check-sdk-guidance.mjs
+mint validate
+mint broken-links --check-redirects
 ```
 
-Run the actual custom frontend's required build, link, and rendering checks after verifying its source and configuration. Mintlify CLI checks may be useful for compatible content, but are not evidence of the deployed frontend or a reason to request Mintlify login.
+The public deployment identifies this repository's `main` branch and Mint rendering infrastructure. Use the compatible renderer for validation and preview; CLI validation does not require publishing-dashboard login. If this environment cannot render, report that specific gate and use an already-authorized supported environment rather than skipping it.
 
 Preview the changed pages at desktop and mobile widths. Confirm headings, code blocks, callouts, tables, and next-step links remain easy to scan.
 
 ## Deployment architecture
 
-- The Bily owner identifies a custom frontend for `docs.bily.ai`; verify its actual serving source and release workflow before choosing a publishing tool.
-- Follow [the deployment checklist](../../DEPLOYMENT.md): verify the actual frontend source, content input, and existing release workflow before publishing.
-- Do not infer a Mintlify login requirement from this repository. Do not install the Mintlify GitHub App or treat an **Installation Needed** prompt as a deployment blocker.
-- A merged commit does not prove publication. Verify the deployed revision and changed live pages after the custom frontend deployment completes.
+- Public deployment metadata identifies `the-boring-ai/mintlify-docs`, branch `main`, root content directory, as the source for `docs.bily.ai`.
+- Follow [the deployment checklist](../../DEPLOYMENT.md). Use the existing source integration; do not invent a separate custom frontend or mandatory manual publication step.
+- Do not infer login requirements from repository format. Do not install the Mintlify GitHub App or treat an **Installation Needed** prompt as permission to add an integration.
+- A merge does not prove publication. Verify changed live content against the approved revision after the source update.
 - If the established workflow is unavailable, report its exact blocker. Do not create a replacement integration or expand persistent access.

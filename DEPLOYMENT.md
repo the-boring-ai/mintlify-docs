@@ -1,37 +1,40 @@
 # Deploy Bily documentation
 
-On 2026-10-21, the Bily owner identified a custom frontend for `docs.bily.ai`;
-the exact frontend source and publishing workflow still need verification.
-Public routing evidence and source configuration must be reconciled before
-release. A Mintlify-shaped content repository or CLI configuration alone does
-not establish the live hosting or publishing path.
+## Verified source linkage
+
+A fresh response from `https://docs.bily.ai/sdk/javascript` on 2026-10-21
+identified this existing GitHub source in its public deployment metadata:
+
+- Owner: `the-boring-ai`
+- Repository: `mintlify-docs`
+- Deployment branch: `main`
+- Content directory: repository root
+- Public domain: `docs.bily.ai`
+
+The response also contained an `x-mintlify-client-version` header. This verifies the currently served source
+and Mint infrastructure; it does not prove a future source push has published.
+The owner's earlier custom-frontend description did not identify a separate
+source repository. Do not invent one or infer a manual publishing requirement.
 
 ## Publish a reviewed change
 
 1. Prepare and review the documentation change in this repository.
-2. Run the content checks in [publishing checks](.agents/references/publishing.md).
-3. Verify the live custom frontend's source repository, content input, build
-   configuration, and existing release workflow. Confirm the exact approved
-   revision that workflow will publish.
-4. Run the frontend's required build and rendering checks, including changed
-   pages at desktop and mobile widths.
-5. Merge the approved source change and publish through that verified existing
-   workflow. Do not guess a deployment command from this content repository.
-6. Wait for the deployment to finish and verify the changed pages at
-   `https://docs.bily.ai` with fresh requests.
+2. Run content, build, link, and rendering checks from
+   [publishing checks](.agents/references/publishing.md).
+3. Merge the approved change into `main`, the verified deployment source.
+4. Observe the existing source integration's publication result. Do not start
+   a separate manual release or request login unless a concrete failure shows
+   that the established workflow requires it.
+5. Verify changed pages at `https://docs.bily.ai` with fresh requests and
+   confirm their content corresponds to the approved revision.
 
-A merged commit is source-history evidence, not deployment evidence. Record
-both the deployed revision and the live page checks.
+A merge is source-history evidence, not deployment evidence. Record both the
+approved revision and live page checks. A changed infrastructure asset ID alone
+does not prove that documentation content updated.
 
-## Missing deployment evidence
+## If publication does not follow the source update
 
-The exact custom frontend deployment command is not yet recorded here.
-Resolve it from the current frontend configuration and existing Bily deployment
-before publishing, then update this document with the verified path. If access
-is unavailable, report the specific missing repository, command, or permission
-rather than asking for a Mintlify login.
-
+Inspect the existing integration and deployment evidence. Report the exact
+missing status, permission, or failed step; do not automatically request login.
 Do not install the Mintlify GitHub App, add an OAuth grant, create a replacement
-integration, or change credentials to repair a documentation release. Do not treat Mintlify
-login or direct Mintlify publication as prerequisites without verified evidence
-that the actual release workflow requires them.
+integration, or change credentials to repair the release.
