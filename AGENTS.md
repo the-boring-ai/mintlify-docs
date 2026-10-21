@@ -26,11 +26,11 @@ Avoid vague product language such as “powerful,” “seamless,” “robust,�
 - Keep every example aligned with the exported `@bilyai/js` contract.
 - Copy the exact Bily tracking URL. Never remove, reorder, decode, or rebuild its query string.
 - Use one installation path per website surface: the raw script for plain HTML or the SDK for application frameworks.
-- Treat the initial `PageView` as automatic. Track only later client-side route changes manually.
+- Treat the initial `PageView` as automatic. Let the browser script track supported client-side navigation automatically; do not duplicate it with manual page-view calls.
 - Never include credentials, private tokens, or customer data in examples.
 - Preserve API authentication, organization scope, store scope, safety, and retry semantics.
 - Keep `openapi.json` generated from `scripts/build-openapi.mjs`; update the generator first.
 
 ## Publishing
 
-Before publishing public pages, follow [publishing checks and deployment](.agents/references/publishing.md). Keep the existing direct Mintlify path and verify changed live pages; a merge alone is not publication. Do not install a replacement integration. For instruction-only changes, validate the changed instructions and links without running a public-page publishing workflow.
+Before publishing public pages, follow [publishing checks and deployment](.agents/references/publishing.md). Live deployment metadata identifies this repository's `main` branch as the source. Preserve that existing integration; do not assume a separate custom frontend repository or require a Mintlify login merely because of the content format. Verify the actual publication result, not just a source merge. Do not install a replacement integration. For instruction-only changes, validate instructions and links without running a public-page publishing workflow.

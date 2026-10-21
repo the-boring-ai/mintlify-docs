@@ -11,7 +11,7 @@ Verify your installation in development or staging before you release it to cust
 | --- | --- |
 | Browser script | One request and one script element |
 | Initial document | One automatic `PageView` |
-| SPA navigation | One explicit `PageView` after each later committed route |
+| SPA navigation | One automatic `PageView` for each later supported client-side route |
 | Action event | One event after the action succeeds |
 | Console | No Bily load errors |
 | Built assets | No credentials or private tokens |
@@ -39,7 +39,7 @@ try {
 `debug` logs lifecycle diagnostics, not event payloads. Remove it or set it to `false` when verification is complete.
 
 <Note>
-  Normal `track()` calls do not need to await `ready()`. The bounded SDK queue holds calls while the script loads.
+  Normal `track()` calls do not need to await `ready()`. The bounded SDK queue holds calls until the browser runtime initializes. `ready()` does not prove that an analytics destination received an event.
 </Note>
 
 ## Confirm a plain HTML installation
@@ -60,7 +60,7 @@ Run these checks:
 
 1. Load a page directly. Expect one automatic `PageView`.
 2. Reload it. Expect one new `PageView` for the new document load.
-3. In an SPA, navigate to a different route. Expect one explicit `PageView`.
+3. In an SPA, navigate to a different route. Expect one automatic `PageView`.
 4. Trigger a component rerender without changing the URL. Expect no new page view.
 5. Navigate back and forward. Expect one event for each committed URL change.
 

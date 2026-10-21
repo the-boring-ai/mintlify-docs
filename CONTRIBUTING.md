@@ -8,12 +8,15 @@ Keep changes concise, testable, and consistent with the current public SDK types
 2. Use active voice and address the reader as "you."
 3. Preserve exact event names, option names, and payload keys.
 4. Run `node scripts/check-public-language.mjs`.
-5. Run `mint broken-links --check-redirects` when the Mintlify CLI is available.
-6. Preview the changed pages with `mint dev`.
+5. Run the renderer's validation and link checks from the publishing reference.
+6. Preview changed pages at desktop and mobile widths through the compatible
+   renderer. Local checks do not require publishing-dashboard login.
 
 Do not publish or deploy documentation from a feature branch.
 
-After the change merges into `main`, use the existing direct Mintlify
-deployment described in [DEPLOYMENT.md](./DEPLOYMENT.md). Do not install or
-authorize the Mintlify GitHub App for this repository, including when the
-dashboard presents an **Installation Needed** prompt.
+After the approved change merges into `main`, observe the existing source
+integration described in [DEPLOYMENT.md](./DEPLOYMENT.md). Public deployment
+metadata identifies this repository and branch as the live source. Do not
+invent a separate frontend, infer a manual login requirement, install the
+Mintlify GitHub App, or create a replacement integration. Verify changed live
+content separately from the source merge.

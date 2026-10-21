@@ -41,6 +41,8 @@ The script records the initial `PageView` for every full document load. Do not s
 
 This HTML installation does not include the `@bilyai/js` application API. If your site becomes a single-page application, remove the raw script and follow the [JavaScript](/sdk/javascript), [React](/sdk/react), or [Next.js](/sdk/nextjs) guide.
 
+For a browser-module integration that needs SDK event methods without a bundler, see the [managed module option](/sdk/javascript#use-the-managed-browser-module). Choose that path instead of a second raw script installation.
+
 ## Keep your content security policy
 
 If your policy requires a script nonce, add the server-generated nonce to the script element. Keep the `src` unchanged.

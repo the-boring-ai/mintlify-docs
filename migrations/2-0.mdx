@@ -5,17 +5,19 @@ description: "Upgrade an existing @bilyai/js integration to the stable 2.0 contr
 
 Version 2.0 gives you exact-URL initialization, bounded event queuing, explicit readiness, and complete public types. Older initialization code remains compatible.
 
-The current stable release is `2.0.2`.
+The current stable release is `2.0.8`.
 
 ```bash
 npm view @bilyai/js version
 ```
 
-Install the current compatible 2.x release.
+The command below resolves the current npm release. Review breaking changes before accepting a future major version, and update your lockfile. Version 2.0.8 waits for the browser runtime to initialize, rather than treating its bootstrap queue as ready.
 
 ```bash
-npm install @bilyai/js@^2.0.2
+npm install @bilyai/js
 ```
+
+For installations that stay on the compatible 2.x line, use your package manager's update command within the saved major range. Bundled or self-hosted SDK files still require a tested rebuild and redeployment. See [update behavior](/sdk/javascript#choose-how-sdk-updates-arrive).
 
 ## Preserve the exact tracking URL
 
@@ -49,24 +51,15 @@ In SDK-based applications, remove unmanaged script tags, manual injection helper
 
 ## Send one page view per route
 
-The browser script records the initial `PageView` automatically. Remove any manual call for that first view.
+The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
-For every later SPA route, send the exact event name after navigation commits:
-
-```typescript
-track("PageView", {
-  sourceUrl: window.location.href,
-  pageTitle: document.title,
-});
-```
-
-Add a same-URL guard so rerenders do not create duplicate page views.
+Remove older router hooks that call `track("PageView")`. Verify direct loads, client navigation, and browser Back and Forward before deploying.
 
 ## Let early events queue
 
 The SDK queues `track()` calls made before loading finishes. Your event code does not need to await `ready()`.
 
-Use `ready()` only for installation checks and diagnostics:
+Use `ready()` for installation checks and diagnostics. It resolves after runtime initialization, not merely after the bootstrap loads, and is not a destination delivery receipt:
 
 ```typescript
 try {
@@ -143,9 +136,9 @@ See the complete [event name reference](/api-reference/events) for every normali
 
 1. Confirm the exact tracking URL remains unchanged in the browser.
 2. Confirm one automatic initial `PageView`.
-3. Confirm one explicit event for each later SPA route.
+3. Confirm one automatic event for each later supported SPA route, including Back and Forward.
 4. Trigger events before loading finishes and verify their delivery order.
-5. Test a load failure and the `ready()` rejection path.
+5. Test script failure and stalled runtime initialization through the `ready()` rejection path.
 6. Test server rendering without `window` or `document`.
 7. Verify zero-valued order fields and optional product quantities.
 8. Search the browser bundle for credentials and private tokens.

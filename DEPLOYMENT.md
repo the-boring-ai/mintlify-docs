@@ -1,27 +1,40 @@
 # Deploy Bily documentation
 
-Bily publishes `docs.bily.ai` through the existing direct deployment in the
-Bily Mintlify project.
+## Verified source linkage
 
-The Mintlify GitHub App is not part of this deployment architecture. Do not
-install or authorize it for this repository. Treat an **Installation Needed**
-prompt as an optional integration prompt, not as evidence that publication is
-blocked.
+A fresh response from `https://docs.bily.ai/sdk/javascript` on 2026-10-21
+identified this existing GitHub source in its public deployment metadata:
+
+- Owner: `the-boring-ai`
+- Repository: `mintlify-docs`
+- Deployment branch: `main`
+- Content directory: repository root
+- Public domain: `docs.bily.ai`
+
+The response also contained an `x-mintlify-client-version` header. This verifies the currently served source
+and Mint infrastructure; it does not prove a future source push has published.
+The owner's earlier custom-frontend description did not identify a separate
+source repository. Do not invent one or infer a manual publishing requirement.
 
 ## Publish a reviewed change
 
 1. Prepare and review the documentation change in this repository.
-2. Run every check listed in `AGENTS.md`.
-3. Merge the approved change into `main`.
-4. Publish the approved content through Bily's existing direct Mintlify
-   deployment.
-5. Wait for the direct deployment to finish.
-6. Verify the changed pages at `https://docs.bily.ai` with a fresh request.
+2. Run content, build, link, and rendering checks from
+   repository publishing checks in `.agents/references/publishing.md`.
+3. Merge the approved change into `main`, the verified deployment source.
+4. Observe the existing source integration's publication result. Do not start
+   a separate manual release or request login unless a concrete failure shows
+   that the established workflow requires it.
+5. Verify changed pages at `https://docs.bily.ai` with fresh requests and
+   confirm their content corresponds to the approved revision.
 
-A merged commit is source-history evidence. It is not deployment evidence.
-Record the live page checks separately.
+A merge is source-history evidence, not deployment evidence. Record both the
+approved revision and live page checks. A changed infrastructure asset ID alone
+does not prove that documentation content updated.
 
-If the direct deployment is unavailable or does not contain the expected
-content, stop and ask the Bily owner to restore the established connection. Do
-not solve the problem by installing a GitHub App, adding an OAuth grant, or
-creating another persistent integration.
+## If publication does not follow the source update
+
+Inspect the existing integration and deployment evidence. Report the exact
+missing status, permission, or failed step; do not automatically request login.
+Do not install the Mintlify GitHub App, add an OAuth grant, create a replacement
+integration, or change credentials to repair the release.

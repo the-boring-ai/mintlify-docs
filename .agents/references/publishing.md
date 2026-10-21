@@ -10,16 +10,19 @@ Use Node.js 22 LTS and run:
 node scripts/build-openapi.mjs --check
 node scripts/check-public-language.mjs
 node scripts/check-docs-structure.mjs
+node scripts/check-sdk-guidance.mjs
 mint validate
 mint broken-links --check-redirects
 ```
+
+The public deployment identifies this repository's `main` branch and Mint rendering infrastructure. Use the compatible renderer for validation and preview; CLI validation does not require publishing-dashboard login. If this environment cannot render, report that specific gate and use an already-authorized supported environment rather than skipping it.
 
 Preview the changed pages at desktop and mobile widths. Confirm headings, code blocks, callouts, tables, and next-step links remain easy to scan.
 
 ## Deployment architecture
 
-- Publish `docs.bily.ai` through Bily's existing direct Mintlify deployment.
-- Do not install or authorize the Mintlify GitHub App for this repository.
-- Treat **Installation Needed** as an optional integration prompt, not a deployment blocker.
-- A merged commit does not prove publication. Verify the changed live pages after the direct deployment completes.
-- If the established direct deployment is unavailable, stop and ask the Bily owner. Do not create a replacement integration.
+- Public deployment metadata identifies `the-boring-ai/mintlify-docs`, branch `main`, root content directory, as the source for `docs.bily.ai`.
+- Follow [the deployment checklist](../../DEPLOYMENT.md). Use the existing source integration; do not invent a separate custom frontend or mandatory manual publication step.
+- Do not infer login requirements from repository format. Do not install the Mintlify GitHub App or treat an **Installation Needed** prompt as permission to add an integration.
+- A merge does not prove publication. Verify changed live content against the approved revision after the source update.
+- If the established workflow is unavailable, report its exact blocker. Do not create a replacement integration or expand persistent access.

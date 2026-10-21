@@ -27,7 +27,7 @@ type BilyPayload = {
 
 The browser SDK sets `source` to `web` for you.
 
-For explicit SPA page views, send `sourceUrl` and `pageTitle`. For product searches, send `searchQuery`.
+Page context fields include `sourceUrl` and `pageTitle`. The browser script records page views automatically; do not add manual SPA page-view calls. For product searches, send `searchQuery`.
 
 Do not supply an IP address from browser code.
 

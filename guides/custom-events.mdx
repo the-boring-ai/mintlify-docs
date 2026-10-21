@@ -3,11 +3,17 @@ title: "Custom events"
 description: "Track meaningful application outcomes with stable names and safe properties."
 ---
 
-Use custom events for meaningful product-specific outcomes outside the standard Bily catalog. `track()` accepts known Bily event names and your own non-empty string names.
+Use custom events for meaningful product-specific outcomes outside the standard conversion catalog. The SDK accepts non-empty names, but Bily ingestion requires a recognized built-in lifecycle name or a custom name already configured in the website or store's Moment catalog. Unknown, unconfigured names are rejected as `UNSUPPORTED_EVENT`; a successful `track()` call does not confirm acceptance.
 
 <Warning>
-  Check the [event reference](/api-reference/events) first. Authentication, registration, contact, demo, trial, subscription, lead, download, and commerce outcomes already have standard names that Bily can connect consistently across destinations.
+  Check the [event reference](/api-reference/events) for recognized conversion names, collector admission and destination support. Prefer a standard event only when it matches the real outcome; SDK name acceptance does not guarantee ingestion or advertising delivery.
 </Warning>
+
+## Confirm admission and destination support
+
+Before implementing a new custom name, confirm its Moment configuration for the correct website or store. Do not assume an example name is configured in your account. Use a stable name of at most 120 characters, beginning with a letter; letters, numbers, spaces, underscores, dots and hyphens are supported by the configured catalog.
+
+Check Bily Test events for the exact event ID, then inspect each connected destination separately. TikTok, Google Ads and Snapchat use finite standard-event mappings; an arbitrary custom name is not automatically an ads conversion. Do not disguise a product milestone as a purchase or lead merely to pass a destination filter. Set `bily_standard_event` only when the real outcome matches that standard; it takes precedence over the custom name. Report unsupported or rejected events explicitly.
 
 ## Give every outcome one stable name
 
@@ -59,18 +65,19 @@ Never include raw error objects. They can expose request data, stack traces, or 
 The SDK creates `event_id` and `ts` when you omit them. Provide a stable event ID when more than one system can report the same business outcome.
 
 ```typescript
-track("billing_checkout_completed", {
+track("Purchase", {
   event_id: "checkout_session_01J2M8YQ7B",
   checkout_id: "checkout_123",
-  plan: "growth",
+  value: 49,
+  currency: "EUR",
 });
 ```
 
-Use one `event_id` for one logical outcome. Never reuse it for a later outcome.
+Use the actual payment amount and currency, not these illustrative values. Use one `event_id` for one logical outcome. Never reuse it for a later outcome.
 
 ## Track while Bily loads
 
-Call `track()` immediately after `init()` if needed. The SDK keeps calls while Bily loads and delivers them in order when ready.
+Call `track()` immediately after `init()` if needed. The SDK keeps calls in memory while Bily loads and forwards them in order when ready. This is not durable storage or an ingestion/destination delivery receipt.
 
 <CardGroup cols={2}>
   <Card title="track() reference" icon="function" href="/api-reference/track" />

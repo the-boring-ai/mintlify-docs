@@ -3,7 +3,7 @@ title: "Vue"
 description: "Add Bily to a Vue application after its first route is ready, then track each successful navigation once."
 ---
 
-Start Bily after Vue Router resolves the initial route. Then observe successful later navigations from one global `afterEach()` hook.
+Start Bily after Vue Router resolves the initial route. The browser script records later navigation automatically.
 
 Do not add a raw Bily script tag. `init()` loads the exact tracking URL for this installation path.
 
@@ -28,9 +28,8 @@ Vite includes `VITE_` values in the browser bundle. The value is public installa
 Create one module that waits for Vue Router to finish its initial navigation. Bily then records that final initial page automatically.
 
 ```typescript src/bily.ts
-import { nextTick } from "vue";
 import type { Router } from "vue-router";
-import { init, track } from "@bilyai/js";
+import { init } from "@bilyai/js";
 
 const BILY_SCRIPT_URL = import.meta.env.VITE_BILY_SCRIPT_URL;
 
@@ -42,21 +41,6 @@ export async function startBily(router: Router): Promise<void> {
   await router.isReady();
   init({ scriptUrl: BILY_SCRIPT_URL });
 
-  let previousUrl = window.location.href;
-
-  router.afterEach(async (_to, _from, failure) => {
-    if (failure) return;
-
-    await nextTick();
-    const currentUrl = window.location.href;
-    if (currentUrl === previousUrl) return;
-
-    previousUrl = currentUrl;
-    track("PageView", {
-      sourceUrl: currentUrl,
-      pageTitle: document.title,
-    });
-  });
 }
 ```
 
@@ -81,7 +65,7 @@ void startApplication();
 
 Keep your existing plugins, stores, error handlers, and application setup. Add only the Bily call at the matching point in your bootstrap.
 
-`router.isReady()` lets initial redirects settle before Bily loads. `afterEach()` runs after a navigation is confirmed. The URL guard ignores repeated notifications and failed navigations.
+`router.isReady()` lets initial redirects settle before Bily loads. The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
 ## Track successful actions
 

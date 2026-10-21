@@ -46,10 +46,10 @@ description: "Clear definitions for Bily products, events, identity, analytics, 
     The event timestamp. The SDK generates an ISO timestamp unless you provide `ts` as a string.
   </Accordion>
   <Accordion title="PageView">
-    Bily's current page-view event name. The browser script records the initial document automatically. Single-page applications send it for each later committed route.
+    Bily's current page-view event name. The browser script records the initial document automatically. The browser script also records supported client-side navigation automatically.
   </Accordion>
   <Accordion title="Single-page application (SPA)">
-    A browser application that changes routes without loading a new document. Its router integration sends an explicit `PageView` for each later route change.
+    A browser application that changes routes without loading a new document. The browser script tracks supported client-side navigation automatically.
   </Accordion>
   <Accordion title="Product">
     A `BilyProduct` with required `id`, `name`, `price`, and `currency`, plus optional quantity, SKU, category, brand, and image fields.
@@ -69,7 +69,7 @@ description: "Clear definitions for Bily products, events, identity, analytics, 
     Your stable authenticated customer or account ID on an event. It provides context. It does not log anyone in or prove authorization.
   </Accordion>
   <Accordion title="sourceUrl">
-    The current page URL you include with an explicit event, especially an SPA page view.
+    The current page URL you include with an explicit event, when that event needs page context.
   </Accordion>
   <Accordion title="referrer">
     An optional referring URL you include when your privacy policy permits it.

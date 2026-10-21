@@ -40,7 +40,7 @@ server.
 
 ## Track Next.js navigation
 
-The browser script records the initial page view automatically. This component remembers that URL and tracks only later client-side Next.js transitions.
+The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
 Create `components/bily-tracking.tsx` beside your `app/` or `pages/` directory. If your project uses both routers, the
 same component serves both. If your routes live under `src/`, place it at `src/components/bily-tracking.tsx` instead.
@@ -48,18 +48,12 @@ same component serves both. If your routes live under `src/`, place it at `src/c
 ```tsx components/bily-tracking.tsx
 "use client";
 
-import { useEffect, useRef } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
-import { init, track } from "@bilyai/js";
+import { useEffect } from "react";
+import { init } from "@bilyai/js";
 
 const BILY_SCRIPT_URL = process.env.NEXT_PUBLIC_BILY_SCRIPT_URL;
 
 export function BilyTracking() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const search = searchParams?.toString() ?? "";
-  const previousUrl = useRef<string | null>(null);
-
   useEffect(() => {
     if (!BILY_SCRIPT_URL) {
       throw new Error("NEXT_PUBLIC_BILY_SCRIPT_URL is required");
@@ -67,40 +61,21 @@ export function BilyTracking() {
     init({ scriptUrl: BILY_SCRIPT_URL });
   }, []);
 
-  useEffect(() => {
-    const currentUrl = window.location.href;
-
-    if (previousUrl.current === null) {
-      previousUrl.current = currentUrl;
-      return;
-    }
-
-    if (currentUrl === previousUrl.current) return;
-    previousUrl.current = currentUrl;
-
-    track("PageView", {
-      sourceUrl: currentUrl,
-      pageTitle: document.title,
-    });
-  }, [pathname, search]);
-
   return null;
 }
 ```
 
-The null-safe search value supports App Router, Pages Router, and applications that use both.
-Comparing URLs prevents route notifications from duplicating the initial page view.
+The client-only effect supports App Router, Pages Router, and applications that use both.
 
 ## Mount it once in App Router
 
-Add the component to the root layout. Wrap it in `Suspense` because it reads the current search parameters.
+Add the component to the root layout. It does not need a router subscription or a `Suspense` boundary.
 
 If `app/layout.tsx` already exists, add only the Bily mount. Keep its metadata exports, fonts, providers, global CSS,
 data hooks, error boundaries, and existing document markup. Use this complete example only when your application does
 not already have a root layout.
 
 ```tsx app/layout.tsx
-import { Suspense } from "react";
 import { BilyTracking } from "../components/bily-tracking";
 
 export default function RootLayout({
@@ -109,9 +84,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Suspense fallback={null}>
-          <BilyTracking />
-        </Suspense>
+        <BilyTracking />
         {children}
       </body>
     </html>
@@ -129,15 +102,12 @@ data hooks, and error boundaries. Use this minimal example only when your applic
 
 ```tsx pages/_app.tsx
 import type { AppProps } from "next/app";
-import { Suspense } from "react";
 import { BilyTracking } from "../components/bily-tracking";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
-      <Suspense fallback={null}>
-        <BilyTracking />
-      </Suspense>
+      <BilyTracking />
       <Component {...pageProps} />
     </>
   );

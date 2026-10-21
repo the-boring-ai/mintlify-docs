@@ -11,6 +11,10 @@ Use the SDK in browser applications built with npm. It loads your exact Bily tra
 npm install @bilyai/js
 ```
 
+New npm installs resolve the latest release. npm normally saves a compatible caret range unless your project changes that setting. A lockfile keeps existing builds reproducible; publishing a new SDK version does not rewrite a deployed bundle.
+
+The current stable release is 2.0.8. It waits for runtime initialization before resolving `ready()`.
+
 ## Start tracking once
 
 Select your store. Then open **Bily > Settings > Apps > More settings > Install tracking**, choose your framework, and copy the exact `scriptUrl` from the SDK snippet.
@@ -37,32 +41,45 @@ startApplication();
 
 Do not add a separate script tag. For this installation path, `init()` loads the script.
 
-## Track every later route once
+## Let Bily track navigation
 
-The browser script records the initial page view automatically. Save that URL, then run this function only after the router completes a later navigation.
+The browser script records the initial page and supported client-side navigation automatically. Do not add manual `PageView` calls for those navigations; use `track()` for business events.
 
-```typescript analytics.ts
-import { init, track } from "@bilyai/js";
+## Choose how SDK updates arrive
 
-init({
-  scriptUrl: "https://tracking.example.com/b.js?shop=store.example.com",
-});
+Use one installation path for the website surface.
 
-let previousUrl = window.location.href;
+- Bundled npm applications: keep the compatible major range saved by your package manager, update the lockfile, test, rebuild, and redeploy to receive a new SDK release. Do not enable automatic breaking-major upgrades.
+- Browser modules without a bundler: the managed major-version URL below follows compatible 2.x releases as CDN and browser caches refresh on new page loads. An already-open page keeps its loaded code. This is not an immediate update guarantee.
+- Copied or uploaded SDK assets, including Shopify theme files: those bytes remain unchanged until you replace and redeploy them. They do not become managed merely because the npm package was updated.
 
-export function trackCommittedRoute(): void {
-  const currentUrl = window.location.href;
-  if (currentUrl === previousUrl) return;
+### Use the managed browser module
 
-  previousUrl = currentUrl;
-  track("PageView", {
-    sourceUrl: currentUrl,
-    pageTitle: document.title,
+Use this instead of the npm initializer when the site supports browser modules and you want compatible CDN updates without rebuilding the SDK file. Do not also install a second raw Bily tracking script. Keep the exact customer tracking URL from Bily; the CDN module is only the SDK loader.
+
+```html
+<script type="module">
+  import { init, ready, track } from "https://cdn.jsdelivr.net/npm/@bilyai/js@2/dist/index.js";
+
+  // Run initialization only when your site's consent policy permits it.
+  init({
+    scriptUrl: "https://tracking.example.com/b.js?shop=store.example.com",
   });
-}
+
+  try {
+    await ready();
+    // Runtime initialized, not a destination delivery receipt.
+  } catch (error) {
+    console.error("Bily failed to initialize", error);
+  }
+
+  // Call track() from verified successful business actions in this module.
+</script>
 ```
 
-Call `trackCommittedRoute()` from your router's after-navigation callback. Do not call it during the initial mount, or you will duplicate the automatic page view.
+Keep `@2` in the managed URL to avoid an automatic breaking-major change. Your content security policy must permit the selected CDN module and your exact Bily tracking URL. If you require immutable asset review or a fixed integrity hash, pin a specific release and manage updates explicitly instead of using this moving URL.
+
+The SDK's in-memory queue is not durable delivery storage. Do not clear application-owned pending events or redirect solely because `track()` returned. Preserve consent and stable event IDs in your own retry or delivery contract.
 
 ## Track successful actions
 
