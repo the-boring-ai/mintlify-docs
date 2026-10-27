@@ -26,4 +26,5 @@ Preview the changed pages at desktop and mobile widths. Confirm headings, code b
 - Do not infer login requirements from repository format. Do not install the Mintlify GitHub App or treat an **Installation Needed** prompt as permission to add an integration.
 - Reverify the current mode in DEPLOYMENT.md. On 2026-10-21 the existing Manual update action worked while automatic updates were not connected; no new app or grant was required. Do not assume that mode is permanent.
 - A merge does not prove publication. Verify changed live content against the approved revision after the source update.
+- If a successful publication still serves the previous content, follow the exact-page cache check in DEPLOYMENT.md. Unique query strings can still hit the existing edge cache; verify the changed text after a bounded URL purge.
 - If the established workflow is unavailable, report its exact blocker. Do not create a replacement integration or expand persistent access.
