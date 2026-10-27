@@ -21,6 +21,8 @@ An unexpected server error can also include its request ID:
 }
 ```
 
+Use the HTTP status, documented error codes, and request ID to handle a failure. Error text is descriptive and can change. Server errors withhold internal exception details.
+
 ## Act on each status
 
 | Status | Meaning | Recommended handling |
@@ -56,17 +58,19 @@ const response = await fetch(
 
 if (!response.ok) {
   const bilyRequestId = response.headers.get("x-request-id");
-  const body = await response.json().catch(() => null);
   throw new Error(
-    `Bily request failed (${response.status}, request ${bilyRequestId}): ${JSON.stringify(body)}`,
+    `Bily request failed (${response.status}, request ${bilyRequestId})`,
   );
 }
 ```
 
 Keep customer data, credentials, and secrets out of request IDs.
+Record the status and request ID instead of logging complete response bodies.
 
 ## Retry only when safe
 
 Retry idempotent `GET` requests after transient `429`, `500`, `502`, `503`, or `504` responses. Add jitter to capped exponential backoff.
 
 Do not automatically retry create, clone, update, toggle, delete, sync, or other mutation requests. First read the affected resource and confirm that the original write did not succeed.
+
+When a failure includes `retryable: false`, a mutation outcome flag, or recorded asset IDs, preserve that evidence and reconcile the affected assets before preparing another write.
