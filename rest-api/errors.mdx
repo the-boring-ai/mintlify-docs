@@ -33,6 +33,7 @@ An unexpected server error can also include its request ID:
 | `429` | Too many requests | Retry with exponential backoff and jitter. |
 | `500` | Bily could not complete the request | Retry safe reads; investigate before retrying writes. |
 | `502` | A dependent Bily operation was temporarily unavailable | Retry safe reads after a short delay. |
+| `503` | Authentication or a required data source is temporarily unavailable | Keep the key, honor `Retry-After` when present, and retry safe reads. |
 | `504` | The request did not complete before its timeout | Retry safe reads after a short delay or reduce the requested range. |
 
 ## Keep the request ID
@@ -66,6 +67,6 @@ Keep customer data, credentials, and secrets out of request IDs.
 
 ## Retry only when safe
 
-Retry idempotent `GET` requests after transient `429`, `500`, `502`, or `504` responses. Add jitter to capped exponential backoff.
+Retry idempotent `GET` requests after transient `429`, `500`, `502`, `503`, or `504` responses. Add jitter to capped exponential backoff.
 
 Do not automatically retry create, clone, update, toggle, delete, sync, or other mutation requests. First read the affected resource and confirm that the original write did not succeed.

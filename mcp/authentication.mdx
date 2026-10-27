@@ -25,8 +25,8 @@ Removing a membership removes that access.
 Use a fallback key only when the client cannot complete Bily Connect.
 
 1. Select the intended store in Bily.
-2. Open **Settings > MCP**.
-3. Under **Access key fallback**, choose a name and expiration.
+2. Open **Settings > AI tools**.
+3. Under **Access keys**, choose a name and expiration.
 4. Create the key and copy the full value immediately.
 5. Send it in the `x-api-key` header.
 
@@ -69,4 +69,4 @@ Do not broaden a key to solve a `403` until you understand why the request needs
 
 ## Replace a key without interruption
 
-Create a replacement before revoking a key used by an active client. Update the client and verify a read-only request. Then revoke the old key from **Settings > MCP**.
+Create a replacement before revoking a key used by an active client. Update the client and verify a read-only request. Then revoke the old key from **Settings > AI tools**.

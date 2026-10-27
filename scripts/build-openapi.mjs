@@ -1,8 +1,12 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const args = process.argv.slice(2);
+if (args.some(arg => arg !== "--check") || args.length > 1) {
+  throw new Error("Usage: node scripts/build-openapi.mjs [--check]");
+}
 const ref = (name) => ({ $ref: `#/components/schemas/${name}` });
 const parameterRef = (name) => ({ $ref: `#/components/parameters/${name}` });
 const responseRef = (name) => ({ $ref: `#/components/responses/${name}` });
@@ -61,6 +65,7 @@ const operation = ({
     ...(statuses.includes(502) ? { "502": responseRef("BadGateway") } : {}),
     ...(statuses.includes(504) ? { "504": responseRef("GatewayTimeout") } : {}),
     "500": responseRef("ServerError"),
+    "503": responseRef("ServiceUnavailable"),
   },
 });
 
@@ -130,7 +135,7 @@ const components = {
       in: "header",
       name: "x-api-key",
       description:
-        "A server-side Bily API key created under Settings > MCP > Access key fallback. Select the intended store before creating it.",
+        "A server-side Bily API key created under Settings > AI tools > Access keys. Select the intended workspace before creating it.",
     },
     BearerAuth: {
       type: "http",
@@ -152,7 +157,7 @@ const components = {
       in: "header",
       required: false,
       description:
-        "An organization ID returned by GET /context or GET /organizations. Required for GET /stores and optional for store-scoped paths.",
+        "An organization ID returned by GET /context or GET /organizations. Omit it when a scoped key supplies the organization. Otherwise provide it when no organization is selected.",
       schema: { type: "string", example: "org_01J8W7T9G3E6ZQ4M2K5N8P1R0S" },
     },
     PixelId: {
@@ -172,6 +177,7 @@ const components = {
       ["Conflict", "The request conflicts with the current resource state."],
       ["TooManyRequests", "The request rate is too high."],
       ["ServerError", "Bily could not complete the request."],
+      ["ServiceUnavailable", "Authentication or a required data source is temporarily unavailable. Honor Retry-After when present; do not interpret this as an invalid key or an empty dataset."],
       ["BadGateway", "A dependent Bily operation was temporarily unavailable."],
       ["GatewayTimeout", "Bily did not complete the request before its timeout."],
     ].map(([name, description]) => [name, jsonResponse(description, ref("Error"))]),
@@ -286,7 +292,7 @@ const components = {
         query: {
           type: "string",
           maxLength: 50000,
-          description: "A GraphQL query. Mutations require allowMutation=true.",
+          description: "A GraphQL query. Mutations require allowMutation=true and the platform_actions:write API-key permission. Subscriptions are rejected.",
         },
         variables: { type: "object", additionalProperties: true },
         operationName: { type: "string" },
@@ -1242,7 +1248,7 @@ const paths = {
     get: operation({
       tag: "Identity",
       summary: "List organizations",
-      description: "Lists every Bily organization available to the authenticated identity.",
+      description: "Lists organizations available to the authenticated identity, narrowed to the credential's organization scope when present.",
       operationId: "listOrganizations",
       responseSchema: ref("OrganizationsResponse"),
     }),
@@ -1253,12 +1259,7 @@ const paths = {
       summary: "List stores",
       description: "Lists stores in the selected organization.",
       operationId: "listStores",
-      parameters: [
-        {
-          ...components.parameters.OrganizationId,
-          required: true,
-        },
-      ],
+      parameters: [orgParameter],
       responseSchema: ref("StoresResponse"),
     }),
   },
@@ -1329,7 +1330,7 @@ const paths = {
       tag: "Commerce",
       summary: "Run a Shopify GraphQL operation",
       description:
-        "Runs a store-scoped Shopify Admin GraphQL query. Queries are enabled by default. Mutations require allowMutation=true and should receive an explicit user approval before the request.",
+        "Runs a store-scoped Shopify Admin GraphQL query. Mutations require allowMutation=true, the platform_actions:write API-key permission, and explicit approval from the user. Read-only keys cannot authorize a mutation. Subscriptions are rejected.",
       operationId: "runShopifyGraphql",
       parameters: storeParameters,
       requestBody: jsonBody(ref("GraphqlRequest")),
@@ -1881,6 +1882,80 @@ const paths = {
   },
 };
 
+components.parameters.ResourceUrl = {
+  ...components.parameters.StoreUrl,
+  name: "resourceUrl",
+  description: "The canonical website or Shopify hostname returned by customer context. The hostname determines the resource type.",
+};
+for (const [path, item] of Object.entries(paths)) {
+  if (!path.startsWith("/ad-metrics/") && !path.startsWith("/platform/")) continue;
+  for (const endpoint of Object.values(item)) {
+    endpoint.parameters = endpoint.parameters?.map(parameter =>
+      parameter.$ref === "#/components/parameters/StoreUrl" ? parameterRef("ResourceUrl") : parameter,
+    );
+    if (/\/(?:products|product-metadata|customer-ltv|customer-ltv-summary|cohorts)$/.test(path)) {
+      endpoint.description += " Available only for Shopify resources; website requests return 400 with code resource_type_mismatch.";
+    }
+  }
+}
+
+const trackingQuery = [
+  stringQuery("connectionKey", "An exact key from tracking connections. Defaults to website.", { default: "website" }),
+  stringQuery("since", "ISO timestamp within the last 120 minutes. Defaults to five minutes ago.", { format: "date-time" }),
+  stringQuery("until", "Optional past ISO timestamp at or after since.", { format: "date-time" }),
+  stringQuery("eventName", "Exact event name without contact details."),
+  stringQuery("eventId", "Opaque event ID without contact details."),
+  stringQuery("limit", "Maximum returned receipts.", { type: "integer", minimum: 1, maximum: 50, default: 50 }),
+  stringQuery("baselineKeys", "Comma-separated baseline keys from test-baseline. At most 200 keys."),
+];
+const trackingProperties = Object.fromEntries(trackingQuery.map(parameter => [parameter.name, { ...parameter.schema, description: parameter.description }]));
+components.schemas.TrackingEventSearch = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    ...trackingProperties,
+    filter: { type: "string", maxLength: 256, description: "Search retained event names and public scalar values." },
+    email: { type: "string", maxLength: 254, description: "Exact case-insensitive email match. Send only in the JSON body, never the URL." },
+    params: { type: "object", maxProperties: 8, additionalProperties: { type: ["string", "number", "boolean"] }, description: "Public scalar event parameters. Sensitive identity, credential and reserved keys are rejected." },
+  },
+};
+const trackingOperation = (operationId, summary, description, parameters = []) => operation({
+  tag: "Tracking evidence", operationId, summary, description, parameters: [...storeParameters, ...parameters], statuses: [404, 409],
+});
+paths["/store-data/{storeUrl}/tracking/setup"] = {
+  get: trackingOperation("getTrackingSetup", "Read tracking installation instructions", "Returns workspace-specific installation instructions without scheduling provisioning or repairs. Requires analytics:query.", [stringQuery("installationTarget", "The surface receiving tracking.", { enum: ["public-website", "product-app"], default: "public-website" })]),
+};
+paths["/store-data/{storeUrl}/tracking/connections"] = {
+  get: trackingOperation("listTrackingConnections", "List testable tracking connections", "Returns connection keys and available readiness evidence. Requires analytics:query. Missing evidence is reported explicitly."),
+};
+paths["/store-data/{storeUrl}/tracking/test-baseline"] = {
+  get: trackingOperation("getTrackingTestBaseline", "Capture a tracking test baseline", "Returns an in-memory baseline for a website or destination connection. Retain the returned test object and baseline keys in your workload; Bily does not persist this capture. Requires analytics:query.", trackingQuery),
+};
+for (const [name, id, summary] of [["events", "TrackingEvents", "Read matching tracking receipts"], ["test-report", "TrackingTestReport", "Read a tracking test report"]]) {
+  const description = "Inspects at most the latest 200 source events in a past window of at most 120 minutes. Returns at most 50 matches. Empty or limited results do not prove that no event arrived. Incoming receipts do not prove destination delivery; inspect providerEvidence separately. Requires analytics:query.";
+  paths[`/store-data/{storeUrl}/tracking/${name}`] = {
+    get: trackingOperation(`get${id}`, summary, `${description} Use POST when searching by email, text or public event parameters.`, trackingQuery),
+    post: {
+      ...trackingOperation(`search${id}`, summary, `${description} This POST is read-only. Supply all search scope in the JSON body with no URL query string; the body must not exceed 16 KiB.`),
+      requestBody: jsonBody(ref("TrackingEventSearch")),
+    },
+  };
+}
+paths["/store-data/{storeUrl}/delivery-observability"] = {
+  get: operation({ tag: "Tracking evidence", operationId: "getDeliveryObservability", summary: "Read tracking delivery health", description: "Returns bounded delivery health for the selected workspace. An unavailable or incomplete snapshot is not proof that an individual event reached a destination.", parameters: [...storeParameters, stringQuery("evidence", "Request destination delivery evidence.", { enum: ["delivery"] })], statuses: [404] }),
+};
+paths["/moments/{storeUrl}"] = {
+  get: operation({ tag: "Tracking evidence", operationId: "getMomentCatalog", summary: "Read the workspace event catalog", description: "Lists configured custom events and reviewed product-app moments for this workspace. Requires analytics:query. A configured event is not proof of incoming data or delivery.", parameters: storeParameters, statuses: [404] }),
+};
+paths["/live-traffic/{storeUrl}"] = {
+  get: operation({ tag: "Analytics", operationId: "getLiveTraffic", summary: "Read a live traffic snapshot", description: "Returns a bounded JSON snapshot for the authorized website or Shopify store, with canonical resourceUrl and resourceType. Requires analytics:query. Unavailable data returns an error rather than an empty success.", parameters: [...storeParameters,
+    stringQuery("snapshotMinutesBack", "Snapshot lookback in minutes.", { type: "integer", minimum: 1, maximum: 120, default: 30 }),
+    stringQuery("activeMinutesBack", "Active visitor lookback in minutes.", { type: "integer", minimum: 1, maximum: 60, default: 15 }),
+    stringQuery("topVisitors", "Maximum top visitors.", { type: "integer", minimum: 1, maximum: 20, default: 10 }),
+    stringQuery("sessionLimit", "Maximum sessions.", { type: "integer", minimum: 1, maximum: 100, default: 50 }),
+  ], statuses: [404, 502, 504] }),
+};
+
 const spec = {
   openapi: "3.1.0",
   info: {
@@ -1912,16 +1987,31 @@ const spec = {
     { name: "Supported actions", description: "Synchronize connections and update supported advertising assets." },
     { name: "Campaign actions", description: "Create or clone supported advertising campaign resources." },
     { name: "Tracking connections", description: "List and manage store-scoped tracking connections without returning credential secrets." },
+    { name: "Tracking evidence", description: "Inspect installation, incoming receipts, reviewed events and destination evidence within one workspace." },
   ],
-  paths,
+  paths: Object.fromEntries(Object.entries(paths).map(([path, item]) => [
+    path.startsWith("/ad-metrics/") || path.startsWith("/platform/")
+      ? path.replaceAll("{storeUrl}", "{resourceUrl}")
+      : path,
+    item,
+  ])),
   components,
 };
-
-await writeFile(resolve(root, "openapi.json"), `${JSON.stringify(spec, null, 2)}\n`);
 
 const operationCount = Object.values(paths).reduce(
   (count, path) => count + Object.keys(path).filter((method) => ["get", "post", "put", "delete", "patch"].includes(method)).length,
   0,
 );
 
-console.info(`Generated openapi.json with ${operationCount} operations.`);
+const output = `${JSON.stringify(spec, null, 2)}\n`;
+const destination = resolve(root, "openapi.json");
+if (args.includes("--check")) {
+  const current = await readFile(destination, "utf8").catch(() => null);
+  if (current !== output) {
+    throw new Error("openapi.json is out of date. Run node scripts/build-openapi.mjs and commit the result.");
+  }
+  console.info(`OpenAPI is up to date (${operationCount} operations).`);
+} else {
+  await writeFile(destination, output);
+  console.info(`Generated openapi.json with ${operationCount} operations.`);
+}

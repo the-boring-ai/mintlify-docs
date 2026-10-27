@@ -213,7 +213,7 @@ for (const source of openApiSources) {
   }
 }
 
-const expectedOpenApiOperations = 51;
+const expectedOpenApiOperations = 61;
 if (openApiOperations.length !== expectedOpenApiOperations) {
   throw new Error(
     `Expected ${expectedOpenApiOperations} OpenAPI operations, found ${openApiOperations.length}.`,

@@ -10,7 +10,7 @@ An organization is the team that owns access. A store is one connected commerce 
 
 ## Give each key one store
 
-An API key created under **Settings > MCP > Access key fallback** carries the selected store and its organization. Bily limits discovery responses to that scope and rejects requests for another store or organization.
+An API key created under **Settings > AI tools > Access keys** carries the selected store and its organization. Bily limits discovery responses to that scope and rejects requests for another store or organization.
 
 Create a separate key when a workload needs another store. Never reuse one customer key as a multi-store credential.
 
@@ -24,7 +24,7 @@ Use the optional `organizationId` query only when an identity can access multipl
 
 ## Make an organization-scoped request
 
-`GET /stores` requires the organization header:
+`GET /stores` uses the organization recorded on a scoped key or selected in a session. When neither supplies an organization, send this header:
 
 ```http
 x-bily-organization-id: org_01J8W7T9G3E6ZQ4M2K5N8P1R0S
@@ -34,13 +34,19 @@ Get valid organization IDs from `GET /context` or `GET /organizations`. Bily con
 
 ## Make a store-scoped request
 
-Store-scoped paths include `{storeUrl}`. Copy the exact `url` from `GET /context` or `GET /stores`. Encode it as a URL path segment when necessary.
+Store-scoped paths include `{storeUrl}` or the canonical `{resourceUrl}` used by analytics and platform endpoints. Copy the exact `url` from `GET /context` or `GET /stores`. Encode it as a URL path segment when necessary.
 
 ```text
 GET /ad-metrics/store.example.com?startDate=2026-07-01&endDate=2026-07-07
 ```
 
 Bily derives the organization from the store and verifies access. You can also send `x-bily-organization-id`. Its value must match the store's organization.
+
+## Match the resource type
+
+Analytics and platform endpoints identify a resource by its canonical hostname. Website resources support acquisition reporting. Shopify resources also support commerce reporting.
+
+Product metrics, product metadata, customer lifetime value, cohorts, and commerce-only query datasets require a Shopify resource. Website requests for these operations or product filters return `400` with code `resource_type_mismatch`. Changing a stored label does not change the hostname's resource type.
 
 <Warning>
   Never forward a store URL from an untrusted client until your application confirms that it intended to access that store.
