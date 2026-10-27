@@ -1,0 +1,24 @@
+name: Validate documentation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/build-openapi.mjs --check
+      - run: node --test scripts/build-openapi.test.mjs
+      - run: node scripts/check-public-language.mjs
+      - run: node scripts/check-docs-structure.mjs
+      - run: node scripts/check-sdk-guidance.mjs

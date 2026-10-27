@@ -67,6 +67,10 @@
     {
       "name": "Tracking connections",
       "description": "List and manage store-scoped tracking connections without returning credential secrets."
+    },
+    {
+      "name": "Tracking evidence",
+      "description": "Inspect installation, incoming receipts, reviewed events and destination evidence within one workspace."
     }
   ],
   "paths": {
@@ -119,6 +123,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -161,6 +168,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -171,7 +181,7 @@
           "Identity"
         ],
         "summary": "List organizations",
-        "description": "Lists every Bily organization available to the authenticated identity.",
+        "description": "Lists organizations available to the authenticated identity, narrowed to the credential's organization scope when present.",
         "operationId": "listOrganizations",
         "responses": {
           "200": {
@@ -203,6 +213,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -217,14 +230,7 @@
         "operationId": "listStores",
         "parameters": [
           {
-            "name": "x-bily-organization-id",
-            "in": "header",
-            "required": true,
-            "description": "An organization ID returned by GET /context or GET /organizations. Required for GET /stores and optional for store-scoped paths.",
-            "schema": {
-              "type": "string",
-              "example": "org_01J8W7T9G3E6ZQ4M2K5N8P1R0S"
-            }
+            "$ref": "#/components/parameters/OrganizationId"
           }
         ],
         "responses": {
@@ -257,6 +263,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -310,6 +319,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -367,6 +379,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -434,6 +449,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -488,6 +506,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -542,6 +563,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -552,7 +576,7 @@
           "Commerce"
         ],
         "summary": "Run a Shopify GraphQL operation",
-        "description": "Runs a store-scoped Shopify Admin GraphQL query. Queries are enabled by default. Mutations require allowMutation=true and should receive an explicit user approval before the request.",
+        "description": "Runs a store-scoped Shopify Admin GraphQL query. Mutations require allowMutation=true, the platform_actions:write API-key permission, and explicit approval from the user. Read-only keys cannot authorize a mutation. Subscriptions are rejected.",
         "operationId": "runShopifyGraphql",
         "parameters": [
           {
@@ -608,6 +632,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -677,6 +704,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -734,6 +764,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -801,13 +834,16 @@
           "502": {
             "$ref": "#/components/responses/BadGateway"
           },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
           "504": {
             "$ref": "#/components/responses/GatewayTimeout"
           }
         }
       }
     },
-    "/ad-metrics/overview/{storeUrl}": {
+    "/ad-metrics/overview/{resourceUrl}": {
       "get": {
         "tags": [
           "Analytics"
@@ -817,7 +853,7 @@
         "operationId": "getAdOverview",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -856,11 +892,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/enrich": {
+    "/ad-metrics/{resourceUrl}/enrich": {
       "post": {
         "tags": [
           "Analytics"
@@ -870,7 +909,7 @@
         "operationId": "enrichAdAssets",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -930,11 +969,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}": {
+    "/ad-metrics/{resourceUrl}": {
       "get": {
         "tags": [
           "Analytics"
@@ -944,7 +986,7 @@
         "operationId": "getAdMetrics",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -1111,11 +1153,14 @@
           },
           "502": {
             "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/daily-series": {
+    "/ad-metrics/{resourceUrl}/daily-series": {
       "get": {
         "tags": [
           "Analytics"
@@ -1125,7 +1170,7 @@
         "operationId": "getPreparedDailySeries",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -1187,11 +1232,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/prepared-channel-summary": {
+    "/ad-metrics/{resourceUrl}/prepared-channel-summary": {
       "get": {
         "tags": [
           "Analytics"
@@ -1201,7 +1249,7 @@
         "operationId": "getPreparedChannelSummary",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -1266,11 +1314,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/prepared-asset-performance": {
+    "/ad-metrics/{resourceUrl}/prepared-asset-performance": {
       "get": {
         "tags": [
           "Analytics"
@@ -1280,7 +1331,7 @@
         "operationId": "getPreparedAssetPerformance",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -1369,21 +1420,24 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/products": {
+    "/ad-metrics/{resourceUrl}/products": {
       "get": {
         "tags": [
           "Analytics"
         ],
         "summary": "Get product metrics",
-        "description": "Returns attributed orders, units, revenue, and product context for the selected date range.",
+        "description": "Returns attributed orders, units, revenue, and product context for the selected date range. Available only for Shopify resources; website requests return 400 with code resource_type_mismatch.",
         "operationId": "getProductMetrics",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -1521,21 +1575,24 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/product-metadata": {
+    "/ad-metrics/{resourceUrl}/product-metadata": {
       "get": {
         "tags": [
           "Analytics"
         ],
         "summary": "Get product metadata",
-        "description": "Returns titles and image URLs for up to 200 comma-separated product IDs.",
+        "description": "Returns titles and image URLs for up to 200 comma-separated product IDs. Available only for Shopify resources; website requests return 400 with code resource_type_mismatch.",
         "operationId": "getProductMetadata",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -1586,11 +1643,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/countries": {
+    "/ad-metrics/{resourceUrl}/countries": {
       "get": {
         "tags": [
           "Analytics"
@@ -1600,7 +1660,7 @@
         "operationId": "getCountryMetrics",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -1738,11 +1798,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/devices": {
+    "/ad-metrics/{resourceUrl}/devices": {
       "get": {
         "tags": [
           "Analytics"
@@ -1752,7 +1815,7 @@
         "operationId": "getDeviceMetrics",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -1910,11 +1973,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/dimensions": {
+    "/ad-metrics/{resourceUrl}/dimensions": {
       "get": {
         "tags": [
           "Analytics"
@@ -1924,7 +1990,7 @@
         "operationId": "getAdMetricDimensions",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2014,11 +2080,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/query/catalog": {
+    "/ad-metrics/{resourceUrl}/query/catalog": {
       "get": {
         "tags": [
           "Analytics SQL"
@@ -2028,7 +2097,7 @@
         "operationId": "listAnalyticsDatasets",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2067,11 +2136,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/query": {
+    "/ad-metrics/{resourceUrl}/query": {
       "post": {
         "tags": [
           "Analytics SQL"
@@ -2081,7 +2153,7 @@
         "operationId": "runAnalyticsQuery",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2130,21 +2202,24 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/customer-ltv": {
+    "/ad-metrics/{resourceUrl}/customer-ltv": {
       "get": {
         "tags": [
           "Analytics"
         ],
         "summary": "Get customer lifetime value",
-        "description": "Returns store-scoped customer lifetime value, order cadence, attribution, and recency rows.",
+        "description": "Returns store-scoped customer lifetime value, order cadence, attribution, and recency rows. Available only for Shopify resources; website requests return 400 with code resource_type_mismatch.",
         "operationId": "getCustomerLtv",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2222,23 +2297,26 @@
           "500": {
             "$ref": "#/components/responses/ServerError"
           },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
           "504": {
             "$ref": "#/components/responses/GatewayTimeout"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/customer-ltv-summary": {
+    "/ad-metrics/{resourceUrl}/customer-ltv-summary": {
       "get": {
         "tags": [
           "Analytics"
         ],
         "summary": "Get a customer lifetime value summary",
-        "description": "Returns zero or one store-scoped summary row with customer, order, revenue, refund, value-window, and purchase-cadence totals.",
+        "description": "Returns zero or one store-scoped summary row with customer, order, revenue, refund, value-window, and purchase-cadence totals. Available only for Shopify resources; website requests return 400 with code resource_type_mismatch.",
         "operationId": "getCustomerLtvSummary",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2304,23 +2382,26 @@
           "500": {
             "$ref": "#/components/responses/ServerError"
           },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
           "504": {
             "$ref": "#/components/responses/GatewayTimeout"
           }
         }
       }
     },
-    "/ad-metrics/{storeUrl}/cohorts": {
+    "/ad-metrics/{resourceUrl}/cohorts": {
       "get": {
         "tags": [
           "Analytics"
         ],
         "summary": "Get cohort metrics",
-        "description": "Returns monthly retention and cumulative revenue metrics for customer cohorts.",
+        "description": "Returns monthly retention and cumulative revenue metrics for customer cohorts. Available only for Shopify resources; website requests return 400 with code resource_type_mismatch.",
         "operationId": "getCohortMetrics",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2382,11 +2463,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/support": {
+    "/platform/{resourceUrl}/support": {
       "get": {
         "tags": [
           "Connections"
@@ -2396,7 +2480,7 @@
         "operationId": "getPlatformSupport",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2435,11 +2519,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/assets": {
+    "/platform/{resourceUrl}/assets": {
       "get": {
         "tags": [
           "Connections"
@@ -2449,7 +2536,7 @@
         "operationId": "listPlatformAssets",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2552,11 +2639,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/sync-ad-accounts": {
+    "/platform/{resourceUrl}/actions/sync-ad-accounts": {
       "post": {
         "tags": [
           "Supported actions"
@@ -2566,7 +2656,7 @@
         "operationId": "syncAdAccounts",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2615,11 +2705,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/update-asset": {
+    "/platform/{resourceUrl}/actions/update-asset": {
       "post": {
         "tags": [
           "Supported actions"
@@ -2629,7 +2722,7 @@
         "operationId": "updatePlatformAsset",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2681,11 +2774,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/create-google-campaign": {
+    "/platform/{resourceUrl}/actions/create-google-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -2695,7 +2791,7 @@
         "operationId": "createGoogleCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2744,11 +2840,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/create-tiktok-campaign": {
+    "/platform/{resourceUrl}/actions/create-tiktok-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -2758,7 +2857,7 @@
         "operationId": "createTikTokCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2807,11 +2906,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/clone-tiktok-campaign": {
+    "/platform/{resourceUrl}/actions/clone-tiktok-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -2821,7 +2923,7 @@
         "operationId": "cloneTikTokCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2870,11 +2972,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/create-pinterest-campaign": {
+    "/platform/{resourceUrl}/actions/create-pinterest-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -2884,7 +2989,7 @@
         "operationId": "createPinterestCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2933,11 +3038,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/clone-pinterest-campaign": {
+    "/platform/{resourceUrl}/actions/clone-pinterest-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -2947,7 +3055,7 @@
         "operationId": "clonePinterestCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -2996,11 +3104,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/create-snapchat-campaign": {
+    "/platform/{resourceUrl}/actions/create-snapchat-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -3010,7 +3121,7 @@
         "operationId": "createSnapchatCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -3059,11 +3170,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/clone-snapchat-campaign": {
+    "/platform/{resourceUrl}/actions/clone-snapchat-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -3073,7 +3187,7 @@
         "operationId": "cloneSnapchatCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -3122,11 +3236,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/create-meta-campaign": {
+    "/platform/{resourceUrl}/actions/create-meta-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -3136,7 +3253,7 @@
         "operationId": "createMetaCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -3185,11 +3302,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/clone-meta-adset": {
+    "/platform/{resourceUrl}/actions/clone-meta-adset": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -3199,7 +3319,7 @@
         "operationId": "cloneMetaAdset",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -3248,11 +3368,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/clone-meta-ad": {
+    "/platform/{resourceUrl}/actions/clone-meta-ad": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -3262,7 +3385,7 @@
         "operationId": "cloneMetaAd",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -3311,11 +3434,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/create-linkedin-campaign": {
+    "/platform/{resourceUrl}/actions/create-linkedin-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -3325,7 +3451,7 @@
         "operationId": "createLinkedInCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -3374,11 +3500,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/clone-linkedin-campaign": {
+    "/platform/{resourceUrl}/actions/clone-linkedin-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -3388,7 +3517,7 @@
         "operationId": "cloneLinkedInCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -3437,11 +3566,14 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
     },
-    "/platform/{storeUrl}/actions/clone-microsoft-campaign": {
+    "/platform/{resourceUrl}/actions/clone-microsoft-campaign": {
       "post": {
         "tags": [
           "Campaign actions"
@@ -3451,7 +3583,7 @@
         "operationId": "cloneMicrosoftCampaign",
         "parameters": [
           {
-            "$ref": "#/components/parameters/StoreUrl"
+            "$ref": "#/components/parameters/ResourceUrl"
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
@@ -3500,6 +3632,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -3553,6 +3688,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       },
@@ -3614,6 +3752,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -3680,6 +3821,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       },
@@ -3734,6 +3878,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -3800,6 +3947,903 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/store-data/{storeUrl}/tracking/setup": {
+      "get": {
+        "tags": [
+          "Tracking evidence"
+        ],
+        "summary": "Read tracking installation instructions",
+        "description": "Returns workspace-specific installation instructions without scheduling provisioning or repairs. Requires analytics:query.",
+        "operationId": "getTrackingSetup",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StoreUrl"
+          },
+          {
+            "$ref": "#/components/parameters/OrganizationId"
+          },
+          {
+            "name": "installationTarget",
+            "in": "query",
+            "description": "The surface receiving tracking.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "public-website",
+                "product-app"
+              ],
+              "default": "public-website"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "headers": {
+              "x-request-id": {
+                "description": "The request identifier selected or generated by Bily.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/store-data/{storeUrl}/tracking/connections": {
+      "get": {
+        "tags": [
+          "Tracking evidence"
+        ],
+        "summary": "List testable tracking connections",
+        "description": "Returns connection keys and available readiness evidence. Requires analytics:query. Missing evidence is reported explicitly.",
+        "operationId": "listTrackingConnections",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StoreUrl"
+          },
+          {
+            "$ref": "#/components/parameters/OrganizationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "headers": {
+              "x-request-id": {
+                "description": "The request identifier selected or generated by Bily.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/store-data/{storeUrl}/tracking/test-baseline": {
+      "get": {
+        "tags": [
+          "Tracking evidence"
+        ],
+        "summary": "Capture a tracking test baseline",
+        "description": "Returns an in-memory baseline for a website or destination connection. Retain the returned test object and baseline keys in your workload; Bily does not persist this capture. Requires analytics:query.",
+        "operationId": "getTrackingTestBaseline",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StoreUrl"
+          },
+          {
+            "$ref": "#/components/parameters/OrganizationId"
+          },
+          {
+            "name": "connectionKey",
+            "in": "query",
+            "description": "An exact key from tracking connections. Defaults to website.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "website"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "ISO timestamp within the last 120 minutes. Defaults to five minutes ago.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "description": "Optional past ISO timestamp at or after since.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "eventName",
+            "in": "query",
+            "description": "Exact event name without contact details.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "query",
+            "description": "Opaque event ID without contact details.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum returned receipts.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "baselineKeys",
+            "in": "query",
+            "description": "Comma-separated baseline keys from test-baseline. At most 200 keys.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "headers": {
+              "x-request-id": {
+                "description": "The request identifier selected or generated by Bily.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/store-data/{storeUrl}/tracking/events": {
+      "get": {
+        "tags": [
+          "Tracking evidence"
+        ],
+        "summary": "Read matching tracking receipts",
+        "description": "Inspects at most the latest 200 source events in a past window of at most 120 minutes. Returns at most 50 matches. Empty or limited results do not prove that no event arrived. Incoming receipts do not prove destination delivery; inspect providerEvidence separately. Requires analytics:query. Use POST when searching by email, text or public event parameters.",
+        "operationId": "getTrackingEvents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StoreUrl"
+          },
+          {
+            "$ref": "#/components/parameters/OrganizationId"
+          },
+          {
+            "name": "connectionKey",
+            "in": "query",
+            "description": "An exact key from tracking connections. Defaults to website.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "website"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "ISO timestamp within the last 120 minutes. Defaults to five minutes ago.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "description": "Optional past ISO timestamp at or after since.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "eventName",
+            "in": "query",
+            "description": "Exact event name without contact details.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "query",
+            "description": "Opaque event ID without contact details.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum returned receipts.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "baselineKeys",
+            "in": "query",
+            "description": "Comma-separated baseline keys from test-baseline. At most 200 keys.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "headers": {
+              "x-request-id": {
+                "description": "The request identifier selected or generated by Bily.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tracking evidence"
+        ],
+        "summary": "Read matching tracking receipts",
+        "description": "Inspects at most the latest 200 source events in a past window of at most 120 minutes. Returns at most 50 matches. Empty or limited results do not prove that no event arrived. Incoming receipts do not prove destination delivery; inspect providerEvidence separately. Requires analytics:query. This POST is read-only. Supply all search scope in the JSON body with no URL query string; the body must not exceed 16 KiB.",
+        "operationId": "searchTrackingEvents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StoreUrl"
+          },
+          {
+            "$ref": "#/components/parameters/OrganizationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "headers": {
+              "x-request-id": {
+                "description": "The request identifier selected or generated by Bily.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackingEventSearch"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/store-data/{storeUrl}/tracking/test-report": {
+      "get": {
+        "tags": [
+          "Tracking evidence"
+        ],
+        "summary": "Read a tracking test report",
+        "description": "Inspects at most the latest 200 source events in a past window of at most 120 minutes. Returns at most 50 matches. Empty or limited results do not prove that no event arrived. Incoming receipts do not prove destination delivery; inspect providerEvidence separately. Requires analytics:query. Use POST when searching by email, text or public event parameters.",
+        "operationId": "getTrackingTestReport",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StoreUrl"
+          },
+          {
+            "$ref": "#/components/parameters/OrganizationId"
+          },
+          {
+            "name": "connectionKey",
+            "in": "query",
+            "description": "An exact key from tracking connections. Defaults to website.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "website"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "description": "ISO timestamp within the last 120 minutes. Defaults to five minutes ago.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "description": "Optional past ISO timestamp at or after since.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "eventName",
+            "in": "query",
+            "description": "Exact event name without contact details.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "query",
+            "description": "Opaque event ID without contact details.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum returned receipts.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "baselineKeys",
+            "in": "query",
+            "description": "Comma-separated baseline keys from test-baseline. At most 200 keys.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "headers": {
+              "x-request-id": {
+                "description": "The request identifier selected or generated by Bily.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tracking evidence"
+        ],
+        "summary": "Read a tracking test report",
+        "description": "Inspects at most the latest 200 source events in a past window of at most 120 minutes. Returns at most 50 matches. Empty or limited results do not prove that no event arrived. Incoming receipts do not prove destination delivery; inspect providerEvidence separately. Requires analytics:query. This POST is read-only. Supply all search scope in the JSON body with no URL query string; the body must not exceed 16 KiB.",
+        "operationId": "searchTrackingTestReport",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StoreUrl"
+          },
+          {
+            "$ref": "#/components/parameters/OrganizationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "headers": {
+              "x-request-id": {
+                "description": "The request identifier selected or generated by Bily.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackingEventSearch"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/store-data/{storeUrl}/delivery-observability": {
+      "get": {
+        "tags": [
+          "Tracking evidence"
+        ],
+        "summary": "Read tracking delivery health",
+        "description": "Returns bounded delivery health for the selected workspace. An unavailable or incomplete snapshot is not proof that an individual event reached a destination.",
+        "operationId": "getDeliveryObservability",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StoreUrl"
+          },
+          {
+            "$ref": "#/components/parameters/OrganizationId"
+          },
+          {
+            "name": "evidence",
+            "in": "query",
+            "description": "Request destination delivery evidence.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "delivery"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "headers": {
+              "x-request-id": {
+                "description": "The request identifier selected or generated by Bily.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/moments/{storeUrl}": {
+      "get": {
+        "tags": [
+          "Tracking evidence"
+        ],
+        "summary": "Read the workspace event catalog",
+        "description": "Lists configured custom events and reviewed product-app moments for this workspace. Requires analytics:query. A configured event is not proof of incoming data or delivery.",
+        "operationId": "getMomentCatalog",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StoreUrl"
+          },
+          {
+            "$ref": "#/components/parameters/OrganizationId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "headers": {
+              "x-request-id": {
+                "description": "The request identifier selected or generated by Bily.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/live-traffic/{storeUrl}": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Read a live traffic snapshot",
+        "description": "Returns a bounded JSON snapshot for the authorized website or Shopify store, with canonical resourceUrl and resourceType. Requires analytics:query. Unavailable data returns an error rather than an empty success.",
+        "operationId": "getLiveTraffic",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StoreUrl"
+          },
+          {
+            "$ref": "#/components/parameters/OrganizationId"
+          },
+          {
+            "name": "snapshotMinutesBack",
+            "in": "query",
+            "description": "Snapshot lookback in minutes.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 30,
+              "minimum": 1,
+              "maximum": 120
+            }
+          },
+          {
+            "name": "activeMinutesBack",
+            "in": "query",
+            "description": "Active visitor lookback in minutes.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 15,
+              "minimum": 1,
+              "maximum": 60
+            }
+          },
+          {
+            "name": "topVisitors",
+            "in": "query",
+            "description": "Maximum top visitors.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 20
+            }
+          },
+          {
+            "name": "sessionLimit",
+            "in": "query",
+            "description": "Maximum sessions.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "headers": {
+              "x-request-id": {
+                "description": "The request identifier selected or generated by Bily.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         }
       }
@@ -3811,7 +4855,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "x-api-key",
-        "description": "A server-side Bily API key created under Settings > MCP > Access key fallback. Select the intended store before creating it."
+        "description": "A server-side Bily API key created under Settings > AI tools > Access keys. Select the intended workspace before creating it."
       },
       "BearerAuth": {
         "type": "http",
@@ -3835,7 +4879,7 @@
         "name": "x-bily-organization-id",
         "in": "header",
         "required": false,
-        "description": "An organization ID returned by GET /context or GET /organizations. Required for GET /stores and optional for store-scoped paths.",
+        "description": "An organization ID returned by GET /context or GET /organizations. Omit it when a scoped key supplies the organization. Otherwise provide it when no organization is selected.",
         "schema": {
           "type": "string",
           "example": "org_01J8W7T9G3E6ZQ4M2K5N8P1R0S"
@@ -3849,6 +4893,16 @@
         "schema": {
           "type": "string",
           "example": "pix_01J8W8D5GSPN3XQYF4K2A6M7RT"
+        }
+      },
+      "ResourceUrl": {
+        "name": "resourceUrl",
+        "in": "path",
+        "required": true,
+        "description": "The canonical website or Shopify hostname returned by customer context. The hostname determines the resource type.",
+        "schema": {
+          "type": "string",
+          "example": "store.example.com"
         }
       }
     },
@@ -3963,6 +5017,24 @@
       },
       "ServerError": {
         "description": "Bily could not complete the request.",
+        "headers": {
+          "x-request-id": {
+            "description": "The request identifier selected or generated by Bily.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Authentication or a required data source is temporarily unavailable. Honor Retry-After when present; do not interpret this as an invalid key or an empty dataset.",
         "headers": {
           "x-request-id": {
             "description": "The request identifier selected or generated by Bily.",
@@ -4293,7 +5365,7 @@
           "query": {
             "type": "string",
             "maxLength": 50000,
-            "description": "A GraphQL query. Mutations require allowMutation=true."
+            "description": "A GraphQL query. Mutations require allowMutation=true and the platform_actions:write API-key permission. Subscriptions are rejected."
           },
           "variables": {
             "type": "object",
@@ -6772,6 +7844,68 @@
                 "default": "PAUSED"
               }
             }
+          }
+        }
+      },
+      "TrackingEventSearch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "connectionKey": {
+            "type": "string",
+            "default": "website",
+            "description": "An exact key from tracking connections. Defaults to website."
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp within the last 120 minutes. Defaults to five minutes ago."
+          },
+          "until": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Optional past ISO timestamp at or after since."
+          },
+          "eventName": {
+            "type": "string",
+            "description": "Exact event name without contact details."
+          },
+          "eventId": {
+            "type": "string",
+            "description": "Opaque event ID without contact details."
+          },
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Maximum returned receipts."
+          },
+          "baselineKeys": {
+            "type": "string",
+            "description": "Comma-separated baseline keys from test-baseline. At most 200 keys."
+          },
+          "filter": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "Search retained event names and public scalar values."
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "description": "Exact case-insensitive email match. Send only in the JSON body, never the URL."
+          },
+          "params": {
+            "type": "object",
+            "maxProperties": 8,
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            },
+            "description": "Public scalar event parameters. Sensitive identity, credential and reserved keys are rejected."
           }
         }
       }

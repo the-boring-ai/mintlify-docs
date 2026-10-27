@@ -11,8 +11,8 @@ Use a Bily API key to give trusted server workloads scoped access. Keep the key 
 1. Sign in to [Bily](https://app.bily.ai).
 2. Select the store this workload may access.
 3. Open **Settings**.
-4. Open **MCP**.
-5. Under **Access key fallback**, enter a descriptive name and expiration.
+4. Open **AI tools**.
+5. Under **Access keys**, enter a descriptive name and expiration.
 6. Create the key and copy its full value immediately.
 
 Bily shows the full key once. Save it in your deployment platform's secret manager.
@@ -60,6 +60,8 @@ Choose one authentication method for each request.
 Each key includes the permissions available through the stable customer API. It also carries the selected store and organization scope.
 
 Bily rejects requests for another store or organization. An action can also return `403` when the caller lacks its required permission.
+
+Read-only analytics operations use `analytics:query`. Platform and tracking changes use `platform_actions:write`. Shopify GraphQL mutations require that write permission as well as `allowMutation: true`; setting the flag does not grant permission.
 
 A `401` means the key is missing, expired, revoked, or invalid. Replace or rotate it.
 

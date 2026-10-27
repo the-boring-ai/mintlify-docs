@@ -10,10 +10,23 @@ Run the public-language guard before previewing or submitting changes:
 
 ```bash
 node scripts/build-openapi.mjs
+node scripts/build-openapi.mjs --check
+node --test scripts/build-openapi.test.mjs
 node scripts/check-public-language.mjs
 node scripts/check-docs-structure.mjs
 node scripts/check-sdk-guidance.mjs
 ```
+
+`--check` fails on a stale generated specification without rewriting it. Pull
+requests and main updates run these contract checks automatically. When changing
+API documentation alongside the dispatcher, also compare the checked-out source:
+
+```bash
+node scripts/check-api-routes.mjs --dispatcher-root /path/to/app-workers-dispatcher
+```
+
+This verifies registered paths and methods for every documented operation. The
+public reference intentionally excludes routes that Bily uses internally.
 
 Run the compatible renderer's build/link checks and preview changed pages at
 desktop and mobile widths as described in the publishing reference. Local
