@@ -37,6 +37,14 @@ If you do not know the organization and store, start with one request:
 
 Use `GET /me`, `GET /organizations`, or `GET /stores` when your workload needs only one part of the discovery response.
 
+## Choose an analytics endpoint
+
+Use the dedicated `/ad-metrics/{resourceUrl}` endpoints for advertising metrics, daily series, countries, devices, dimensions, and website views. Product, customer LTV, and cohort endpoints require a Shopify resource.
+
+The generic SQL endpoint, `POST /ad-metrics/{resourceUrl}/query`, currently supports only `customer_ltv` and `cohorts` for Shopify resources. Call `GET /ad-metrics/{resourceUrl}/query/catalog` before composing SQL. An empty website catalog is expected; use the dedicated website analytics endpoints. Other datasets require their dedicated endpoint and return a `400` response if sent to generic SQL.
+
+For LTV, date filters select customers by their first-order date while revenue remains lifetime revenue. Keep the default input limit when you need a population-level result; a smaller limit selects a top-revenue sample. The `page` compatibility field does not paginate SQL results.
+
 <CardGroup cols={2}>
   <Card title="Authentication" icon="key" href="/rest-api/authentication">
     Create, store, send, and revoke an API key safely.
