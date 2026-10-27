@@ -35,6 +35,23 @@ Use an existing-account sign-in only when the supported dashboard requires it.
 Do not treat **Connect GitHub** or **Installation needed** as authorization to
 install an app or expand access.
 
+## Observed edge-cache behavior (2026-10-28)
+
+The existing Manual update action published main commit
+`cb78f7fd29d819496c8b6b8dcfb653ef81d84dd1` successfully. Fresh requests to
+`/rest-api/errors` still returned the previous page through Bily's edge
+cache, including requests with a unique query string and `Cache-Control:
+no-cache`. The response reported `cf-cache-status: HIT` despite its `no-store`
+response policy.
+
+Purging only the changed page URLs in the existing `bily.ai` zone made the
+approved content appear immediately. Include the changed HTML path and any
+published Markdown variants, then read the public page again and compare its
+changed text with the approved source. Keep the purge limited to those URLs;
+do not purge the entire zone or change cache rules as part of publication.
+A successful publisher status or a cache-busting query does not prove that
+visitors receive the new content.
+
 ## Publish a reviewed change
 
 1. Prepare and review the documentation change in this repository.
