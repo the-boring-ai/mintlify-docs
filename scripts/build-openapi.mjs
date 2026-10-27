@@ -1317,7 +1317,7 @@ const paths = {
       tag: "Commerce",
       summary: "Run a Shopify GraphQL operation",
       description:
-        "Runs a store-scoped Shopify Admin GraphQL query. Mutations require allowMutation=true, the platform_actions:write API-key permission, and explicit approval from the user. Read-only keys cannot authorize a mutation. Subscriptions are rejected.",
+        "Runs a Shopify Admin GraphQL query for an authorized canonical *.myshopify.com resource. Website hostnames return 400 resource_type_mismatch. Mutations require allowMutation=true, the platform_actions:write API-key permission, and explicit approval from the user. Read-only keys cannot authorize a mutation. Subscriptions are rejected.",
       operationId: "runShopifyGraphql",
       parameters: storeParameters,
       requestBody: jsonBody(ref("GraphqlRequest")),
@@ -1329,7 +1329,7 @@ const paths = {
     post: operation({
       tag: "Commerce",
       summary: "Read a Shopify REST resource",
-      description: "Runs a store-scoped, read-only Shopify Admin REST request. Prefer GraphQL for new workflows.",
+      description: "Runs a read-only Shopify Admin REST request for an authorized canonical *.myshopify.com resource. Website hostnames return 400 resource_type_mismatch. Prefer GraphQL for new workflows.",
       operationId: "readShopifyRest",
       parameters: storeParameters,
       requestBody: jsonBody(ref("RestReadRequest")),
