@@ -41,3 +41,18 @@ assert.match(eventReference, /This table describes mapping, not a delivery guara
 assert.match(customEvents, /TikTok, Google Ads and Snapchat use finite standard-event mappings/);
 assert.doesNotMatch(customEvents, /track\("billing_checkout_completed"/);
 console.log('Event guidance passed: standard outcomes, custom admission and destination boundaries.');
+
+
+// Keep standalone recipes aligned with collector admission and recovery guards.
+const verification = await readFile(new URL('guides/verification.mdx', root), 'utf8');
+const tracking = await readFile(new URL('api-reference/track.mdx', root), 'utf8');
+for (const [page, name] of [[verification, 'installation_verified'], [tracking, 'integration_connected']]) {
+  assert.match(page, /configured Moment/);
+  assert.match(page, /UNSUPPORTED_EVENT/);
+  assert.ok(page.indexOf('configured Moment') < page.indexOf(`track("${name}"`), 'Admission prerequisite must precede example');
+}
+assert.match(readiness, /ownership.*conflict/);
+assert.match(readiness, /reload the page/);
+assert.match(readiness, /Calling `init\(\)` again does not clear/);
+assert.doesNotMatch(readiness, /After a terminal load failure, call/);
+console.log('Standalone recipes passed: custom admission and reload-required conflicts.');
