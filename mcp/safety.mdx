@@ -40,7 +40,17 @@ Use the strongest value returned by any helper as the minimum review level for t
 - Do not place credentials inside `code`; Bily helpers already use the connection's authentication.
 - Return only the fields needed for the task.
 - Do not attempt arbitrary network requests; direct outbound network access is unavailable.
-- Break long analyses into smaller calls. Each execution must stay within its 20-second runtime.
+- Break long analyses into smaller calls. Standard executions have a 55-second limit. The 180-second restricted website-draft mode permits only its website-draft operations; it does not expand advertising permissions.
+
+## Review ad drafts before publication
+
+Use `saveAdDraft` for a supported campaign, child, status, budget, creative, or duplicate action. Read and approve its exact immutable bodies before a separate `publishAdDraft` call. For several reviewed drafts, prepare and approve a selected batch; do not publish every draft found by a list operation.
+
+Meta and Google budget edits require the current native budget quote and unchanged `budgetGuard`, including the exact source and affected owner scope. Planning metadata or a percentage change alone does not replace that review.
+
+Poll the returned durable job and inspect every action. Preserve accepted IDs, partial results, mutation outcome flags, and verification errors. If a write may have completed, reconcile it before preparing another draft; do not replay the action because an MCP execution timed out. Cancellation can leave an in-flight native action to settle.
+
+See [Ads and creative workflows](/rest-api/ads) for the shared API/MCP contracts and platform limits.
 
 ## Confirm every write
 

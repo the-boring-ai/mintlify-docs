@@ -64,7 +64,7 @@ description: "Restore a Bily MCP connection, correct its scope, and recover safe
   </Accordion>
 
   <Accordion title="Shorten a timed-out execution">
-    One execution can run for at most 20 seconds. Split broad work into smaller calls. Reduce query ranges or result limits, and return only the fields needed for the next decision.
+    Standard executions can run for at most 55 seconds. Restricted website-draft connections have a separate 180-second limit for their allowed website-draft operations; this does not grant advertising writes. Split broad work into smaller calls. For an ad publication timeout, poll the original durable job instead of replaying the mutation. Reduce query ranges or result limits, and return only the fields needed for the next decision.
   </Accordion>
 
   <Accordion title="Review a write before approval">

@@ -1,0 +1,131 @@
+---
+title: "Manage ads through reviewed drafts"
+sidebarTitle: "Ads and creative workflows"
+description: "Save campaign changes, review budgets and creative, publish selected drafts, and reconcile each result through Bily."
+---
+
+Use the same sequence in Bily, the Bily API, and Bily MCP: **save a draft → review its complete scope → publish explicitly → verify each action**. Saving a draft does not contact an ad platform or start delivery.
+
+In **Ads Manager**, use the existing grid's switch, budget edit, or row action to prepare a change. Open **Review and publish** to inspect saved changes and select the drafts to publish together. Use the creation flow for a fresh campaign. A switch represents the configured state; platform review, billing, schedules, or parent status can still prevent delivery.
+
+<Info>
+  This page describes the reviewed public contracts. Availability depends on the deployed Bily version, workspace connection, advertiser permissions, and exact campaign profile. A documented schema or a connected social account does not establish that every campaign type has passed a live advertiser test. Check the current support response and MCP catalog before constructing a write.
+</Info>
+
+## Confirm the workspace and advertiser
+
+1. Call `GET /context` and select the exact workspace URL.
+2. Read `GET /platform/{resourceUrl}/support` and the selected account's assets. Use an advertiser account, rather than a Google manager account, for campaign creation.
+3. Read `GET /platform/{resourceUrl}/action-jobs/capabilities` for the action IDs that can be saved in a draft. In MCP, search for the exact intent and inspect its current input schema, preconditions, and verification steps.
+4. Complete the required platform permissions, billing, Page or identity access, and any product-account links before saving a launch draft.
+
+Keep the exact account and connector selection returned by Bily. Where a contract requires `sourceAuthority`, supply both `dataSourceAdAccountId` and `dataSourceConnectorId`; an account name alone is insufficient.
+
+## Save and review an immutable draft
+
+Call `POST /platform/{resourceUrl}/action-drafts`, or `bily.actions.saveAdDraft(...)`, with a stable `idempotencyKey`, supported `capabilityId` values, and the exact action bodies. A draft contains 1–100 actions and expires after seven days while unpublished.
+
+For example, after confirming that `update-asset` is available for this Meta campaign, an MCP execution can save a pause for review:
+
+```javascript
+async () => {
+  return bily.actions.saveAdDraft({
+    storeUrl: "store.example.com",
+    idempotencyKey: "review-pause-campaign-2026-10-31",
+    title: "Pause the autumn campaign",
+    actions: [{
+      capabilityId: "update-asset",
+      label: "Pause campaign",
+      body: {
+        platform: "FACEBOOK",
+        adAccountId: "act_123456789012345",
+        assetType: "campaign",
+        assetId: "234567890123456",
+        updates: { status: "PAUSED" },
+      },
+    }],
+    reviewRows: [{ label: "Delivery", value: "Paused after publication" }],
+    warnings: [],
+  });
+}
+```
+
+Read the returned draft using `GET /platform/{resourceUrl}/action-drafts/{jobId}` or `bily.actions.readAdDraft({ storeUrl, draftId })`. Review the actual action bodies as well as their display summaries: advertiser, target IDs, children, copy, destination, budget, and any warnings. Review labels do not authorize or validate the underlying action.
+
+Keep the returned draft `id`. If a save response is lost or save confirmation fails, retry the identical save with its original key and body to recover the same staged draft. Do not create a new key to work around an uncertain save. Saving is separate from publication.
+
+<Warning>
+  Low-level action endpoints can execute immediately. `POST /action-jobs` also auto-starts inline actions unless `autoStart` is explicitly `false`. Use the saved-draft endpoint for normal review flows. If you build a low-level job client, stage with `autoStart:false`, read the job, and call `start` only after approval.
+</Warning>
+
+## Publish selected drafts together
+
+For one reviewed draft, call `POST /platform/{resourceUrl}/action-jobs/{jobId}/start` or `bily.actions.publishAdDraft({ storeUrl, draftId })`.
+
+For several drafts:
+
+1. Select 2–100 distinct, unpublished draft IDs from the same user and workspace.
+2. Call `POST /platform/{resourceUrl}/action-drafts/batch`, or `bily.actions.prepareAdDraftBatch({ storeUrl, draftIds, idempotencyKey })`.
+3. Read and approve the returned batch draft, including every source draft and warning.
+4. Publish the batch's returned `id` through the same explicit `start` operation.
+
+A batch permits at most 100 underlying actions. Bily orders its source drafts chronologically and executes them serially. Nested batches and overlapping reviewed budget owners are rejected. This is a selected, reviewed batch—not an instruction to publish all drafts found in the workspace.
+
+List drafts with `GET /platform/{resourceUrl}/action-drafts` or `listAdDrafts`. Follow every opaque `cursor` until it is `null`, and deduplicate by draft `id`. A bounded first page is not a complete history; large legacy histories can require **Load more**. Do not edit, decode, or reuse a cursor in another workspace or identity.
+
+## Review a native budget before changing it
+
+Meta campaign/ad-set budgets and Google campaign budgets require a fresh native budget review. Both increases and decreases follow the same guard contract.
+
+1. Call `POST /platform/{resourceUrl}/actions/read-asset-budget` or `bily.actions.readAssetBudget(...)` with the selected advertiser, exact `sourceAuthority`, and `payload: { version: 1, assetType, assetId }`. Meta ad sets also require `parentAssetId`; Google selects a campaign.
+2. Inspect `result.canEdit`. If it is `false`, show `result.reason` and resolve it before constructing an action. For an inherited Meta budget, select its owning campaign.
+3. Show the current amount, currency, daily/lifetime cadence, native owner, and complete affected scope. Google shared budgets require review of every `affectedCampaignIds` entry.
+4. Approve an absolute target amount in the account currency. `amountUnits` uses exact integer strings; divide by `unitsPerCurrency` for display. Do not assume cents or change a percentage without first resolving its absolute target.
+5. Copy the returned `budgetGuard` unchanged into an `update-asset` draft. Put only `budget` and `budgetType` in `updates`; do not combine a budget change with a rename or status change.
+6. For Meta, omit top-level `sourceAuthority`: the returned guard contains its exact source. For Google, also supply the exact top-level `sourceAuthority` pair. The URL supplies `resourceUrl`; do not add it to the action body.
+7. Review and publish the draft. Bily rereads the owner before dispatch and verifies the live amount afterward. A changed baseline requires a new review and draft.
+
+Treat the guard as a review of one exact owner and baseline. Do not invent a fingerprint, alter its scope, or reuse it for another campaign. Unsupported budget periods, ambiguous ownership, or incomplete shared scope remain unavailable.
+
+## Verify every action and recover safely
+
+After publication, poll `GET /platform/{resourceUrl}/action-jobs/{jobId}` or `bily.actions.getAdActionJob({ storeUrl, jobId })`. Retain the same job ID if a client execution times out or the browser closes. A `202`, `queued`, or `running` response does not establish completion.
+
+| Result | Required next step |
+| --- | --- |
+| `completed` | Inspect every action's verified data and accepted asset IDs. Read the exact native asset when the catalog requires it. |
+| `completed_with_errors` or `failed` | Preserve each successful result and failed action's `error`, `details`, and `retryable` value. Do not repeat the whole job. |
+| `providerMutationMayHaveCompleted: true`, `retryable: false`, or verification-required code | Read the recorded IDs and native state before preparing another write. Do not replay the uncertain action. |
+| `cancelRequestedAt` is set | Keep polling. Cancellation requests a stop; an in-flight action may still complete before the job settles. |
+| `canRetry: true` | Prefer `prepareAdRetryDraft` / `POST /action-drafts/{jobId}/retry-draft`, review the new draft, then publish. Only server-eligible failures are included. |
+
+`BUDGET_REVIEW_REQUIRED` needs a new live quote. `BUDGET_OWNER_BUSY` needs the existing owner's job reconciled. `BUDGET_UPDATE_REJECTED` needs corrected native requirements and a new review. `BUDGET_VERIFY_REQUIRED` must be reconciled without replay. `BUDGET_JOB_STEP_LIMIT` requires splitting the reviewed job into fewer actions.
+
+Dismissal removes a saved change from the review list. It does not reverse an accepted platform change or stop already dispatched work. Keep request IDs and job IDs for support; avoid logging complete creative bodies or transport URLs.
+
+## Generate or upload creative before a launch
+
+A saved image in Bily's creative library is separate from a published ad. Generating or uploading it does not activate a campaign.
+
+For generation, select a completed creative analysis, refresh the workspace's brand context and current offers, and call `POST /creative-intelligence/{storeUrl}/generate` or `bily.creative.generateStatic(...)`. Use a stable key and the reviewed aspect ratio. Poll the returned generation ID until `status` is `ready`; only then use its authenticated `mediaUrl`. A website uses its eligible brand context; a Shopify product reference must belong to the selected store.
+
+For a local file, reserve an upload with its exact name, content type, and byte length, transfer its bytes to the returned customer upload URL using an authenticated write-capable Bily API connection, then read/finalize the upload. An OAuth MCP connection alone does not authenticate the byte-transfer endpoint. Supported formats are JPEG, PNG, WebP, MP4, MOV, and WebM, bounded at 15 MiB per image or 95 MiB per video. Bily validates the actual media. A ready upload can still need its analysis scheduled or retried.
+
+Respect each record's retention or pinned state. A library item does not prove that the target advertiser has a matching native image, authorized identity, or supported ad format. Stage any required platform image upload, publish and verify it, then select the resulting native asset in the launch draft.
+
+## Check the supported campaign profile
+
+The following boundaries describe the reviewed contracts. Query the deployed catalog and support response for availability in your workspace. Connected-platform permissions, native account eligibility, and live verification are required in addition to a valid input schema.
+
+| Platform | Bounded creation and management contracts | Prerequisites and limits |
+| --- | --- | --- |
+| Meta | Paused Traffic/Sales static-image packages; separate fixed Awareness website-image and website Leads-image profiles; eligible ad-set, image-ad and retained static-carousel actions; exact-source copies and status/budget actions. | Requires an accessible Page, advertiser and retained native image. Sales/website Leads require the eligible pixel/event profile. Carousel is limited to eligible Traffic/Sales profiles. Arbitrary Engagement, App Promotion, messaging, instant-form, video, and other objective/format combinations are not covered. |
+| Google Ads | Paused Search, responsive Display, non-feed Demand Gen image or existing-YouTube video, non-retail Performance Max, Standard Shopping, App installs, Hotel and Things to do profiles. Exact Search child/copy, Performance Max asset-group, and Demand Gen video actions have separate contracts. | Requires an advertiser account and exact connection. Shopping, Hotel and travel profiles need their linked product account; video profiles need eligible existing native assets. Classic Video creation/management writes, Smart, Local Services, retail Performance Max listing trees, and arbitrary campaign/media copies are not covered. |
+| Pinterest | Campaign shells/copies plus eligible Awareness/Consideration ad-group, standard image-ad, variation and copy actions. | Requires native Pin/board permissions and the selected profile's targeting and image prerequisites. A Sales/Leads campaign shell does not establish a conversion ad-group contract. Video, carousel, catalog and collection formats are not covered. |
+| Snapchat | Campaign shells/copies and a fixed Traffic profile using an existing static Web View creative; paused ad-squad/ad creation, ad copy and eligible existing-child management. | Requires an eligible pre-existing native creative. Name/status/owned-budget edits use the dedicated hierarchy contract. Fresh media packaging, non-Traffic creation and arbitrary formats are not covered. |
+| TikTok | Campaign shells/copies and a fixed manual website-Traffic Spark profile with an authorized `TT_USER` identity and existing public video post; paused ad-group/ad and eligible child copy/management. | Requires authorized identity/post access and native budget minimums. Smart+, Shop, new-post/media-upload/identity creation and arbitrary objective/format variants are not covered. |
+| X Ads | No paid-ad creation or management contract. | A connected X social account does not grant an Ads advertiser, funding, line-item or promoted-post integration. |
+
+New fixed-profile builders create paused native resources. Some older low-level shell routes accept explicit active status; do not use them to bypass a launch review. Configured active status is also distinct from effective delivery. On platforms where archival maps to native removal, treat it as destructive rather than as a reversible pause.
+
+Continue with [API error handling](/rest-api/errors) and [MCP safety](/mcp/safety).

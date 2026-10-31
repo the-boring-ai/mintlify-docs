@@ -61,6 +61,8 @@ Bily narrows a store-scoped fallback key automatically. With Bily Connect, add t
 | Breakdowns and reports | `bily.analytics.getProductMetrics(...)`, `bily.analytics.getCountryMetrics(...)`, `bily.analytics.getCohortMetrics(...)` |
 | Connected-platform reads | `bily.actions.getPlatformSupport(...)`, `bily.actions.listAssets(...)`, `bily.actions.listPixels(...)` |
 | Supported actions | `bily.actions.syncAdAccounts(...)`, `bily.actions.updateAsset(...)`, and the current creation or clone helpers returned by `search` |
+| Reviewed ad changes | `bily.actions.saveAdDraft(...)`, `bily.actions.prepareAdDraftBatch(...)`, `bily.actions.publishAdDraft(...)`, `bily.actions.getAdActionJob(...)` |
+| Creative library | `bily.creative.generateStatic(...)`, `bily.creative.getGenerated(...)`, `bily.creative.createUpload(...)` |
 
 Use this table as a map, not an exhaustive reference. Call `search` for the current helper signature and planning guidance.
 
@@ -81,7 +83,9 @@ Example tool input:
 }
 ```
 
-The function can run for up to 20 seconds. It has no direct outbound network access.
+Standard executions can run for up to 55 seconds. Restricted website-draft connections have a separate 180-second limit for their allowed website-draft operations; this mode does not grant advertising or creative-generation writes. An allowed helper can still fail earlier. Executions have no direct outbound network access.
+
+Ad publication continues as a durable job. Save and review a draft, publish it in a separate approved call, then poll its job ID in focused read calls. A client timeout does not cancel the job or authorize replay. See [Ads and creative workflows](/rest-api/ads).
 
 Use `bily.*` helpers for Bily data and supported actions. Return JSON-serializable data.
 

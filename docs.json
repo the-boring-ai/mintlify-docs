@@ -124,6 +124,7 @@
               "rest-api/authentication",
               "rest-api/quickstart",
               "rest-api/scoping",
+              "rest-api/ads",
               "rest-api/errors"
             ]
           },

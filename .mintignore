@@ -8,3 +8,7 @@ drafts/
 
 # Repository instructions are not public documentation.
 AGENTS.md
+
+# Generator inputs and release notes are not public documentation.
+/scripts/**
+/DEPLOYMENT.md
