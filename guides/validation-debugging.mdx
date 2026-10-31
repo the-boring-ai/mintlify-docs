@@ -117,7 +117,7 @@ Follow this sequence:
 5. Review the complete async function before approving `execute`.
 6. Verify any write with the recommended read.
 
-An `execute` function can contain several helper calls. It has no direct outbound network access and can run for at most 20 seconds.
+An `execute` function can contain several helper calls. It has no direct outbound network access. Standard executions have a 55-second limit; restricted website-draft connections have a separate 180-second limit for their permitted website-draft operations. That mode does not grant advertising writes. A durable ad job can continue after a client timeout: poll its original ID rather than replaying the change.
 
 ## Make a support report actionable
 

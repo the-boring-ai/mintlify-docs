@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { addAdsContracts } from "./ads-openapi.mjs";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const args = process.argv.slice(2);
@@ -1943,6 +1944,8 @@ paths["/live-traffic/{storeUrl}"] = {
   ], statuses: [404, 502, 504] }),
 };
 
+addAdsContracts({ paths, components });
+
 const spec = {
   openapi: "3.1.0",
   info: {
@@ -1973,6 +1976,8 @@ const spec = {
     { name: "Connections", description: "Inspect available connections, support, and advertising assets." },
     { name: "Supported actions", description: "Synchronize connections and update supported advertising assets." },
     { name: "Campaign actions", description: "Create or clone supported advertising campaign resources." },
+    { name: "Ad drafts and jobs", description: "Save, review, publish and reconcile immutable advertising changes." },
+    { name: "Creative library", description: "Analyze references and retain generated images separately from ad publication." },
     { name: "Tracking connections", description: "List and manage store-scoped tracking connections without returning credential secrets." },
     { name: "Tracking evidence", description: "Inspect installation, incoming receipts, reviewed events and destination evidence within one workspace." },
   ],
@@ -1986,7 +1991,7 @@ const spec = {
 };
 
 const operationCount = Object.values(paths).reduce(
-  (count, path) => count + Object.keys(path).filter((method) => ["get", "post", "put", "delete", "patch"].includes(method)).length,
+  (count, path) => count + Object.keys(path).filter((method) => ["get", "post", "put", "delete", "patch", "head"].includes(method)).length,
   0,
 );
 

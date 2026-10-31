@@ -202,7 +202,7 @@ for (const source of openApiSources) {
     throw new Error(`OpenAPI source uses an unexpected public server: ${source}`);
   }
   for (const [path, pathItem] of Object.entries(specification.paths ?? {})) {
-    for (const method of ["get", "post", "put", "patch", "delete"]) {
+    for (const method of ["get", "post", "put", "patch", "delete", "head"]) {
       const endpoint = pathItem?.[method];
       if (!endpoint) continue;
       if (!endpoint.operationId) {
@@ -213,11 +213,29 @@ for (const source of openApiSources) {
   }
 }
 
-const expectedOpenApiOperations = 61;
+const expectedOpenApiOperations = 125;
 if (openApiOperations.length !== expectedOpenApiOperations) {
   throw new Error(
     `Expected ${expectedOpenApiOperations} OpenAPI operations, found ${openApiOperations.length}.`,
   );
+}
+
+for (const [method, path] of [
+  ["GET", "/platform/{resourceUrl}/action-jobs/capabilities"],
+  ["GET", "/platform/{resourceUrl}/action-drafts"],
+  ["POST", "/platform/{resourceUrl}/action-drafts"],
+  ["POST", "/platform/{resourceUrl}/action-drafts/batch"],
+  ["GET", "/platform/{resourceUrl}/action-drafts/{jobId}"],
+  ["POST", "/platform/{resourceUrl}/action-jobs/{jobId}/start"],
+  ["GET", "/platform/{resourceUrl}/action-jobs/{jobId}"],
+  ["POST", "/platform/{resourceUrl}/actions/read-asset-budget"],
+  ["POST", "/creative-intelligence/{storeUrl}/generate"],
+  ["POST", "/creative-intelligence/{storeUrl}/uploads"],
+  ["PUT", "/creative-intelligence/{storeUrl}/uploads/{uploadId}/media"],
+]) {
+  if (!openApiOperations.some(operation => operation.method === method && operation.path === path)) {
+    throw new Error(`The public Ads workflow is missing ${method} ${path}.`);
+  }
 }
 
 const contextOperation = openApiOperations.find(
