@@ -232,3 +232,37 @@ test('pending Demand Gen IMAGE endpoints preserve separate paused image schema a
   assert.ok(paths[prefix + 'read-google-demand-gen-asset'], 'Existing video read remains separate and unchanged');
   assert.ok(paths[prefix + 'manage-google-demand-gen-asset'], 'Existing video manage remains separate and unchanged');
 });
+
+
+test('Demand Gen IMAGE omits the native-less longHeadline while Display, PMax and VIDEO keep their contracts', () => {
+  const { schemas } = adsSpec();
+  for (const operation of ['Create', 'Validate']) {
+    const root = `Ads${operation}GoogleCampaignInput`;
+    const input = schemas[root];
+    const sharedName = `${root}_googleCreative`;
+    const imageName = `${root}_googleDemandGenImageCreative`;
+    const shared = schemas[sharedName];
+    const image = schemas[imageName];
+    const families = input.properties.payload.oneOf;
+    assert.equal(families[1].properties.creative.$ref, `#/components/schemas/${sharedName}`);
+    assert.equal(families[3].properties.creative.$ref, `#/components/schemas/${sharedName}`);
+    assert.ok(shared.required.includes('longHeadline'));
+    assert.equal(families[2].properties.creative.oneOf[0].$ref, `#/components/schemas/${imageName}`);
+    assert.ok(image);
+    assert.ok(!image.required.includes('longHeadline'));
+    assert.deepEqual(image.required, shared.required.filter(name => name !== 'longHeadline'));
+    assert.deepEqual(
+      { ...image.properties.longHeadline, description: undefined },
+      { ...shared.properties.longHeadline, description: undefined }
+    );
+    assert.equal(image.properties.longHeadline.type, 'string');
+    assert.equal(image.properties.longHeadline.minLength, 1);
+    assert.equal(image.properties.longHeadline.maxLength, 90);
+    assert.match(image.properties.longHeadline.description, /Deprecated compatibility.*no native effect.*Omit/u);
+    const video = families[2].properties.creative.oneOf[1];
+    assert.ok(video.required.includes('longHeadlines'));
+    assert.equal(video.properties.longHeadlines.minItems, 1);
+    assert.equal(video.properties.longHeadlines.maxItems, 5);
+    assert.equal(video.properties.longHeadlines.items.maxLength, 90);
+  }
+});

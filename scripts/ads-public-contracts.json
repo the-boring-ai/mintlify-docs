@@ -5848,7 +5848,7 @@
                   "creative": {
                     "oneOf": [
                       {
-                        "$ref": "#/$defs/googleCreative"
+                        "$ref": "#/$defs/googleDemandGenImageCreative"
                       },
                       {
                         "type": "object",
@@ -6441,6 +6441,112 @@
                 }
               }
             }
+          },
+          "googleDemandGenImageCreative": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "businessName",
+              "finalUrl",
+              "headlines",
+              "descriptions",
+              "images"
+            ],
+            "properties": {
+              "businessName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 25
+              },
+              "finalUrl": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https?://",
+                "maxLength": 4096
+              },
+              "headlines": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 5,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 30
+                }
+              },
+              "descriptions": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 5,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 90
+                }
+              },
+              "longHeadline": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 90,
+                "description": "Deprecated compatibility field for older Demand Gen image callers; it has no native effect. Omit it in new requests."
+              },
+              "images": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 10,
+                "description": "Include landscape marketing, square marketing and square logo images. Bily validates actual bytes, dimensions, placement ratios and the combined 8 MB limit.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "role",
+                    "name",
+                    "data",
+                    "mimeType",
+                    "width",
+                    "height"
+                  ],
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "MARKETING_IMAGE",
+                        "SQUARE_MARKETING_IMAGE",
+                        "LOGO"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "data": {
+                      "type": "string",
+                      "minLength": 8,
+                      "maxLength": 5600000,
+                      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                    },
+                    "mimeType": {
+                      "type": "string",
+                      "enum": [
+                        "IMAGE_JPEG",
+                        "IMAGE_PNG"
+                      ]
+                    },
+                    "width": {
+                      "type": "integer",
+                      "minimum": 128,
+                      "maximum": 8192
+                    },
+                    "height": {
+                      "type": "integer",
+                      "minimum": 128,
+                      "maximum": 8192
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -6892,7 +6998,7 @@
                   "creative": {
                     "oneOf": [
                       {
-                        "$ref": "#/$defs/googleCreative"
+                        "$ref": "#/$defs/googleDemandGenImageCreative"
                       },
                       {
                         "type": "object",
@@ -7427,6 +7533,112 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 90
+              },
+              "images": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 10,
+                "description": "Include landscape marketing, square marketing and square logo images. Bily validates actual bytes, dimensions, placement ratios and the combined 8 MB limit.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "role",
+                    "name",
+                    "data",
+                    "mimeType",
+                    "width",
+                    "height"
+                  ],
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "MARKETING_IMAGE",
+                        "SQUARE_MARKETING_IMAGE",
+                        "LOGO"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128
+                    },
+                    "data": {
+                      "type": "string",
+                      "minLength": 8,
+                      "maxLength": 5600000,
+                      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                    },
+                    "mimeType": {
+                      "type": "string",
+                      "enum": [
+                        "IMAGE_JPEG",
+                        "IMAGE_PNG"
+                      ]
+                    },
+                    "width": {
+                      "type": "integer",
+                      "minimum": 128,
+                      "maximum": 8192
+                    },
+                    "height": {
+                      "type": "integer",
+                      "minimum": 128,
+                      "maximum": 8192
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "googleDemandGenImageCreative": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "businessName",
+              "finalUrl",
+              "headlines",
+              "descriptions",
+              "images"
+            ],
+            "properties": {
+              "businessName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 25
+              },
+              "finalUrl": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https?://",
+                "maxLength": 4096
+              },
+              "headlines": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 5,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 30
+                }
+              },
+              "descriptions": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 5,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 90
+                }
+              },
+              "longHeadline": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 90,
+                "description": "Deprecated compatibility field for older Demand Gen image callers; it has no native effect. Omit it in new requests."
               },
               "images": {
                 "type": "array",
@@ -10331,6 +10543,16 @@
       "read-google-demand-gen-image",
       "manage-google-demand-gen-image"
     ],
-    "liveAvailabilityClaim": false
+    "liveAvailabilityClaim": false,
+    "demandGenImageInputCorrection": {
+      "status": "LOCAL_SOURCE_ALIGNED_UNRELEASED_NOT_LIVE_QUALIFIED",
+      "apiSource": "9800f096918e0cd7e8bec60a73904199299a00d1",
+      "operationIds": [
+        "create-google-campaign",
+        "validate-google-campaign"
+      ],
+      "change": "Demand Gen image branch has its own definition; omit unused longHeadline in new input, retain bounded legacy compatibility. Display/PMax and VIDEO stay unchanged.",
+      "liveAvailabilityClaim": false
+    }
   }
 }

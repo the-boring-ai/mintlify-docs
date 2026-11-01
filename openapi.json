@@ -21107,7 +21107,7 @@
                   "creative": {
                     "oneOf": [
                       {
-                        "$ref": "#/components/schemas/AdsCreateGoogleCampaignInput_googleCreative"
+                        "$ref": "#/components/schemas/AdsCreateGoogleCampaignInput_googleDemandGenImageCreative"
                       },
                       {
                         "type": "object",
@@ -21702,6 +21702,112 @@
           }
         }
       },
+      "AdsCreateGoogleCampaignInput_googleDemandGenImageCreative": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "businessName",
+          "finalUrl",
+          "headlines",
+          "descriptions",
+          "images"
+        ],
+        "properties": {
+          "businessName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 25
+          },
+          "finalUrl": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https?://",
+            "maxLength": 4096
+          },
+          "headlines": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 30
+            }
+          },
+          "descriptions": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 90
+            }
+          },
+          "longHeadline": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 90,
+            "description": "Deprecated compatibility field for older Demand Gen image callers; it has no native effect. Omit it in new requests."
+          },
+          "images": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 10,
+            "description": "Include landscape marketing, square marketing and square logo images. Bily validates actual bytes, dimensions, placement ratios and the combined 8 MB limit.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "role",
+                "name",
+                "data",
+                "mimeType",
+                "width",
+                "height"
+              ],
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "MARKETING_IMAGE",
+                    "SQUARE_MARKETING_IMAGE",
+                    "LOGO"
+                  ]
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "data": {
+                  "type": "string",
+                  "minLength": 8,
+                  "maxLength": 5600000,
+                  "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                },
+                "mimeType": {
+                  "type": "string",
+                  "enum": [
+                    "IMAGE_JPEG",
+                    "IMAGE_PNG"
+                  ]
+                },
+                "width": {
+                  "type": "integer",
+                  "minimum": 128,
+                  "maximum": 8192
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 128,
+                  "maximum": 8192
+                }
+              }
+            }
+          }
+        }
+      },
       "AdsReadGoogleCampaignTargetingInput": {
         "type": "object",
         "additionalProperties": false,
@@ -22126,7 +22232,7 @@
                   "creative": {
                     "oneOf": [
                       {
-                        "$ref": "#/components/schemas/AdsValidateGoogleCampaignInput_googleCreative"
+                        "$ref": "#/components/schemas/AdsValidateGoogleCampaignInput_googleDemandGenImageCreative"
                       },
                       {
                         "type": "object",
@@ -22662,6 +22768,112 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 90
+          },
+          "images": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 10,
+            "description": "Include landscape marketing, square marketing and square logo images. Bily validates actual bytes, dimensions, placement ratios and the combined 8 MB limit.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "role",
+                "name",
+                "data",
+                "mimeType",
+                "width",
+                "height"
+              ],
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "MARKETING_IMAGE",
+                    "SQUARE_MARKETING_IMAGE",
+                    "LOGO"
+                  ]
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                },
+                "data": {
+                  "type": "string",
+                  "minLength": 8,
+                  "maxLength": 5600000,
+                  "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                },
+                "mimeType": {
+                  "type": "string",
+                  "enum": [
+                    "IMAGE_JPEG",
+                    "IMAGE_PNG"
+                  ]
+                },
+                "width": {
+                  "type": "integer",
+                  "minimum": 128,
+                  "maximum": 8192
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 128,
+                  "maximum": 8192
+                }
+              }
+            }
+          }
+        }
+      },
+      "AdsValidateGoogleCampaignInput_googleDemandGenImageCreative": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "businessName",
+          "finalUrl",
+          "headlines",
+          "descriptions",
+          "images"
+        ],
+        "properties": {
+          "businessName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 25
+          },
+          "finalUrl": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https?://",
+            "maxLength": 4096
+          },
+          "headlines": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 30
+            }
+          },
+          "descriptions": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 90
+            }
+          },
+          "longHeadline": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 90,
+            "description": "Deprecated compatibility field for older Demand Gen image callers; it has no native effect. Omit it in new requests."
           },
           "images": {
             "type": "array",
