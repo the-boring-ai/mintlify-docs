@@ -91,6 +91,8 @@ Treat the guard as a review of one exact owner and baseline. Do not invent a fin
 
 After publication, poll `GET /platform/{resourceUrl}/action-jobs/{jobId}` or `bily.actions.getAdActionJob({ storeUrl, jobId })`. Retain the same job ID if a client execution times out or the browser closes. A `202`, `queued`, or `running` response does not establish completion.
 
+When Ads Manager shows a Reference, retain that exact job ID for recovery and support. A status-read timeout leaves the publication result unconfirmed: continue reading the original job and inspect its actions before preparing another write.
+
 | Result | Required next step |
 | --- | --- |
 | `completed` | Inspect every action's verified data and accepted asset IDs. Read the exact native asset when the catalog requires it. |
