@@ -91,6 +91,8 @@ Treat the guard as a review of one exact owner and baseline. Do not invent a fin
 
 After publication, poll `GET /platform/{resourceUrl}/action-jobs/{jobId}` or `bily.actions.getAdActionJob({ storeUrl, jobId })`. Retain the same job ID if a client execution times out or the browser closes. A `202`, `queued`, or `running` response does not establish completion.
 
+When Ads Manager shows a Reference, retain that exact job ID for recovery and support. A status-read timeout leaves the publication result unconfirmed: continue reading the original job and inspect its actions before preparing another write.
+
 | Result | Required next step |
 | --- | --- |
 | `completed` | Inspect every action's verified data and accepted asset IDs. Read the exact native asset when the catalog requires it. |
@@ -107,7 +109,9 @@ Dismissal removes a saved change from the review list. It does not reverse an ac
 
 A saved image in Bily's creative library is separate from a published ad. Generating or uploading it does not activate a campaign.
 
-For generation, select a completed creative analysis, refresh the workspace's brand context and current offers, and call `POST /creative-intelligence/{storeUrl}/generate` or `bily.creative.generateStatic(...)`. Use a stable key and the reviewed aspect ratio. Poll the returned generation ID until `status` is `ready`; only then use its authenticated `mediaUrl`. A website uses its eligible brand context; a Shopify product reference must belong to the selected store.
+The legacy generation path is `POST /creative-intelligence/{storeUrl}/generate` or `bily.creative.generateStatic(...)`. Existing known planned results keep their saved IDs and reads. Select a completed owned analysis and the reviewed aspect ratio; use ready authenticated media only after reading its result. A website uses its eligible brand context; a Shopify product reference must belong to the selected store. The pending update requires the current fresh-key domain for genuinely new legacy planning as well as the new request flow. Do not use the legacy path to bypass disabled admission or missing control data.
+
+The pending accepted-first successor saves a generation request before planning and exposes current admission metadata. It is not yet a deployed-availability claim. See [saved image requests](/rest-api/creative-generation) for the proposed read-first, one-POST and same-key recovery contract. Do not switch a current client until the deployed catalog and authenticated availability response support it.
 
 For a local file, reserve an upload with its exact name, content type, and byte length, transfer its bytes to the returned customer upload URL using an authenticated write-capable Bily API connection, then read/finalize the upload. An OAuth MCP connection alone does not authenticate the byte-transfer endpoint. Supported formats are JPEG, PNG, WebP, MP4, MOV, and WebM, bounded at 15 MiB per image or 95 MiB per video. Bily validates the actual media. A ready upload can still need its analysis scheduled or retried.
 
@@ -125,6 +129,65 @@ The following boundaries describe the reviewed contracts. Query the deployed cat
 | Snapchat | Campaign shells/copies and a fixed Traffic profile using an existing static Web View creative; paused ad-squad/ad creation, ad copy and eligible existing-child management. | Requires an eligible pre-existing native creative. Name/status/owned-budget edits use the dedicated hierarchy contract. Fresh media packaging, non-Traffic creation and arbitrary formats are not covered. |
 | TikTok | Campaign shells/copies and a fixed manual website-Traffic Spark profile with an authorized `TT_USER` identity and existing public video post; paused ad-group/ad and eligible child copy/management. | Requires authorized identity/post access and native budget minimums. Smart+, Shop, new-post/media-upload/identity creation and arbitrary objective/format variants are not covered. |
 | X Ads | No paid-ad creation or management contract. | A connected X social account does not grant an Ads advertiser, funding, line-item or promoted-post integration. |
+
+## Pending Demand Gen image child operations
+
+<Warning>
+  The dedicated IMAGE read and management operations below describe a pending update. Existing Demand Gen campaign creation or video support does not establish their deployed availability. Confirm the exact operation and prerequisites in the deployed catalog before constructing a draft.
+</Warning>
+
+The proposed Google helpers are `bily.actions.readGoogleDemandGenImage(...)` and `bily.actions.manageGoogleDemandGenImage(...)`. Their Customer API paths are `POST /platform/{resourceUrl}/actions/read-google-demand-gen-image` and `POST /platform/{resourceUrl}/actions/manage-google-demand-gen-image`. Supply the selected advertiser and exact `sourceAuthority` pair.
+
+Use the read operation for a bounded existing-image library, an exact eligible parent ad group, or an exact image ad. Keep its current parent/ad fingerprint for review. The image library returns at most 50 native metadata rows and a has-more flag, with eligible orientation roles. It does not return image bytes or upload a Bily generation.
+
+The management operation creates a paused ad under the reviewed parent or edits the selected image ad while pausing it. Stage its `manage-google-demand-gen-image` capability and complete action body in a saved ad draft; review and publish separately. An edit retains the native ad name. The creative uses `format: "IMAGE"`, one destination, the default call to action, and existing same-advertiser image resource names. Marketing references total at most 20 across orientations, including at least one landscape or square image; logos total 1–5. Copy fields have their own current schema limits.
+
+This profile is limited to standard non-product-feed Demand Gen image ads. It does not add media upload, a dedicated source-ad clone, product-feed creatives, classic display variants, or an automatic activation/retry path. Review the planned pause and the complete before/after creative. Retain uncertain accepted IDs for reconciliation; they do not prove complete native inventory or permit replay. A successful Bily library generation is separate from native advertiser-image eligibility.
+
+### Copy reviewed image creative into paused ads
+
+Once the deployed catalog and support response expose both IMAGE operations for the selected account, this pending recipe can prepare 1–20 paused copies in the same campaign and ad group. It reuses `create-ad`; it does not introduce a native clone operation or an activation guarantee.
+
+Use `bily.actions.readGoogleDemandGenImage(...)`, or the read path above, for **two separate reads**. Keep the same workspace, advertiser and exact `sourceAuthority` in both requests. The payloads below use the selected IDs as pseudocode variables:
+
+| Read | Payload |
+| --- | --- |
+| Exact source ad | `{ assetType: "ad", campaignId, adGroupId, adId }` |
+| Separate parent | `{ assetType: "adset", campaignId, adGroupId }` |
+
+Accept only successful responses proving that exact scope. Require an IMAGE source and matching customer, campaign and ad group IDs, plus matching campaign and ad group names and statuses in both results. Resolve a mismatch before preparing a draft. Each new action uses the **parent** result's fingerprint, never the source ad's fingerprint.
+
+Freeze a complete copy of the source result's `creative`: format, business name, destination, every headline/description and all five image reference arrays. Keep every reference; the first 50-image library page is not a complete membership check for a source ad. The exact ad read validates its referenced images. Later source edits do not update the frozen copy; publication rechecks the parent and native image eligibility.
+
+Choose 1–20 distinct final names. Trim each name's leading/trailing whitespace and enforce its 255-character limit before review, so the reviewed name matches the submitted name. Review the exact advertiser, campaign, group, source ad, count, every output name, complete creative and paused delivery.
+
+The following is **pseudocode for preparing data**, not an executable SDK program. `FROZEN_COMPLETE_CREATIVE` is the privately retained source creative above; `NAMES` contains the validated final names. This block performs no save or publication. The action helpers belong to Bily MCP, rather than the `@bilyai/js` browser SDK.
+
+```text
+actions = NAMES.map(name => ({
+  capabilityId: "manage-google-demand-gen-image",
+  label: "Create paused image copy",
+  body: {
+    adAccountId: SELECTED_ADVERTISER_ID,
+    sourceAuthority: EXACT_SOURCE_AUTHORITY,
+    payload: {
+      operation: "create-ad",
+      campaignId: PARENT.result.campaignId,
+      adGroupId: PARENT.result.adGroupId,
+      expectedFingerprint: PARENT.result.fingerprint,
+      status: "PAUSED",
+      name,
+      creative: FROZEN_COMPLETE_CREATIVE
+    }
+  }
+}))
+RETURN actions FOR private caller retention and review
+```
+
+After approval, save these actions in **one** draft using the existing `saveAdDraft` helper or `POST /platform/{resourceUrl}/action-drafts`, with `stopOnFailure: true` and complete `reviewRows`. Durably retain the exact save body and its stable `idempotencyKey` before sending it; a variable held in one execution is not durable storage. Review labels do not replace action validation. Keep the complete review within 100 rows; this recipe needs at most 64 rows for 20 names and the supported creative maxima. Do not call the low-level management helper to bypass review.
+
+Read and approve the saved draft before [publishing it or a selected draft batch](#publish-selected-drafts-together). A selected batch still permits at most 100 underlying actions. Retain its job ID and inspect every action through [job recovery](#verify-every-action-and-recover-safely). A lost save response permits the identical save with the original key/body. An uncertain publication requires the original job and accepted IDs to be reconciled; do not automatically repeat copies, repeat the entire batch or substitute a new key.
+
 
 New fixed-profile builders create paused native resources. Some older low-level shell routes accept explicit active status; do not use them to bypass a launch review. Configured active status is also distinct from effective delivery. On platforms where archival maps to native removal, treat it as destructive rather than as a reversible pause.
 

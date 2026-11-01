@@ -114,3 +114,11 @@ async () => {
 ```
 
 Do not add other writes to the function without showing them. If the request expands, present the complete function for approval again.
+
+## Preview the pending saved-image request flow
+
+The accepted-first helper family is a pending contract, not a claim of current availability. Once the deployed catalog supports it, use the [source-filtered read](/rest-api/creative-generation#check-unresolved-work-and-availability-first) to recover unresolved work and inspect current admission before preparing a fresh request.
+
+Keep the client’s single-send lock across that read. Preserve any existing ID or unknown key first. Only after explicit generation approval and verified current availability may the caller persist a fresh prefixed key and send one `requestStatic` call. The helper must receive that saved key unchanged. A lost response means same-key `findGenerationRequest` recovery, followed by `getGenerationRequest` and the linked `getGenerated` read; it does not authorize another POST.
+
+Dedicated Demand Gen IMAGE read/edit helpers are also pending. Read the exact advertiser selection and current fingerprint, save a reviewed paused action draft, publish separately, and verify it. They do not upload a generated image or clone an arbitrary source ad. See [the bounded image profile](/rest-api/ads#pending-demand-gen-image-child-operations).

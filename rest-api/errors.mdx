@@ -78,3 +78,5 @@ When a failure includes `retryable: false`, a mutation outcome flag, or recorded
 Ad publication returns a durable job. A timeout or lost response does not cancel it; poll the original job ID and inspect each action before deciding whether recovery is safe. Use a reviewed retry draft only when the server marks actions eligible. If a draft save confirmation fails, an identical save with its original key can recover the same unpublished draft; do not use a new key or publish to test whether the save worked.
 
 For `BUDGET_REVIEW_REQUIRED`, refresh the exact native quote and approve a new draft. For `BUDGET_OWNER_BUSY`, reconcile the owner's existing action. For `BUDGET_VERIFY_REQUIRED`, inspect the recorded owner and live amount without replay. See [Ads and creative workflows](/rest-api/ads).
+
+The [pending saved-image request contract](/rest-api/creative-generation) has stricter POST recovery rules. A generic status or missing by-key receipt cannot release an unknown submission. Only a positively verified same-submission rejection can support a later explicit fresh decision; it never permits automatic generation retry or key replacement.
