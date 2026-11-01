@@ -142,6 +142,51 @@ The management operation creates a paused ad under the reviewed parent or edits 
 
 This profile is limited to standard non-product-feed Demand Gen image ads. It does not add media upload, a dedicated source-ad clone, product-feed creatives, classic display variants, or an automatic activation/retry path. Review the planned pause and the complete before/after creative. Retain uncertain accepted IDs for reconciliation; they do not prove complete native inventory or permit replay. A successful Bily library generation is separate from native advertiser-image eligibility.
 
+### Copy reviewed image creative into paused ads
+
+Once the deployed catalog and support response expose both IMAGE operations for the selected account, this pending recipe can prepare 1–20 paused copies in the same campaign and ad group. It reuses `create-ad`; it does not introduce a native clone operation or an activation guarantee.
+
+Use `bily.actions.readGoogleDemandGenImage(...)`, or the read path above, for **two separate reads**. Keep the same workspace, advertiser and exact `sourceAuthority` in both requests. The payloads below use the selected IDs as pseudocode variables:
+
+| Read | Payload |
+| --- | --- |
+| Exact source ad | `{ assetType: "ad", campaignId, adGroupId, adId }` |
+| Separate parent | `{ assetType: "adset", campaignId, adGroupId }` |
+
+Accept only successful responses proving that exact scope. Require an IMAGE source and matching customer, campaign and ad group IDs, plus matching campaign and ad group names and statuses in both results. Resolve a mismatch before preparing a draft. Each new action uses the **parent** result's fingerprint, never the source ad's fingerprint.
+
+Freeze a complete copy of the source result's `creative`: format, business name, destination, every headline/description and all five image reference arrays. Keep every reference; the first 50-image library page is not a complete membership check for a source ad. The exact ad read validates its referenced images. Later source edits do not update the frozen copy; publication rechecks the parent and native image eligibility.
+
+Choose 1–20 distinct final names. Trim each name's leading/trailing whitespace and enforce its 255-character limit before review, so the reviewed name matches the submitted name. Review the exact advertiser, campaign, group, source ad, count, every output name, complete creative and paused delivery.
+
+The following is **pseudocode for preparing data**, not an executable SDK program. `FROZEN_COMPLETE_CREATIVE` is the privately retained source creative above; `NAMES` contains the validated final names. This block performs no save or publication. The action helpers belong to Bily MCP, rather than the `@bilyai/js` browser SDK.
+
+```text
+actions = NAMES.map(name => ({
+  capabilityId: "manage-google-demand-gen-image",
+  label: "Create paused image copy",
+  body: {
+    adAccountId: SELECTED_ADVERTISER_ID,
+    sourceAuthority: EXACT_SOURCE_AUTHORITY,
+    payload: {
+      operation: "create-ad",
+      campaignId: PARENT.result.campaignId,
+      adGroupId: PARENT.result.adGroupId,
+      expectedFingerprint: PARENT.result.fingerprint,
+      status: "PAUSED",
+      name,
+      creative: FROZEN_COMPLETE_CREATIVE
+    }
+  }
+}))
+RETURN actions FOR private caller retention and review
+```
+
+After approval, save these actions in **one** draft using the existing `saveAdDraft` helper or `POST /platform/{resourceUrl}/action-drafts`, with `stopOnFailure: true` and complete `reviewRows`. Durably retain the exact save body and its stable `idempotencyKey` before sending it; a variable held in one execution is not durable storage. Review labels do not replace action validation. Keep the complete review within 100 rows; this recipe needs at most 64 rows for 20 names and the supported creative maxima. Do not call the low-level management helper to bypass review.
+
+Read and approve the saved draft before [publishing it or a selected draft batch](#publish-selected-drafts-together). A selected batch still permits at most 100 underlying actions. Retain its job ID and inspect every action through [job recovery](#verify-every-action-and-recover-safely). A lost save response permits the identical save with the original key/body. An uncertain publication requires the original job and accepted IDs to be reconciled; do not automatically repeat copies, repeat the entire batch or substitute a new key.
+
+
 New fixed-profile builders create paused native resources. Some older low-level shell routes accept explicit active status; do not use them to bypass a launch review. Configured active status is also distinct from effective delivery. On platforms where archival maps to native removal, treat it as destructive rather than as a reversible pause.
 
 Continue with [API error handling](/rest-api/errors) and [MCP safety](/mcp/safety).
