@@ -213,7 +213,7 @@ for (const source of openApiSources) {
   }
 }
 
-const expectedOpenApiOperations = 125;
+const expectedOpenApiOperations = 131;
 if (openApiOperations.length !== expectedOpenApiOperations) {
   throw new Error(
     `Expected ${expectedOpenApiOperations} OpenAPI operations, found ${openApiOperations.length}.`,
@@ -221,6 +221,12 @@ if (openApiOperations.length !== expectedOpenApiOperations) {
 }
 
 for (const [method, path] of [
+  ["POST", "/creative-intelligence/{storeUrl}/generation-requests"],
+  ["GET", "/creative-intelligence/{storeUrl}/generation-requests/{requestId}"],
+  ["GET", "/creative-intelligence/{storeUrl}/generation-requests/by-key"],
+  ["GET", "/creative-intelligence/{storeUrl}/generation-requests"],
+  ["POST", "/platform/{resourceUrl}/actions/read-google-demand-gen-image"],
+  ["POST", "/platform/{resourceUrl}/actions/manage-google-demand-gen-image"],
   ["GET", "/platform/{resourceUrl}/action-jobs/capabilities"],
   ["GET", "/platform/{resourceUrl}/action-drafts"],
   ["POST", "/platform/{resourceUrl}/action-drafts"],

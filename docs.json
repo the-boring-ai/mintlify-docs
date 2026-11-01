@@ -125,6 +125,7 @@
               "rest-api/quickstart",
               "rest-api/scoping",
               "rest-api/ads",
+              "rest-api/creative-generation",
               "rest-api/errors"
             ]
           },

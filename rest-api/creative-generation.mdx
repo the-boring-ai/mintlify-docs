@@ -1,0 +1,93 @@
+---
+title: "Recover a saved image-generation request"
+sidebarTitle: "Saved image requests"
+description: "Preview the accepted-first generation contract: check availability, retain one request key, and recover the same saved work."
+---
+
+<Warning>
+  This page describes a pending API update. The operations below are not a claim of deployed availability. Adopt the contract only after the deployed catalog advertises it. Submit fresh work only when the authenticated list response reports current admission as available. Reading an already owned saved request or known generated result remains separate from fresh admission. Retain unknown keys for read-only recovery.
+</Warning>
+
+The proposed flow saves a request before creative planning starts. A returned request ID confirms acceptance; it does not confirm that an image exists. Keep that ID and its original key, then read the saved request until its outcome is known. Image generation creates a Bily draft, not an ad-platform campaign or published ad.
+
+## Keep the same workspace and reference
+
+Use the exact workspace returned by `GET /context`, the current authenticated identity, and a completed analysis owned by that workspace. Select the reviewed quality, aspect ratio, instruction and explicit library-save choice before submitting. Bily checks authorization and shared workspace limits separately from availability.
+
+The four operations use `/creative-intelligence/{storeUrl}/generation-requests` under the Customer API base URL:
+
+| Operation | Bily MCP helper | Purpose |
+| --- | --- | --- |
+| `GET` collection | `bily.creative.listGenerationRequests(...)` | Read saved requests and current fresh-admission metadata. |
+| `POST` collection | `bily.creative.requestStatic(...)` | Accept one explicitly approved image-generation request. |
+| `GET /{requestId}` | `bily.creative.getGenerationRequest(...)` | Read the same saved request without dispatching work. |
+| `GET /by-key` | `bily.creative.findGenerationRequest(...)` | Recover the original request after a lost response. |
+
+Keep each request scoped to its original authenticated workspace and source. None of these reads starts generation. A missing lookup does not authorize a new POST.
+
+## Check unresolved work and availability first
+
+Acquire your client’s single-send lock before awaiting a read. Recover any retained local request ID or unknown submission first. Do not create a replacement key while that outcome remains unresolved.
+
+For the selected source, read the collection with `unresolvedOnly=true`, `limit=1` and `offset=0`, and send the source in `x-bily-generation-request-source`. The source header and true flag are a required pair. They filter before paging; do not read a broad history page and infer that older unresolved work is absent.
+
+In MCP, the corresponding read is:
+
+```javascript
+async () => {
+  return bily.creative.listGenerationRequests({
+    storeUrl: "store.example.com",
+    sourceIntelligenceId: "analysis-example",
+    unresolvedOnly: true,
+    limit: 1,
+    offset: 0,
+  });
+}
+```
+
+Abort a fresh send if the workspace, authenticated identity or selected source changes during the read. Keep any existing submission owner for its original scope.
+
+The list envelope includes `admission` in both filtered and unfiltered reads. Its protocol is `creative-generation-admission-v1`:
+
+| State | `keyPrefix` | Next step |
+| --- | --- | --- |
+| `available` | Exactly `cg1.` + 64 lowercase hexadecimal characters + `.` | Only an otherwise eligible, explicitly approved fresh request may prepare a new key. |
+| `disabled` | `null` | Hold fresh submissions. Continue reading an existing saved ID or unknown original key. |
+
+Missing, malformed or failed metadata is unavailable. Availability does not replace authentication, source ownership, generation approval, quota checks or confirmation of a finished image.
+
+## Persist one fresh key before one POST
+
+Only when there is no retained owner and no unresolved request, append a fresh lowercase UUIDv4 to the currently advertised prefix. The complete fresh key is 105 characters. Persist that exact key with its workspace, identity, source and submission owner before sending one POST. Never invent a prefix, silently prefix an old key, or replace a key restored after a timeout.
+
+The body requires `sourceIntelligenceId` and `idempotencyKey`. Optional fields are `quality` (`draft` or `polished`), `aspectRatio` (`1:1`, `4:5`, `9:16` or `2:3`), an `instruction` of at most 500 characters, and boolean `saveToLibrary` (omitted means false). Public callers cannot supply internal ownership or an outcome assertion.
+
+If retaining the key fails or cannot be verified, hold the submission. An in-memory key alone must not become permission for an unrecoverable POST.
+
+Get explicit approval for the generation cost and the complete selected input. Submit once through the POST or `requestStatic`, passing the persisted key unchanged. MCP does not silently create or rewrite a caller’s key. Retain the returned `request.id` immediately.
+
+For an already owned saved request, keep its existing key and ID even if availability changes. A new availability prefix is not permission to replay an old submission. The older `generateStatic` operation remains a separate compatibility path: known planned results retain their existing reads, while genuinely fresh legacy planning also requires the current fresh-key domain after this update is deployed. It is not a fallback for disabled admission or missing control data. Known-result recovery does not establish permission for a fresh legacy plan.
+
+## Read the outcome and linked media
+
+| Request status | Meaning and next step |
+| --- | --- |
+| `queued` | Accepted and awaiting work. Read the same ID. |
+| `processing` | Preparation, planning, rendering or an explicit library save is in progress. Read the same ID. |
+| `ready` | Read the linked `generationId` through `getGenerated` and verify the ready media before use. |
+| `failed` | Read the saved finite error. A later generation requires an explicit new decision and current availability. |
+| `reconcile_required` | Keep the request and key. Do not repeat uncertain planning or image work. |
+
+An explicit `saveToLibrary:true` requires confirmation of the linked ready image’s pin. False or omitted keeps the existing retention deadline. Polling does not extend retention or pin an image. A generated library item is not proof of a native advertiser image; [platform creation and review](/rest-api/ads) remain separate.
+
+## Recover without repeating an uncertain submission
+
+For by-key REST recovery, send the original values in `x-bily-generation-request-key` and `x-bily-generation-request-source`. In MCP, pass them unchanged to `findGenerationRequest`. Never put the key, source or instruction in a URL, shared cache key or log.
+
+A timeout, generic error, absent by-key result, or `409`/`429`/`503` alone does not prove that the POST was rejected before acceptance. Retain the owner and use read-only recovery. Do not automatically repeat the POST with the same or a new key.
+
+REST clients using qualified rejection proof send a fresh UUIDv4 in the POST-only `x-bily-generation-request-attempt` header and bind it to that single submission. The MCP helper supplies its confined attempt nonce; callers still retain their own original request key. Do not put this nonce in the request body or recovery URL.
+
+A qualified same-submission non-admission receipt can identify `invalid_request` or `source_unavailable` with HTTP 400, `generation_limit` with HTTP 429, or `admission_changed` with HTTP 409. It must match the original POST-only attempt nonce, source, key digest, canonical workspace and private no-store response contract. Treat an unverified or mismatched receipt as unknown. A verified rejection permits only a later explicit decision that rereads availability; it never starts an automatic retry or silently replaces a retained owner.
+
+Continue with [API error handling](/rest-api/errors) and [MCP safety](/mcp/safety). Check the live catalog before using any pending operation on this page.

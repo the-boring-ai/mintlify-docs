@@ -64,6 +64,8 @@ Bily narrows a store-scoped fallback key automatically. With Bily Connect, add t
 | Reviewed ad changes | `bily.actions.saveAdDraft(...)`, `bily.actions.prepareAdDraftBatch(...)`, `bily.actions.publishAdDraft(...)`, `bily.actions.getAdActionJob(...)` |
 | Creative library | `bily.creative.generateStatic(...)`, `bily.creative.getGenerated(...)`, `bily.creative.createUpload(...)` |
 
+A pending accepted-first generation update adds `requestStatic`, `getGenerationRequest`, `findGenerationRequest` and `listGenerationRequests`. These are not a deployed-availability claim. The list’s admission metadata gates only fresh submissions; keep the original ID/key for recovery. See [saved image requests](/rest-api/creative-generation) before adopting the new contract.
+
 Use this table as a map, not an exhaustive reference. Call `search` for the current helper signature and planning guidance.
 
 ## `execute`

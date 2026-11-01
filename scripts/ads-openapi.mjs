@@ -10,7 +10,7 @@ const text = { type: "string" };
 const number = { type: "integer", minimum: 0 };
 const arbitrary = { type: "object", additionalProperties: true };
 const componentName = id => `Ads${id.split("-").map(word => word[0].toUpperCase() + word.slice(1)).join("")}Input`;
-const pathSelectors = new Set(["storeUrl", "resourceUrl", "draftId", "jobId", "generationId", "uploadId"]);
+const pathSelectors = new Set(["storeUrl", "resourceUrl", "draftId", "jobId", "generationId", "uploadId", "requestId"]);
 
 function annotateLiteralTypes(value) {
   if (!value || typeof value !== "object") return value;
@@ -53,6 +53,13 @@ function installSchema(components, name, input) {
 }
 
 const queryInputs = {
+  "read-creative-generation-request": object({}),
+  "find-creative-generation-request": object({}),
+  "list-creative-generation-requests": object({
+    limit: { type: "integer", minimum: 1, maximum: 100, default: 24 },
+    offset: { type: "integer", minimum: 0, maximum: 10000, default: 0 },
+    unresolvedOnly: { type: "boolean", const: true, description: "Supply true only together with the private source header. Omit both for an unfiltered list." },
+  }),
   "creative-intelligence-search": object({ q: text, limit: { type: "integer", default: 30 }, offset: number }),
   "creative-intelligence-detail": object({ platform: text, accountId: text, creativeId: text }, ["platform", "accountId", "creativeId"]),
   "list-generated-creatives": object({ limit: { type: "integer", default: 24 }, offset: number, sourceIntelligenceId: text }),
@@ -64,6 +71,16 @@ const queryInputs = {
     nativeAssetType: { enum: ["asset_group"] }, includeGoogleAssetGroups: { enum: ["0", "1"] },
     dataSourceAdAccountId: text, dataSourceConnectorId: text,
   }),
+};
+
+const generationRequestIds = new Set([
+  "request-static-creative", "read-creative-generation-request",
+  "find-creative-generation-request", "list-creative-generation-requests",
+]);
+const generationSourceHeader = {
+  name: "x-bily-generation-request-source", in: "header",
+  description: "The original source analysis. For a filtered list this header and unresolvedOnly=true are a required pair; never place this selector in the URL.",
+  schema: { type: "string", pattern: "^[A-Za-z0-9._~-]{1,256}$", minLength: 1, maxLength: 256 },
 };
 
 const draftIds = new Set(["save-ad-draft", "prepare-ad-draft-batch", "read-ad-draft", "prepare-ad-retry-draft"]);
@@ -166,6 +183,42 @@ export function addAdsContracts({ paths, components }) {
   }, ["id", "status", "fileName", "contentType", "sizeBytes", "mediaUrl", "expiresAt", "pinnedAt"]);
   components.schemas.UploadedAdCreative.example = { id: "00000000-0000-4000-8000-000000000001", status: "pending", fileName: "product.png", contentType: "image/png", sizeBytes: 1024, mediaUrl: null, expiresAt: 1800000000, pinnedAt: null };
 
+  const requestContract = contracts.operations.find(item => item.id === "request-static-creative");
+  const listRequestContract = contracts.operations.find(item => item.id === "list-creative-generation-requests");
+  if (!requestContract?.outputSchema?.properties?.request || !listRequestContract?.outputSchema?.properties?.admission)
+    throw new Error("Missing exact saved-generation request/admission schemas");
+  components.schemas.CreativeGenerationRequest = structuredClone(requestContract.outputSchema.properties.request);
+  components.schemas.CreativeGenerationAdmission = structuredClone(listRequestContract.outputSchema.properties.admission);
+  const queuedRequestExample = {
+    protocol: "creative-generation-request-v1", id: "request-example", status: "queued", phase: "awaiting_dispatch",
+    generationId: null, sourceIntelligenceId: "analysis-example", quality: "draft", aspectRatio: "1:1",
+    saveToLibrary: false, pinnedAt: null, createdAt: 1800000000, updatedAt: 1800000000,
+    expiresAt: 1800172800, lastError: null,
+  };
+  const qualifiedErrorCodes = {
+    "400": ["invalid_request", "source_unavailable"],
+    "409": ["admission_changed"],
+    "429": ["generation_limit"],
+  };
+  components.schemas.CreativeGenerationNonAdmission = {
+    type: "object", additionalProperties: false,
+    required: ["protocol", "outcome", "scope", "attemptId", "requestKeySha256", "sourceIntelligenceId", "code"],
+    properties: {
+      protocol: { const: "creative-generation-non-admission-v1" }, outcome: { const: "not_admitted" }, scope: { const: "this_submission" },
+      attemptId: { type: "string", pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$" },
+      requestKeySha256: { type: "string", pattern: "^[a-f0-9]{64}$" }, sourceIntelligenceId: generationSourceHeader.schema,
+      code: { enum: Object.values(qualifiedErrorCodes).flat() },
+    },
+  };
+  components.schemas.CreativeGenerationQualifiedRejection = {
+    ...object({
+      resourceUrl: text, resourceType: { enum: ["website", "shopify-store"] }, storeUrl: text,
+      error: { type: "string", maxLength: 500 }, code: { enum: Object.values(qualifiedErrorCodes).flat() }, nonAdmission: ref("CreativeGenerationNonAdmission"),
+    }, ["resourceUrl", "resourceType", "storeUrl", "error", "code", "nonAdmission"]),
+    additionalProperties: false,
+    description: "Shape alone is not rejection authority. Verify the original one-send POST nonce, exact key SHA256/source, canonical workspace and private,no-store JSON response. Unknown or mismatched evidence keeps the original owner and GET-only recovery.",
+  };
+
   for (const contract of contracts.operations) {
     const { id, title, method } = contract;
     const path = contract.path.replaceAll("{draftId}", "{jobId}");
@@ -207,6 +260,20 @@ export function addAdsContracts({ paths, components }) {
     }
     let result = draftIds.has(id) ? draftResult : jobIds.has(id) ? jobResult : arbitrary;
     if (["generate-static-creative", "read-generated-creative"].includes(id)) result = object({ generation: ref("GeneratedAdCreative") }, ["generation"]);
+    if (generationRequestIds.has(id)) {
+      result = structuredClone(contract.outputSchema);
+      if (!result) throw new Error("Missing saved-generation output schema");
+      if (id === "list-creative-generation-requests") {
+        result.properties.requests.items = ref("CreativeGenerationRequest");
+        result.properties.admission = ref("CreativeGenerationAdmission");
+      } else result.properties.request = id === "find-creative-generation-request"
+        ? { anyOf: [{ type: "null" }, ref("CreativeGenerationRequest")] }
+        : ref("CreativeGenerationRequest");
+      // Customer POST/ID/by-key successes retain storeUrl; canonical identity is
+      // required on collection metadata and qualified rejection responses only.
+      result.properties.storeUrl = text;
+      result.required = [...new Set([...(result.required ?? []), "storeUrl"])];
+    }
     if (id === "list-generated-creatives") result = object({ generations: { type: "array", items: ref("GeneratedAdCreative") } }, ["generations"]);
     if (id === "list-creative-uploads") result = object({ uploads: { type: "array", items: ref("UploadedAdCreative") } }, ["uploads"]);
     if (["read-creative-upload", "create-creative-upload", "finalize-creative-upload", "analyze-uploaded-creative"].includes(id)) result = object({ upload: ref("UploadedAdCreative"), ...(id === "create-creative-upload" ? { uploadUrl: text, reused: { type: "boolean" } } : {}) }, ["upload"]);
@@ -215,6 +282,7 @@ export function addAdsContracts({ paths, components }) {
     if (id === "read-asset-budget") result = object({ ok: { const: true }, result: ref("NativeBudgetSnapshot") }, ["ok", "result"]);
     if (id === "list-ad-action-capabilities") result = object({ capabilities: { type: "array", items: arbitrary } }, ["capabilities"]);
     const statuses = ["save-ad-draft", "prepare-ad-draft-batch", "prepare-ad-retry-draft"].includes(id) ? [201]
+      : id === "request-static-creative" ? [200, 202]
       : ["publish-ad-draft", "analyze-uploaded-creative"].includes(id) ? [202]
       : id === "create-creative-upload" ? [200, 201]
       : ["generate-static-creative", "analyze-creative", "prepare-creative-placements", "finalize-creative-upload"].includes(id) ? [200, 202] : [200];
@@ -225,6 +293,51 @@ export function addAdsContracts({ paths, components }) {
       description: contract.description + stageAdvice,
       input, result, statuses, tag: creative ? "Creative library" : durable ? "Ad drafts and jobs" : "Campaign actions",
     });
+    if (generationRequestIds.has(id)) {
+      const operation = paths[path][method.toLowerCase()];
+      for (const status of statuses) {
+        operation.responses[String(status)].content["application/json"].example = id === "list-creative-generation-requests"
+          ? { storeUrl: "store.example.com", resourceUrl: "store.example.com", resourceType: "website", requests: [], admission: { protocol: "creative-generation-admission-v1", state: "disabled", keyPrefix: null } }
+          : { storeUrl: "store.example.com", request: id === "find-creative-generation-request" ? null
+            : id === "request-static-creative" && status === 200
+              ? { ...queuedRequestExample, status: "failed", phase: "failed", lastError: { protocol: "creative-generation-error-v1", code: "strategy_failed", phase: "planning", message: "Generation planning failed." } }
+              : queuedRequestExample };
+      }
+      for (const status of statuses) operation.responses[String(status)].headers["Cache-Control"] = {
+        schema: { type: "string", const: "private, no-store" }, description: "Do not place these responses in shared caches.",
+      };
+      if (id === "find-creative-generation-request") {
+        operation.parameters.push({ ...generationSourceHeader, required: true }, {
+          name: "x-bily-generation-request-key", in: "header", required: true,
+          description: "Original unchanged key. A null lookup never authorizes another POST.",
+          schema: { type: "string", pattern: "^[A-Za-z0-9._~-]{1,256}$", minLength: 1, maxLength: 256 },
+        });
+        operation.responses["200"].headers.Vary = { schema: text, description: "Varies on both private generation headers, authorization and cookie." };
+      }
+      if (id === "list-creative-generation-requests") {
+        operation.parameters.push({ ...generationSourceHeader, required: false });
+        operation.responses["200"].headers["x-bily-workspace-resource-type"] = { schema: { enum: ["website", "shopify-store"] }, description: "Matches the canonical response identity." };
+        operation.responses["200"].headers.Vary = { schema: text, description: "Filtered lists vary on the source header, authorization and cookie." };
+      } else operation.responses["410"] = { description: "The saved request expired. This does not authorize automatic resubmission.", content: { "application/json": { schema: ref("Error") } } };
+      if (id === "request-static-creative") {
+        operation.parameters.push({
+          name: "x-bily-generation-request-attempt", in: "header", required: false,
+          description: "Fresh UUIDv4 for this one POST only when consuming qualified non-admission proof; never an authorization token or key rewrite.",
+          schema: components.schemas.CreativeGenerationNonAdmission.properties.attemptId,
+        });
+        for (const [status, codes] of Object.entries(qualifiedErrorCodes)) operation.responses[status] = {
+          description: "Generic errors remain unknown. Only the exact same-submission verified receipt can prove non-admission; a later explicit request must reread availability. Never automatically retry or replace the key.",
+          headers: {
+            "Cache-Control": { schema: { type: "string", const: "private, no-store" } },
+            "x-bily-workspace-resource-type": { schema: { enum: ["website", "shopify-store"] }, description: "Required for a qualified receipt and equal to its canonical resourceType." },
+          },
+          content: { "application/json": { schema: { anyOf: [
+            { allOf: [ref("Error"), { not: { required: ["nonAdmission"] } }] },
+            ...codes.map(code => ({ allOf: [ref("CreativeGenerationQualifiedRejection"), { properties: { code: { const: code }, nonAdmission: { properties: { code: { const: code } } } } }] })),
+          ] } } },
+        };
+      }
+    }
     // References are enough in request bodies; keep all definitions canonical.
     const request = paths[path][method.toLowerCase()].requestBody;
     if (request) request.content["application/json"].schema = ref(schemaName);
