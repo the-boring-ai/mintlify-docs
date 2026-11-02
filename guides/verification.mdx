@@ -18,6 +18,8 @@ Verify your installation in development or staging before you release it to cust
 
 ## Confirm the SDK is ready
 
+Before running this example, use an isolated test website you own or are authorized to use with no production destinations. Add `installation_verified` to that website's configured Moment catalog first; otherwise the collector can reject it as `UNSUPPORTED_EVENT`. See [custom-event admission](/guides/custom-events). Do not substitute a fabricated production conversion.
+
 Temporarily enable lifecycle diagnostics, then wait for the explicit readiness signal.
 
 ```typescript verify-bily.ts
@@ -39,7 +41,7 @@ try {
 `debug` logs lifecycle diagnostics, not event payloads. Remove it or set it to `false` when verification is complete.
 
 <Note>
-  Normal `track()` calls do not need to await `ready()`. The bounded SDK queue holds calls until the browser runtime initializes. `ready()` does not prove that an analytics destination received an event.
+  Normal `track()` calls do not need to await `ready()`. The bounded SDK queue holds calls until the browser runtime initializes. Neither `ready()` nor the return from `track()` proves Bily receipt or destination delivery. Verify those separately using the same event ID.
 </Note>
 
 ## Confirm a plain HTML installation
@@ -81,3 +83,4 @@ Do not compare only the hostname. Match the complete URL character for character
 <Card title="Troubleshoot a failed check" icon="screwdriver-wrench" href="/troubleshooting">
   Diagnose timeouts, duplicate page views, missing routes, and incorrect tracking URLs.
 </Card>
+

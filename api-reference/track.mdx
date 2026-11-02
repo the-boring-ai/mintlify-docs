@@ -30,6 +30,8 @@ track("Product Viewed", {
 
 ## Track an application outcome
 
+Before using a custom name such as `integration_connected`, add it to the store's configured Moment catalog. A non-empty name alone does not authorize collection: an unknown name can be rejected as `UNSUPPORTED_EVENT`. See [custom-event admission](/guides/custom-events).
+
 ```typescript
 track("integration_connected", {
   integration_id: "integration_456",
@@ -73,3 +75,4 @@ The browser script records the initial page and supported client-side navigation
   <Card title="Event names" icon="list" href="/api-reference/events" />
   <Card title="Payload types" icon="brackets-curly" href="/api-reference/payload" />
 </CardGroup>
+

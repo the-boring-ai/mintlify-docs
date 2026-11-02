@@ -42,12 +42,17 @@ The promise rejects when:
 - The browser reports a script load error.
 - Bily does not finish runtime initialization before `loadTimeoutMs`, even if the bootstrap script loaded.
 - The script loads but does not expose a usable Bily browser API.
+- The configured tracking URL conflicts with an existing script or runtime ownership.
 
 The default timeout is 15 seconds. Set a value from 1 to 60 seconds through `init()`.
 
 ## Retry one failed load
 
-After a terminal load failure, call `init()` again. Then call `ready()` for the new attempt.
+For a recoverable network or script-load failure, retry once with the same exact tracking URL, then call `ready()` for the new attempt.
+
+A script or runtime ownership conflict requires a different recovery: resolve the duplicate installation or conflicting URL, then reload the page. Calling `init()` again does not clear an ownership conflict. Never bypass these guards or switch tracking URLs within the same page.
+
+Use this bounded retry only after identifying a recoverable load failure; it does not repair ownership conflicts.
 
 ```typescript
 async function loadBily() {
@@ -71,3 +76,4 @@ If production keeps failing, check the URL, network policy, and duplicate instal
 <Card title="Troubleshooting" icon="screwdriver-wrench" href="/troubleshooting">
   Resolve timeouts, script errors, and conflicting configuration.
 </Card>
+
